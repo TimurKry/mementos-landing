@@ -52,23 +52,18 @@ h1 em{font-style:normal;text-decoration:underline wavy 1.5px;text-decoration-col
 .hero-cta{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
 .hero-note{display:flex;align-items:center;gap:8px;margin-top:26px;font-size:13px;color:var(--stone)}
 
-.hub{position:relative;width:100%;max-width:560px;height:548px;margin:0 auto}
+.hub{position:relative;width:100%;max-width:560px;height:460px;margin:0 auto}
 .hub svg.lines{position:absolute;inset:0;width:100%;height:100%}
-.node{position:absolute;background:var(--card);border:1.2px solid var(--ink);width:120px;padding:12px 10px;text-align:center}
-.node .ni{margin:0 auto 6px;width:26px;height:26px;color:var(--ink)}
-.node b{display:block;font-size:13px;font-weight:600}
-.node span{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--stone);margin-top:3px}
+.node{position:absolute;background:var(--card);border:1.2px solid var(--ink);width:118px;padding:11px 8px 10px;text-align:center}
+.node .ni{margin:0 auto 5px;width:24px;height:24px;color:var(--ink)}
+.node b{display:block;font-size:12.5px;font-weight:600}
+.node span{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--stone);margin-top:2px}
 .node span i{width:6px;height:6px;border-radius:50%;background:var(--wald);display:inline-block}
-.core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-.6deg);background:var(--ink);color:var(--paper);width:192px;padding:24px 18px;text-align:center;border-radius:16px 7px 18px 8px/8px 17px 7px 16px}
+.core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--ink);color:var(--paper);width:190px;padding:22px 18px;text-align:center;border-radius:16px 7px 18px 8px/8px 17px 7px 16px}
 .core::before{content:"";position:absolute;z-index:-1;inset:7px -9px -9px 9px;background:var(--hatch);border-radius:inherit;opacity:.35}
 .core b{font-size:17px;font-weight:600;display:block}
 .core span{font-size:11.5px;color:#B9B6AE;display:block;margin-top:5px}
 .core .dots{margin:0 auto 10px}
-.overview{position:absolute;right:-6px;bottom:-26px;background:var(--card);border:1.2px solid var(--ink);padding:14px 18px;min-width:300px;transform:rotate(.4deg)}
-.overview .ot{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone);margin-bottom:10px}
-.overview .os{display:flex;gap:22px}
-.overview .os div b{font-size:22px;font-family:var(--serif);font-weight:500;display:block}
-.overview .os div span{font-size:11px;color:var(--stone)}
 
 section.block{padding:64px 0}
 .center{text-align:center}
@@ -123,7 +118,6 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
   .hub svg.lines{display:none}
   .node{position:static;width:auto}
   .core{position:static;transform:none;width:auto;grid-column:1/-1;order:-1}
-  .overview{position:static;margin-top:4px;grid-column:1/-1;min-width:0;transform:none}
   .cards4{grid-template-columns:repeat(2,1fr)}
   .steps{grid-template-columns:1fr;gap:26px}
   .step .sn{display:none}
@@ -176,47 +170,59 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
     </div>
 
     <div class="hub" aria-label="Diagramm: MementoOS verbindet alle Beteiligten eines Bestattungsfalls">
-      <svg class="lines" viewBox="0 0 560 540" aria-hidden="true">
-        <g stroke="#8B877D" stroke-width="1" stroke-dasharray="5 4" fill="none" stroke-linecap="round">
-          <path d="M280 250 Q 196 178 122 92"/>
-          <path d="M280 250 Q 296 156 301 72"/>
-          <path d="M280 250 Q 386 168 463 97"/>
-          <path d="M280 250 Q 178 244 82 252"/>
-          <path d="M280 250 Q 384 258 478 256"/>
-          <path d="M280 250 Q 194 336 122 413"/>
-          <path d="M280 250 Q 288 348 301 438"/>
-          <path d="M280 250 Q 388 334 463 408"/>
+      <svg class="lines" viewBox="0 0 560 460" aria-hidden="true">
+        <circle cx="280" cy="230" r="122" fill="none" stroke="#E6E2D9" stroke-width="1"/>
+        <circle cx="280" cy="230" r="178" fill="none" stroke="#ECE8E0" stroke-width="1"/>
+        <g stroke="#8B877D" stroke-width="1" stroke-dasharray="4 4" fill="none" stroke-linecap="round">
+          <line x1="213" y1="175" x2="146" y2="120"/>
+          <line x1="280" y1="175" x2="280" y2="108"/>
+          <line x1="347" y1="175" x2="413" y2="120"/>
+          <line x1="185" y1="230" x2="134" y2="230"/>
+          <line x1="375" y1="230" x2="426" y2="230"/>
+          <line x1="213" y1="285" x2="146" y2="340"/>
+          <line x1="280" y1="285" x2="280" y2="352"/>
+          <line x1="347" y1="285" x2="413" y2="340"/>
+        </g>
+        <g fill="#1A1A1A">
+          <circle cx="213" cy="175" r="2.4"/><circle cx="146" cy="120" r="2.4"/>
+          <circle cx="280" cy="175" r="2.4"/><circle cx="280" cy="108" r="2.4"/>
+          <circle cx="347" cy="175" r="2.4"/><circle cx="413" cy="120" r="2.4"/>
+          <circle cx="185" cy="230" r="2.4"/><circle cx="134" cy="230" r="2.4"/>
+          <circle cx="375" cy="230" r="2.4"/><circle cx="426" cy="230" r="2.4"/>
+          <circle cx="213" cy="285" r="2.4"/><circle cx="146" cy="340" r="2.4"/>
+          <circle cx="280" cy="285" r="2.4"/><circle cx="280" cy="352" r="2.4"/>
+          <circle cx="347" cy="285" r="2.4"/><circle cx="413" cy="340" r="2.4"/>
         </g>
       </svg>
-      <div class="node w1" style="left:62px;top:48px">
+      <div class="node w1" style="left:36px;top:36px">
         <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="16.5" cy="9.5" r="2.3"/><path d="M4 19c.5-3 2.5-4.5 5-4.5s4.5 1.5 5 4.5M14.5 14.8c2 .2 3.6 1.4 4.1 4.2"/></svg>
         <b>Familie</b><span><i></i>Eingebunden</span>
       </div>
-      <div class="node w2" style="left:242px;top:22px">
+      <div class="node w2" style="left:221px;top:24px">
         <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V8l8-4 8 4v12"/><path d="M9 20v-5h6v5M2 20h20"/></svg>
         <b>Bestatter</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node w3" style="left:404px;top:50px">
+      <div class="node w3" style="left:405px;top:36px">
         <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-2 3-2 5 0 7 2-2 2-4 0-7z"/><path d="M6 21v-7a6 6 0 0 1 12 0v7M4 21h16"/></svg>
         <b>Krematorium</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node w2" style="left:22px;top:208px">
+      <div class="node w2" style="left:16px;top:188px">
         <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M5 20V9l4-3v14M13 20V6h6v14"/><path d="M15.5 9h1M15.5 12h1"/></svg>
         <b>Friedhof</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node w1" style="left:420px;top:212px">
+      <div class="node w1" style="left:426px;top:188px">
         <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 16V8h11l4 4h4v4h-2"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="17" r="2"/><path d="M9 17h5"/></svg>
         <b>Transport</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node w3" style="left:62px;top:372px">
+      <div class="node w3" style="left:36px;top:340px">
         <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l3 6-2 12H8L6 9l3-6z"/><path d="M6.5 9h11"/></svg>
         <b>Särge & Urnen</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node w1" style="left:242px;top:398px">
+      <div class="node w1" style="left:221px;top:352px">
         <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21v-9M12 12c-2.6 0-4.4-1.5-4.8-4 2.6 0 4.4 1.3 4.8 4zm0 0c2.6 0 4.4-1.5 4.8-4-2.6 0-4.4 1.3-4.8 4z"/><path d="M12 7.5c-1.6-1.8-1.6-3.4 0-5 1.6 1.6 1.6 3.2 0 5z"/></svg>
         <b>Floristik</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node w2" style="left:404px;top:370px">
+      <div class="node w2" style="left:405px;top:340px">
         <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
         <b>Termine</b><span><i></i>Synchron</span>
       </div>
@@ -224,14 +230,6 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
         <svg class="dots" width="32" height="29" viewBox="0 0 32 29" aria-hidden="true"><circle cx="8.5" cy="8" r="7" fill="#F7F5F1"/><circle cx="23.5" cy="8" r="7" fill="#F7F5F1"/><circle cx="16" cy="21" r="7" fill="#F7F5F1"/></svg>
         <b>MementoOS</b>
         <span>Ein Fall. Alle Beteiligten.</span>
-      </div>
-      <div class="overview">
-        <div class="ot">Heutige Übersicht — Beispiel</div>
-        <div class="os">
-          <div><b>24</b><span>Aktive Vorgänge</span></div>
-          <div><b>17</b><span>Partner-Updates</span></div>
-          <div><b>8</b><span>Offene Aufgaben</span></div>
-        </div>
       </div>
     </div>
   </div>
