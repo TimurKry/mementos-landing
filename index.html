@@ -10,49 +10,61 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#F7F5F1;--card:#FFFFFF;--ink:#1A1A1A;--stone:#6E6B64;--hair:#E3DFD6;
-  --wald:#3E5C41;--ocker:#8F6A24;--terra:#8F4527;
+  --paper:#F7F5F1;--card:#FFFFFF;--ink:#1A1A1A;--stone:#6E6B64;--hair:#D8D3C8;
+  --wald:#3E5C41;
   --serif:"Playfair Display",Georgia,serif;--sans:Inter,"Segoe UI",Arial,sans-serif;
+  --hatch:repeating-linear-gradient(45deg,rgba(26,26,26,.5) 0 1px,transparent 1px 4.5px);
+  --hatch-soft:repeating-linear-gradient(45deg,rgba(26,26,26,.10) 0 1px,transparent 1px 5px);
+  --hatch-paper:repeating-linear-gradient(45deg,rgba(247,245,241,.5) 0 1px,transparent 1px 4.5px);
 }
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
 body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-img,svg{display:block}
+svg{display:block}
 .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
-.eyebrow{display:inline-block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);background:var(--card);border:1px solid var(--hair);border-radius:999px;padding:6px 14px}
-.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--sans);font-size:14px;font-weight:500;padding:13px 22px;border-radius:8px;border:1px solid var(--ink);cursor:pointer;transition:opacity .15s}
-.btn:hover{opacity:.85}
+
+.w1{border-radius:14px 5px 16px 7px/7px 15px 6px 14px}
+.w2{border-radius:6px 15px 7px 14px/14px 6px 15px 7px}
+.w3{border-radius:12px 8px 15px 6px/8px 13px 7px 15px}
+.hsh{position:relative;z-index:0}
+.hsh::before{content:"";position:absolute;z-index:-1;inset:6px -7px -7px 7px;background:var(--hatch);border-radius:inherit;opacity:.28}
+
+.eyebrow{display:inline-block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);background:var(--card);border:1px solid var(--ink);border-radius:12px 4px 12px 4px/4px 12px 4px 12px;padding:6px 14px}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--sans);font-size:14px;font-weight:500;padding:13px 22px;border:1.3px solid var(--ink);border-radius:11px 5px 12px 6px/6px 12px 5px 11px;cursor:pointer;transition:transform .12s}
+.btn:hover{transform:translate(-1px,-1px) rotate(-.3deg)}
 .btn-primary{background:var(--ink);color:var(--paper)}
 .btn-ghost{background:transparent;color:var(--ink)}
 .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
-header.site{position:sticky;top:0;z-index:50;background:rgba(247,245,241,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--hair)}
+header.site{position:sticky;top:0;z-index:50;background:rgba(247,245,241,.93);backdrop-filter:blur(8px);border-bottom:1.3px solid var(--ink)}
 .nav{display:flex;align-items:center;gap:32px;height:68px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px}
 .nav-links{display:flex;gap:26px;margin-left:auto;font-size:14px;color:var(--stone)}
-.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover{color:var(--ink);text-decoration:underline wavy 1px;text-underline-offset:5px}
 .nav .btn{margin-left:8px;padding:10px 18px}
 
-.hero{padding:72px 0 56px}
+.hero{padding:72px 0 64px}
 .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-h1{font-family:var(--serif);font-weight:500;font-size:52px;line-height:1.12;margin:22px 0 18px;text-wrap:balance}
+h1{font-family:var(--serif);font-weight:500;font-size:50px;line-height:1.14;margin:22px 0 18px;text-wrap:balance}
+h1 em{font-style:normal;text-decoration:underline wavy 1.5px;text-decoration-color:var(--stone);text-underline-offset:8px}
 .sub{color:var(--stone);max-width:46ch}
 .hero-cta{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
 .hero-note{display:flex;align-items:center;gap:8px;margin-top:26px;font-size:13px;color:var(--stone)}
 
-.hub{position:relative;width:100%;max-width:560px;height:540px;margin:0 auto}
+.hub{position:relative;width:100%;max-width:560px;height:548px;margin:0 auto}
 .hub svg.lines{position:absolute;inset:0;width:100%;height:100%}
-.node{position:absolute;background:var(--card);border:1px solid var(--hair);border-radius:12px;width:118px;padding:12px 10px;text-align:center;box-shadow:0 1px 2px rgba(26,26,26,.04)}
+.node{position:absolute;background:var(--card);border:1.2px solid var(--ink);width:120px;padding:12px 10px;text-align:center}
 .node .ni{margin:0 auto 6px;width:26px;height:26px;color:var(--ink)}
 .node b{display:block;font-size:13px;font-weight:600}
 .node span{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--stone);margin-top:3px}
 .node span i{width:6px;height:6px;border-radius:50%;background:var(--wald);display:inline-block}
-.core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--ink);color:var(--paper);border-radius:16px;width:190px;padding:24px 18px;text-align:center}
-.core .dots{margin:0 auto 10px}
+.core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-.6deg);background:var(--ink);color:var(--paper);width:192px;padding:24px 18px;text-align:center;border-radius:16px 7px 18px 8px/8px 17px 7px 16px}
+.core::before{content:"";position:absolute;z-index:-1;inset:7px -9px -9px 9px;background:var(--hatch);border-radius:inherit;opacity:.35}
 .core b{font-size:17px;font-weight:600;display:block}
 .core span{font-size:11.5px;color:#B9B6AE;display:block;margin-top:5px}
-.overview{position:absolute;right:-6px;bottom:-30px;background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:14px 18px;box-shadow:0 6px 24px rgba(26,26,26,.07);min-width:300px}
+.core .dots{margin:0 auto 10px}
+.overview{position:absolute;right:-6px;bottom:-26px;background:var(--card);border:1.2px solid var(--ink);padding:14px 18px;min-width:300px;transform:rotate(.4deg)}
 .overview .ot{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone);margin-bottom:10px}
 .overview .os{display:flex;gap:22px}
 .overview .os div b{font-size:22px;font-family:var(--serif);font-weight:500;display:block}
@@ -62,52 +74,56 @@ section.block{padding:64px 0}
 .center{text-align:center}
 .kicker{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone)}
 h2{font-family:var(--serif);font-weight:500;font-size:32px;margin:12px 0 34px;text-wrap:balance}
-.cards4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.fcard{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:22px;display:flex;gap:14px;align-items:flex-start;text-align:left}
-.fcard .ni{flex:0 0 38px;width:38px;height:38px;border:1px solid var(--hair);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.cards4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.fcard{background:var(--card);border:1.2px solid var(--ink);padding:22px;display:flex;gap:14px;align-items:flex-start;text-align:left}
+.fcard .ni{flex:0 0 40px;width:40px;height:40px;border:1.1px solid var(--ink);border-radius:50% 46% 52% 48%/48% 52% 46% 52%;display:flex;align-items:center;justify-content:center;color:var(--ink)}
 .fcard b{font-size:14.5px;font-weight:600;display:block;margin-bottom:4px}
 .fcard p{font-size:13px;color:var(--stone);line-height:1.55}
 
-.eco{background:#EFECE4;border:1px solid var(--hair);border-radius:18px;padding:48px 40px}
+.eco{background:#EFECE4;border:1.2px solid var(--ink);padding:48px 40px;position:relative}
+.eco::after{content:"";position:absolute;inset:8px;border:1px dashed rgba(26,26,26,.25);border-radius:inherit;pointer-events:none}
 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-top:8px}
 .step{text-align:center;position:relative}
-.step .si{width:64px;height:64px;border-radius:50%;background:var(--card);border:1px solid var(--hair);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
-.step .sn{position:absolute;top:44px;left:calc(50% + 14px);width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.step .si{width:66px;height:66px;border-radius:52% 46% 50% 48%/48% 52% 46% 52%;background:var(--card);border:1.2px solid var(--ink);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.step .sn{position:absolute;top:44px;left:calc(50% + 16px);width:21px;height:21px;border-radius:50% 44% 52% 46%;background:var(--ink);color:var(--paper);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
 .step b{font-size:14px;font-weight:600;display:block;margin-bottom:5px}
 .step p{font-size:12.5px;color:var(--stone);line-height:1.5}
 
-.band{background:var(--ink);color:var(--paper);border-radius:18px;padding:36px 40px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.band{background:var(--ink);color:var(--paper);padding:36px 40px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px;position:relative;z-index:0}
+.band::before{content:"";position:absolute;z-index:-1;inset:8px -9px -9px 9px;background:var(--hatch);border-radius:inherit;opacity:.3}
 .band .ni{color:#B9B6AE;margin-bottom:10px;width:26px;height:26px}
 .band b{font-size:16px;font-weight:600;display:block;line-height:1.35}
 .band p{font-size:12.5px;color:#B9B6AE;margin-top:6px;line-height:1.5}
 
-.cards5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
-.acard{background:var(--card);border:1px solid var(--hair);border-radius:12px;overflow:hidden;text-align:center;padding-bottom:20px}
-.acard .art{height:110px;background:#EFECE4;display:flex;align-items:center;justify-content:center;color:var(--stone);border-bottom:1px solid var(--hair)}
-.acard .art svg{width:44px;height:44px}
+.cards5{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.acard{background:var(--card);border:1.2px solid var(--ink);overflow:hidden;text-align:center;padding-bottom:20px}
+.acard .art{height:112px;background:var(--hatch-soft),#F1EEE7;display:flex;align-items:center;justify-content:center;color:var(--ink);border-bottom:1.2px solid var(--ink)}
+.acard .art svg{width:46px;height:46px}
 .acard b{font-size:14px;font-weight:600;display:block;margin:16px 12px 4px}
 .acard p{font-size:12px;color:var(--stone);margin:0 14px;line-height:1.5}
+.acard:nth-child(odd){transform:rotate(-.35deg)}
+.acard:nth-child(even){transform:rotate(.35deg)}
 
 .cta-final{text-align:center;padding:72px 0 84px}
 .cta-final h2{margin-bottom:12px}
 .cta-final p{color:var(--stone);margin-bottom:28px}
 
-footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13px}
-.fgrid{display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;gap:36px;padding-bottom:36px;border-bottom:1px solid #333}
+footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13px;border-top:1.3px solid var(--ink)}
+.fgrid{display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;gap:36px;padding-bottom:36px;border-bottom:1px dashed #4a4a46}
 .fgrid .logo{color:var(--paper)}
 .fgrid h4{color:var(--paper);font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;margin-bottom:14px}
 .fgrid ul{list-style:none;padding:0;display:grid;gap:9px}
-.fgrid a:hover{color:var(--paper)}
+.fgrid a:hover{color:var(--paper);text-decoration:underline wavy 1px;text-underline-offset:4px}
 .fbottom{display:flex;justify-content:space-between;gap:20px;padding-top:22px;flex-wrap:wrap}
 
 @media(max-width:980px){
   .hero-grid{grid-template-columns:1fr}
-  h1{font-size:38px}
+  h1{font-size:37px}
   .hub{height:auto;max-width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding-top:8px}
   .hub svg.lines{display:none}
   .node{position:static;width:auto}
   .core{position:static;transform:none;width:auto;grid-column:1/-1;order:-1}
-  .overview{position:static;margin-top:4px;grid-column:1/-1;min-width:0}
+  .overview{position:static;margin-top:4px;grid-column:1/-1;min-width:0;transform:none}
   .cards4{grid-template-columns:repeat(2,1fr)}
   .steps{grid-template-columns:1fr;gap:26px}
   .step .sn{display:none}
@@ -119,6 +135,9 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
 @media(max-width:520px){
   .cards4,.cards5,.band{grid-template-columns:1fr}
 }
+@media(prefers-reduced-motion:reduce){
+  .btn:hover{transform:none}
+}
 </style>
 </head>
 <body>
@@ -126,7 +145,7 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
 <header class="site">
   <div class="wrap nav">
     <a class="logo" href="#top" aria-label="MementoOS Startseite">
-      <svg width="30" height="26" viewBox="0 0 30 26" aria-hidden="true"><circle cx="9" cy="9" r="7" fill="#1A1A1A"/><circle cx="22" cy="6" r="4.5" fill="#1A1A1A"/><circle cx="13" cy="21" r="5" fill="#1A1A1A"/></svg>
+      <svg width="30" height="27" viewBox="0 0 32 29" aria-hidden="true"><circle cx="8.5" cy="8" r="7" fill="#1A1A1A"/><circle cx="23.5" cy="8" r="7" fill="#1A1A1A"/><circle cx="16" cy="21" r="7" fill="#1A1A1A"/></svg>
       MementoOS
     </a>
     <nav class="nav-links" aria-label="Hauptnavigation">
@@ -144,65 +163,65 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
   <div class="hero-grid">
     <div>
       <span class="eyebrow">Das Betriebssystem für die Bestattungsbranche</span>
-      <h1>Ein Betriebssystem für moderne Bestattungs&shy;koordination.</h1>
+      <h1>Ein <em>Betriebssystem</em> für moderne Bestattungs&shy;koordination.</h1>
       <p class="sub">MementoOS verbindet Bestatter, Krematorien, Friedhöfe, Transport und Zulieferer in einem gemeinsamen digitalen Vorgang — ohne Telefonketten, Fax und Papier.</p>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="#kontakt">Demo anfragen <span aria-hidden="true">↗</span></a>
+        <a class="btn btn-primary hsh" href="#kontakt">Demo anfragen <span aria-hidden="true">↗</span></a>
         <a class="btn btn-ghost" href="#ablauf">So funktioniert es <span aria-hidden="true">→</span></a>
       </div>
       <p class="hero-note">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8.2l1.8 1.8 3.4-3.8"/></svg>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8.2l1.8 1.8 3.4-3.8"/></svg>
         Entwickelt in Leipzig — im direkten Austausch mit der Branche.
       </p>
     </div>
 
     <div class="hub" aria-label="Diagramm: MementoOS verbindet alle Beteiligten eines Bestattungsfalls">
       <svg class="lines" viewBox="0 0 560 540" aria-hidden="true">
-        <g stroke="#C9C4B8" stroke-width="1" stroke-dasharray="4 4">
-          <line x1="280" y1="250" x2="120" y2="90"/>
-          <line x1="280" y1="250" x2="300" y2="70"/>
-          <line x1="280" y1="250" x2="465" y2="95"/>
-          <line x1="280" y1="250" x2="80" y2="250"/>
-          <line x1="280" y1="250" x2="480" y2="255"/>
-          <line x1="280" y1="250" x2="120" y2="415"/>
-          <line x1="280" y1="250" x2="300" y2="440"/>
-          <line x1="280" y1="250" x2="465" y2="410"/>
+        <g stroke="#8B877D" stroke-width="1" stroke-dasharray="5 4" fill="none" stroke-linecap="round">
+          <path d="M280 250 Q 196 178 122 92"/>
+          <path d="M280 250 Q 296 156 301 72"/>
+          <path d="M280 250 Q 386 168 463 97"/>
+          <path d="M280 250 Q 178 244 82 252"/>
+          <path d="M280 250 Q 384 258 478 256"/>
+          <path d="M280 250 Q 194 336 122 413"/>
+          <path d="M280 250 Q 288 348 301 438"/>
+          <path d="M280 250 Q 388 334 463 408"/>
         </g>
       </svg>
-      <div class="node" style="left:62px;top:48px">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="16.5" cy="9.5" r="2.3"/><path d="M4 19c.5-3 2.5-4.5 5-4.5s4.5 1.5 5 4.5M14.5 14.8c2 .2 3.6 1.4 4.1 4.2"/></svg>
+      <div class="node w1" style="left:62px;top:48px">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="16.5" cy="9.5" r="2.3"/><path d="M4 19c.5-3 2.5-4.5 5-4.5s4.5 1.5 5 4.5M14.5 14.8c2 .2 3.6 1.4 4.1 4.2"/></svg>
         <b>Familie</b><span><i></i>Eingebunden</span>
       </div>
-      <div class="node" style="left:242px;top:22px">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 20V8l8-4 8 4v12"/><path d="M9 20v-5h6v5"/><path d="M2 20h20"/></svg>
+      <div class="node w2" style="left:242px;top:22px">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V8l8-4 8 4v12"/><path d="M9 20v-5h6v5M2 20h20"/></svg>
         <b>Bestatter</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node" style="left:404px;top:50px">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 3c-2 3-2 5 0 7 2-2 2-4 0-7z"/><path d="M6 21v-7a6 6 0 0 1 12 0v7"/><path d="M4 21h16"/></svg>
+      <div class="node w3" style="left:404px;top:50px">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-2 3-2 5 0 7 2-2 2-4 0-7z"/><path d="M6 21v-7a6 6 0 0 1 12 0v7M4 21h16"/></svg>
         <b>Krematorium</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node" style="left:22px;top:208px">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 20h18M5 20V9l4-3v14M13 20V6h6v14"/><path d="M15.5 9h1M15.5 12h1"/></svg>
+      <div class="node w2" style="left:22px;top:208px">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M5 20V9l4-3v14M13 20V6h6v14"/><path d="M15.5 9h1M15.5 12h1"/></svg>
         <b>Friedhof</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node" style="left:420px;top:212px">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 16V8h11l4 4h4v4h-2"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="17" r="2"/><path d="M9 17h5"/></svg>
+      <div class="node w1" style="left:420px;top:212px">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 16V8h11l4 4h4v4h-2"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="17" r="2"/><path d="M9 17h5"/></svg>
         <b>Transport</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node" style="left:62px;top:372px">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M9 3h6l3 6-2 12H8L6 9l3-6z"/><path d="M6.5 9h11"/></svg>
+      <div class="node w3" style="left:62px;top:372px">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l3 6-2 12H8L6 9l3-6z"/><path d="M6.5 9h11"/></svg>
         <b>Särge & Urnen</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node" style="left:242px;top:398px">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 4c1.8 2 1.8 3.8 0 5.4C10.2 7.8 10.2 6 12 4z"/><path d="M12 9.4V20M12 14c-2.4 0-4-1.4-4.4-3.6 2.4 0 4 1.2 4.4 3.6zm0 0c2.4 0 4-1.4 4.4-3.6-2.4 0-4 1.2-4.4 3.6z"/></svg>
+      <div class="node w1" style="left:242px;top:398px">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21v-9M12 12c-2.6 0-4.4-1.5-4.8-4 2.6 0 4.4 1.3 4.8 4zm0 0c2.6 0 4.4-1.5 4.8-4-2.6 0-4.4 1.3-4.8 4z"/><path d="M12 7.5c-1.6-1.8-1.6-3.4 0-5 1.6 1.6 1.6 3.2 0 5z"/></svg>
         <b>Floristik</b><span><i></i>Verbunden</span>
       </div>
-      <div class="node" style="left:404px;top:370px">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
+      <div class="node w2" style="left:404px;top:370px">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
         <b>Termine</b><span><i></i>Synchron</span>
       </div>
       <div class="core">
-        <svg class="dots" width="34" height="28" viewBox="0 0 34 28" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="#F7F5F1"/><circle cx="25" cy="7" r="5" fill="#F7F5F1"/><circle cx="15" cy="23" r="5.5" fill="#F7F5F1"/></svg>
+        <svg class="dots" width="32" height="29" viewBox="0 0 32 29" aria-hidden="true"><circle cx="8.5" cy="8" r="7" fill="#F7F5F1"/><circle cx="23.5" cy="8" r="7" fill="#F7F5F1"/><circle cx="16" cy="21" r="7" fill="#F7F5F1"/></svg>
         <b>MementoOS</b>
         <span>Ein Fall. Alle Beteiligten.</span>
       </div>
@@ -224,58 +243,58 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
     <h2>Für Klarheit gebaut. Mit Würde gestaltet.</h2>
   </div>
   <div class="cards4">
-    <div class="fcard">
-      <div class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7.5l7.5 9M16 7.5l-7.5 9M8.5 6h7"/></svg></div>
+    <div class="fcard w1">
+      <div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5l4.5-4.5 4.5 2 3.5-2.5 5.5 5"/><path d="M8 12l3.5 3.5a1.5 1.5 0 0 0 2.1-2.1M10.5 14.6l2 2a1.4 1.4 0 0 0 2-2M13.2 12.8l1.6 1.6a1.4 1.4 0 0 0 2-2"/><path d="M3 11.5V17M21 11.5V17"/></svg></div>
       <div><b>Ein gemeinsamer Vorgang</b><p>Alle Beteiligten und jeder Schritt in einem digitalen Fall — statt verteilter Zettel, Mails und Anrufe.</p></div>
     </div>
-    <div class="fcard">
-      <div class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></div>
-      <div><b>Weniger Koordinationsaufwand</b><p>Statusänderungen, Freigaben und Benachrichtigungen laufen automatisch an die richtigen Stellen.</p></div>
+    <div class="fcard w2">
+      <div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.2 3.5h3.4l1.6 4.3-2 1.6c1 2.4 2.6 4 5 5l1.7-2 4.3 1.7v3.4c0 1.1-.9 2-2 2C10 19 5 14 4.2 5.5c-.1-1.1.9-2 2-2z"/></svg></div>
+      <div><b>Weniger Telefonketten</b><p>Statusänderungen, Freigaben und Benachrichtigungen laufen automatisch an die richtigen Stellen.</p></div>
     </div>
-    <div class="fcard">
-      <div class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg></div>
+    <div class="fcard w3">
+      <div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-1.5 1.9-1.5 3.4 0 5 1.5-1.6 1.5-3.1 0-5z"/><path d="M9.5 10h5V20h-5zM7.5 20h9"/></svg></div>
       <div><b>Familien eingebunden</b><p>Angehörige sehen den Stand und ergänzen Angaben über einen einfachen Link — ohne Registrierung.</p></div>
     </div>
-    <div class="fcard">
-      <div class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4.5"/></svg></div>
+    <div class="fcard w1">
+      <div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6V3z"/><path d="M14 3v5h5M9 13h6M9 16.5h6"/></svg></div>
       <div><b>Lückenlos dokumentiert</b><p>Jede Änderung wird protokolliert. Unterlagen und Zuständigkeiten sind jederzeit nachvollziehbar.</p></div>
     </div>
   </div>
 </section>
 
 <section class="block wrap" id="ablauf">
-  <div class="eco">
+  <div class="eco w2">
     <div class="center">
       <div class="kicker">Der Ablauf</div>
       <h2>Eine Plattform. Jeder Schritt. Alle verbunden.</h2>
     </div>
     <div class="steps">
       <div class="step">
-        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M9 15l2 2 4-4"/></svg></div>
+        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M9 15l2 2 4-4"/></svg></div>
         <span class="sn">1</span>
         <b>Buchung beim Krematorium</b>
         <p>Der Termin wird bestätigt — und der Fall entsteht mit einem Link.</p>
       </div>
       <div class="step">
-        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 20V8l8-4 8 4v12M9 20v-5h6v5M2 20h20"/></svg></div>
+        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V8l8-4 8 4v12M9 20v-5h6v5M2 20h20"/></svg></div>
         <span class="sn">2</span>
         <b>Bestatter füllt den Vorgang</b>
         <p>Strukturierte Angaben statt Fax: alles, was für eine sichere Einäscherung nötig ist.</p>
       </div>
       <div class="step">
-        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.3"/><path d="M4 19c.5-3 2.5-4.5 5-4.5s4.5 1.5 5 4.5M15 15c2 .2 3.5 1.3 4 3.8"/></svg></div>
+        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l4-4 4 1.8 3-2.2 5 4.4"/><path d="M7.5 10.5l3.2 3.2a1.4 1.4 0 0 0 2-2M10 12.8l1.8 1.8a1.3 1.3 0 0 0 1.9-1.9"/></svg></div>
         <span class="sn">3</span>
         <b>Partner über einen Link</b>
         <p>Transport, Floristik, Zulieferer treten ohne Registrierung bei und bestätigen ihren Teil.</p>
       </div>
       <div class="step">
-        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 3h9l4 4v14H6V3z"/><path d="M14 3v5h5M9 13h6M9 16.5h6"/></svg></div>
+        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6V3z"/><path d="M14 3v5h5M9 13h6M9 16.5h6"/></svg></div>
         <span class="sn">4</span>
         <b>Unterlagen & Status</b>
         <p>Fehlende Dokumente fallen sofort auf — nicht erst vor Ort. Jeder sieht, was aussteht.</p>
       </div>
       <div class="step">
-        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3c-1.8 2.4-1.8 4.2 0 6 1.8-1.8 1.8-3.6 0-6z"/><path d="M8 21v-6a4 4 0 0 1 8 0v6M6 21h12"/></svg></div>
+        <div class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20c-4.5-1.3-7.2-4-8-8 2.2.2 3.8 1 5 2.2M12 20c4.5-1.3 7.2-4 8-8-2.2.2-3.8 1-5 2.2M12 20V10"/><path d="M12 10C10 8.4 9.6 6.4 10.8 4c1.8 1.2 2.3 3.4 1.2 6zM12 10c2-1.6 2.4-3.6 1.2-6-1.8 1.2-2.3 3.4-1.2 6z"/></svg></div>
         <span class="sn">5</span>
         <b>Würdevoller Abschluss</b>
         <p>Der Fall wird abgeschlossen, dokumentiert und archiviert — vollständig und nachvollziehbar.</p>
@@ -285,24 +304,24 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
 </section>
 
 <section class="block wrap">
-  <div class="band">
+  <div class="band w1">
     <div>
-      <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="8" r="2.5"/><circle cx="17" cy="8" r="2.5"/><path d="M2.5 19c.4-2.8 2.2-4.2 4.5-4.2S11.1 16.2 11.5 19M12.5 19c.4-2.8 2.2-4.2 4.5-4.2s4.1 1.4 4.5 4.2"/></svg>
+      <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="8" r="2.5"/><circle cx="17" cy="8" r="2.5"/><path d="M2.5 19c.4-2.8 2.2-4.2 4.5-4.2S11.1 16.2 11.5 19M12.5 19c.4-2.8 2.2-4.2 4.5-4.2s4.1 1.4 4.5 4.2"/></svg>
       <b>Alle Beteiligten. Ein Ablauf.</b>
       <p>Eine gemeinsame Quelle der Wahrheit für jeden Fall — für alle Organisationen.</p>
     </div>
     <div>
-      <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg>
+      <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg>
       <b>Weniger Anrufe, Mails und Fax.</b>
       <p>Rückfragen entfallen, weil der Stand für alle sichtbar ist.</p>
     </div>
     <div>
-      <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 19V5M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+      <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>
       <b>Schnellere Koordination.</b>
       <p>Vom ersten Anruf bis zum Abschluss — ohne Wartezeiten zwischen den Stellen.</p>
     </div>
     <div>
-      <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4.5"/></svg>
+      <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4.5"/></svg>
       <b>Prüfbar dokumentiert.</b>
       <p>Jeder Schritt protokolliert — Vertraulichkeit nach Rolle, DSGVO im Blick.</p>
     </div>
@@ -316,27 +335,27 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
   </div>
   <div class="cards5">
     <div class="acard">
-      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M4 20V8l8-4 8 4v12M9 20v-5h6v5M2 20h20"/></svg></div>
+      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4.2-1.2-6.8-3.8-7.5-7.5 2 .2 3.5.9 4.6 2M12 21c4.2-1.2 6.8-3.8 7.5-7.5-2 .2-3.5.9-4.6 2M12 21v-9"/><path d="M12 12c-1.9-1.5-2.3-3.4-1.2-5.7 1.7 1.1 2.1 3.1 1.2 5.7zM12 12c1.9-1.5 2.3-3.4 1.2-5.7-1.7 1.1-2.1 3.1-1.2 5.7z"/><path d="M9 4.5c.9-.9 2-1.4 3-1.4s2.1.5 3 1.4"/></svg></div>
       <b>Bestattungsunternehmen</b>
       <p>Ein Vorgang statt zehn Anrufe — alles dokumentiert.</p>
     </div>
     <div class="acard">
-      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M3 20h18M5 20V9l4-3v14M13 20V6h6v14M15.5 9h1M15.5 12h1"/></svg></div>
+      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V6"/><path d="M12 10C9.8 9.6 8.4 8.2 8 6c2.2.4 3.6 1.7 4 4zM12 14c2.2-.4 3.6-1.8 4-4-2.2.4-3.6 1.7-4 4zM12 18c-2.2-.4-3.6-1.8-4-4 2.2.4 3.6 1.7 4 4z"/></svg></div>
       <b>Friedhofsverwaltungen</b>
       <p>Belegungen, Termine und Unterlagen im Überblick.</p>
     </div>
     <div class="acard">
-      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M12 3c-2 3-2 5 0 7 2-2 2-4 0-7zM6 21v-7a6 6 0 0 1 12 0v7M4 21h16"/></svg></div>
+      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-2 3-2 5 0 7 2-2 2-4 0-7z"/><path d="M6 21v-7a6 6 0 0 1 12 0v7M4 21h16"/></svg></div>
       <b>Krematorien</b>
       <p>Vollständige Unterlagen vor der Anlieferung, digitale Annahme.</p>
     </div>
     <div class="acard">
-      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M4 7h16v13H4zM4 7l2-4h12l2 4M9 11h6"/></svg></div>
+      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4zM4 7l2-4h12l2 4M9 11h6"/></svg></div>
       <b>Zulieferer</b>
       <p>Anfragen empfangen, Aufträge bestätigen, im Takt bleiben.</p>
     </div>
     <div class="acard">
-      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><rect x="3" y="9" width="7" height="12"/><rect x="14" y="4" width="7" height="17"/><path d="M5.5 12h2M5.5 15h2M16.5 8h2M16.5 12h2M16.5 16h2"/></svg></div>
+      <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="7" height="12"/><rect x="14" y="4" width="7" height="17"/><path d="M5.5 12h2M5.5 15h2M16.5 8h2M16.5 12h2M16.5 16h2"/></svg></div>
       <b>Verbünde & Gruppen</b>
       <p>Einheitliche Abläufe über mehrere Standorte hinweg.</p>
     </div>
@@ -347,7 +366,7 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
   <div class="kicker">Kontakt</div>
   <h2>Sehen, wie ein gemeinsamer Vorgang aussieht?</h2>
   <p>Wir zeigen MementoOS in 20 Minuten — ruhig, konkret, ohne Verkaufsdruck.</p>
-  <a class="btn btn-primary" href="mailto:timurkry.dev@gmail.com?subject=MementoOS%20Demo">Demo anfragen <span aria-hidden="true">↗</span></a>
+  <a class="btn btn-primary hsh" href="mailto:timurkry.dev@gmail.com?subject=MementoOS%20Demo">Demo anfragen <span aria-hidden="true">↗</span></a>
 </section>
 </main>
 
@@ -356,7 +375,7 @@ footer.site{background:var(--ink);color:#B9B6AE;padding:52px 0 28px;font-size:13
     <div class="fgrid">
       <div>
         <a class="logo" href="#top">
-          <svg width="28" height="24" viewBox="0 0 30 26" aria-hidden="true"><circle cx="9" cy="9" r="7" fill="#F7F5F1"/><circle cx="22" cy="6" r="4.5" fill="#F7F5F1"/><circle cx="13" cy="21" r="5" fill="#F7F5F1"/></svg>
+          <svg width="28" height="25" viewBox="0 0 32 29" aria-hidden="true"><circle cx="8.5" cy="8" r="7" fill="#F7F5F1"/><circle cx="23.5" cy="8" r="7" fill="#F7F5F1"/><circle cx="16" cy="21" r="7" fill="#F7F5F1"/></svg>
           MementoOS
         </a>
         <p style="margin-top:14px;max-width:30ch">Das Betriebssystem für die Bestattungsbranche. Ein Fall. Alle Beteiligten.</p>
