@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { Logo } from "./icons";
 
 const links = [
   { href: "#plattform", label: "Plattform" },
   { href: "#ablauf", label: "So funktioniert es" },
-  { href: "#warum", label: "Warum MementoOS" },
+  { href: "/demo/", label: "Demo" },
   { href: "#zielgruppen", label: "Für wen" },
 ];
 
@@ -16,11 +17,17 @@ export function Header() {
           MementoOS
         </a>
         <nav className="ml-auto hidden gap-6 text-sm text-stone md:flex" aria-label="Hauptnavigation">
-          {links.map((l) => (
-            <a key={l.href} href={l.href} className="wavy-link hover:text-ink">
-              {l.label}
-            </a>
-          ))}
+          {links.map((l) =>
+            l.href.startsWith("#") ? (
+              <a key={l.href} href={l.href} className="wavy-link hover:text-ink">
+                {l.label}
+              </a>
+            ) : (
+              <Link key={l.href} href={l.href} className="wavy-link hover:text-ink">
+                {l.label}
+              </Link>
+            )
+          )}
         </nav>
         <a href="#kontakt" className="w-btn ml-2 border-[1.3px] border-ink bg-ink px-4 py-2.5 text-sm font-medium text-paper transition-transform hover:-translate-x-px hover:-translate-y-px">
           Demo anfragen <span aria-hidden="true">↗</span>

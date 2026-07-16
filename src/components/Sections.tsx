@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   IconHandshake,
   IconPhone,
@@ -81,6 +82,11 @@ export function Process() {
               <p className="text-[12.5px] leading-normal text-stone">{s.text}</p>
             </div>
           ))}
+        </div>
+        <div className="mt-9 text-center">
+          <Link href="/demo/" className="w-btn inline-flex items-center gap-2.5 border-[1.3px] border-ink bg-card px-5 py-3 text-sm font-medium transition-transform hover:-translate-x-px hover:-translate-y-px">
+            Den Ablauf im Demo durchspielen <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </div>
     </section>
