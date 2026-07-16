@@ -10,6 +10,7 @@
   --color-wald: #3e5c41;
   --color-ocker: #8f6a24;
   --color-terra: #8f4527;
+  --color-kirsche: #7c1d2e;
   --color-ash: #b9b6ae;
   --font-display: var(--font-playfair), Georgia, serif;
   --font-body: var(--font-inter), "Segoe UI", Arial, sans-serif;
@@ -62,8 +63,36 @@ body {
 }
 
 .wavy-link:hover {
-  text-decoration: underline wavy 1px;
+  color: var(--color-kirsche);
+  text-decoration: underline wavy 1px var(--color-kirsche);
   text-underline-offset: 5px;
+}
+
+.kirsche-hover {
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+}
+.kirsche-hover:hover {
+  background: var(--color-kirsche);
+  border-color: var(--color-kirsche);
+}
+
+/* scroll-reveal */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+[data-reveal].revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* марширующий пунктир связей диаграммы */
+@keyframes dash-move {
+  to { stroke-dashoffset: -240; }
+}
+.dash-anim {
+  animation: dash-move 48s linear infinite;
 }
 
 @keyframes step-in {

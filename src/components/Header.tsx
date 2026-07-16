@@ -19,17 +19,17 @@ export function Header() {
         <nav className="ml-auto hidden gap-6 text-sm text-stone md:flex" aria-label="Hauptnavigation">
           {links.map((l) =>
             l.href.startsWith("#") ? (
-              <a key={l.href} href={l.href} className="wavy-link hover:text-ink">
+              <a key={l.href} href={l.href} className="wavy-link">
                 {l.label}
               </a>
             ) : (
-              <Link key={l.href} href={l.href} className="wavy-link hover:text-ink">
+              <Link key={l.href} href={l.href} className="wavy-link">
                 {l.label}
               </Link>
             )
           )}
         </nav>
-        <a href="#kontakt" className="w-btn ml-2 border-[1.3px] border-ink bg-ink px-4 py-2.5 text-sm font-medium text-paper transition-transform hover:-translate-x-px hover:-translate-y-px">
+        <a href="#kontakt" className="w-btn kirsche-hover ml-2 border-[1.3px] border-ink bg-ink px-4 py-2.5 text-sm font-medium text-paper hover:-translate-x-px hover:-translate-y-px">
           Demo anfragen <span aria-hidden="true">↗</span>
         </a>
       </div>

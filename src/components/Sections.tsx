@@ -18,8 +18,8 @@ import {
 
 function SectionHead({ kicker, title }: { kicker: string; title: string }) {
   return (
-    <div className="text-center">
-      <div className="text-[11px] uppercase tracking-[.2em] text-stone">{kicker}</div>
+    <div className="text-center" data-reveal>
+      <div className="text-[11px] uppercase tracking-[.2em] text-kirsche">{kicker}</div>
       <h2 className="mb-9 mt-3 text-balance font-[family-name:var(--font-display)] text-[28px] font-medium md:text-[32px]">
         {title}
       </h2>
@@ -39,8 +39,8 @@ export function Why() {
     <section id="warum" className="mx-auto max-w-[1180px] px-7 py-16">
       <SectionHead kicker="Warum MementoOS" title="Für Klarheit gebaut. Mit Würde gestaltet." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {whyItems.map((it) => (
-          <div key={it.title} className={`${it.w} flex items-start gap-3.5 border-[1.2px] border-ink bg-card p-5`}>
+        {whyItems.map((it, i) => (
+          <div key={it.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`${it.w} flex items-start gap-3.5 border-[1.2px] border-ink bg-card p-5`}>
             <div className="w-circle flex h-10 w-10 flex-none items-center justify-center border-[1.1px] border-ink text-ink">
               {it.icon}
             </div>
@@ -71,7 +71,7 @@ export function Process() {
         <SectionHead kicker="Der Ablauf" title="Eine Plattform. Jeder Schritt. Alle verbunden." />
         <div className="grid gap-7 md:grid-cols-5 md:gap-4">
           {steps.map((s, i) => (
-            <div key={s.title} className="relative text-center">
+            <div key={s.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }} className="relative text-center">
               <div className="w-circle mx-auto mb-3.5 flex h-[66px] w-[66px] items-center justify-center border-[1.2px] border-ink bg-card text-ink">
                 {s.icon}
               </div>
@@ -103,7 +103,7 @@ const bandItems = [
 export function ValueBand() {
   return (
     <section className="mx-auto max-w-[1180px] px-7 py-16">
-      <div className="w1 hatch grid gap-7 border-[1.2px] border-ink bg-ink p-7 text-paper sm:grid-cols-2 lg:grid-cols-4 md:p-10">
+      <div data-reveal className="w1 hatch grid gap-7 border-[1.2px] border-ink bg-ink p-7 text-paper sm:grid-cols-2 lg:grid-cols-4 md:p-10">
         {bandItems.map((b) => (
           <div key={b.title}>
             <span className="mb-2.5 block text-ash">{b.icon}</span>
@@ -130,7 +130,7 @@ export function Audiences() {
       <SectionHead kicker="Für wen" title="Gebaut für jede Organisation der Branche." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {audiences.map((a, i) => (
-          <div key={a.title} className={`overflow-hidden border-[1.2px] border-ink bg-card pb-5 text-center ${i % 2 ? "rotate-[.35deg]" : "-rotate-[.35deg]"}`}>
+          <div key={a.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`overflow-hidden border-[1.2px] border-ink bg-card pb-5 text-center ${i % 2 ? "rotate-[.35deg]" : "-rotate-[.35deg]"}`}>
             <div className="hatch-bg flex h-28 items-center justify-center border-b-[1.2px] border-ink bg-[#F1EEE7] text-ink">
               {a.icon}
             </div>
@@ -145,15 +145,15 @@ export function Audiences() {
 
 export function ContactCta() {
   return (
-    <section id="kontakt" className="mx-auto max-w-[1180px] px-7 pb-20 pt-16 text-center">
-      <div className="text-[11px] uppercase tracking-[.2em] text-stone">Kontakt</div>
+    <section id="kontakt" data-reveal className="mx-auto max-w-[1180px] px-7 pb-20 pt-16 text-center">
+      <div className="text-[11px] uppercase tracking-[.2em] text-kirsche">Kontakt</div>
       <h2 className="mb-3 mt-3 text-balance font-[family-name:var(--font-display)] text-[28px] font-medium md:text-[32px]">
         Sehen, wie ein gemeinsamer Vorgang aussieht?
       </h2>
       <p className="mb-7 text-stone">Wir zeigen MementoOS in 20 Minuten — ruhig, konkret, ohne Verkaufsdruck.</p>
       <a
         href="mailto:timurkry.dev@gmail.com?subject=MementoOS%20Demo"
-        className="w-btn hatch inline-flex items-center gap-2.5 border-[1.3px] border-ink bg-ink px-5 py-3 text-sm font-medium text-paper transition-transform hover:-translate-x-px hover:-translate-y-px"
+        className="w-btn hatch kirsche-hover inline-flex items-center gap-2.5 border-[1.3px] border-ink bg-ink px-5 py-3 text-sm font-medium text-paper hover:-translate-x-px hover:-translate-y-px"
       >
         Demo anfragen <span aria-hidden="true">↗</span>
       </a>

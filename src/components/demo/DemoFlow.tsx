@@ -44,7 +44,7 @@ function PrimaryBtn({ children, onClick, disabled }: { children: React.ReactNode
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-btn hatch inline-flex items-center gap-2.5 border-[1.3px] border-ink bg-ink px-5 py-3 text-sm font-medium text-paper transition-transform enabled:hover:-translate-x-px enabled:hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-40"
+      className="w-btn hatch kirsche-hover inline-flex items-center gap-2.5 border-[1.3px] border-ink bg-ink px-5 py-3 text-sm font-medium text-paper enabled:hover:-translate-x-px enabled:hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ink disabled:hover:border-ink"
     >
       {children}
     </button>

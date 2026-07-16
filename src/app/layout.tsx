@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
+import { Reveal } from "@/components/Reveal";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -25,7 +26,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="de" className={`${playfair.variable} ${inter.variable}`}>
-      <body>{children}</body>
+      <body>
+        <Reveal />
+        {children}
+      </body>
     </html>
   );
 }

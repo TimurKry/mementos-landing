@@ -52,7 +52,7 @@ export function HubDiagram() {
       <svg className="absolute inset-0 hidden h-full w-full md:block" viewBox="0 0 560 460" aria-hidden="true">
         <circle cx="280" cy="230" r="122" fill="none" stroke="#E6E2D9" strokeWidth="1" />
         <circle cx="280" cy="230" r="178" fill="none" stroke="#ECE8E0" strokeWidth="1" />
-        <g stroke="#8B877D" strokeWidth="1" strokeDasharray="4 4" strokeLinecap="round">
+        <g className="dash-anim" stroke="#8B877D" strokeWidth="1" strokeDasharray="4 4" strokeLinecap="round">
           {lines.map(([x1, y1, x2, y2], i) => (
             <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />
           ))}
