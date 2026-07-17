@@ -78,9 +78,94 @@ body {
 }
 .step-in { animation: step-in 0.24s ease-out; }
 
+/* ── Premium layer (Stripe/Linear-Klasse: Tiefe, Glas, ein Akzent) ── */
+:root {
+  --shadow-sm: 0 1px 2px rgba(26, 22, 20, 0.05);
+  --shadow-md: 0 4px 14px rgba(26, 22, 20, 0.08);
+  --shadow-lg: 0 18px 40px -12px rgba(26, 22, 20, 0.18);
+  --shadow-xl: 0 40px 80px -24px rgba(60, 20, 28, 0.28);
+  --accent: #7c1d2e;
+  --accent-2: #a23a4b;
+}
+
+/* мягкое фирменное свечение под hero — глубина без пестроты */
+.hero-glow {
+  position: relative;
+  isolation: isolate;
+}
+.hero-glow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -12%;
+  right: -6%;
+  width: 46rem;
+  height: 46rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 60% 40%, rgba(124, 29, 46, 0.10), rgba(124, 29, 46, 0) 62%);
+  pointer-events: none;
+}
+.hero-glow::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  bottom: -20%;
+  left: -10%;
+  width: 34rem;
+  height: 34rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(62, 92, 65, 0.07), rgba(62, 92, 65, 0) 60%);
+  pointer-events: none;
+}
+
+/* премиум primary-кнопка: глубина + тонкий верхний блик */
+.btn-premium {
+  background: linear-gradient(180deg, #2a2a2a 0%, var(--color-ink) 100%);
+  color: var(--color-paper);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  transition: box-shadow 0.22s ease, transform 0.14s ease, background 0.22s ease;
+}
+.btn-premium:hover {
+  transform: translateY(-1.5px);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, #3a1720 0%, var(--accent) 100%);
+}
+.btn-premium:active { transform: translateY(0); }
+
+/* плавающий продуктовый мокап: 3D-сцена + слоистая тень */
+.tilt-scene { perspective: 1400px; }
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: var(--shadow-xl);
+  border-radius: 16px;
+}
+.tilt-float { transform: translateZ(60px); }
+
+/* парящие чипы */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+.float-a { animation: floaty 4.5s ease-in-out infinite; }
+.float-b { animation: floaty 5.5s ease-in-out infinite 0.6s; }
+
+/* мягкая пульсация «живого» индикатора */
+@keyframes livepulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(62, 92, 65, 0.5); }
+  50% { opacity: 0.85; box-shadow: 0 0 0 4px rgba(62, 92, 65, 0); }
+}
+.live-dot { animation: livepulse 2.4s ease-in-out infinite; }
+
+.elev-md { box-shadow: var(--shadow-md); }
+.elev-lg { box-shadow: var(--shadow-lg); }
+
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+  .float-a, .float-b, .live-dot { animation: none !important; }
+  .tilt-card { transform: none !important; }
 }

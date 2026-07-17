@@ -66,7 +66,8 @@ export function HubDiagram() {
       </svg>
 
       <div className="order-first col-span-2 md:absolute md:left-1/2 md:top-1/2 md:w-[190px] md:-translate-x-1/2 md:-translate-y-1/2">
-        <div className="rounded-2xl bg-ink px-4 py-5 text-center text-paper shadow-[0_8px_24px_rgba(26,26,26,0.18)]">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 hidden h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full md:block" style={{ background: "radial-gradient(circle, rgba(124,29,46,0.14), rgba(124,29,46,0) 65%)" }} />
+        <div className="rounded-2xl bg-ink px-4 py-5 text-center text-paper" style={{ boxShadow: "var(--shadow-xl)" }}>
           <Logo className="mx-auto mb-2.5 h-[26px] w-[29px]" fill="#F7F5F1" />
           <b className="block text-[17px] font-semibold">MementoOS</b>
           <span className="mt-1 block text-[11.5px] text-ash">Ein Fall. Alle Beteiligten.</span>

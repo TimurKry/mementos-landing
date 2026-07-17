@@ -29,7 +29,7 @@ export function Header() {
             )
           )}
         </nav>
-        <a href="#kontakt" className="w-btn kirsche-hover ml-2 border border-transparent bg-ink px-4 py-2.5 text-sm font-medium text-paper hover:-translate-x-px hover:-translate-y-px">
+        <a href="#kontakt" className="btn-premium press ml-2 px-4 py-2.5 text-sm font-medium">
           Demo anfragen <span aria-hidden="true">↗</span>
         </a>
       </div>
