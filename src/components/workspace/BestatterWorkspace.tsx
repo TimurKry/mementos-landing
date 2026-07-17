@@ -216,7 +216,7 @@ export function BestatterWorkspace() {
             ["Warten auf andere", String(waiting), waiting > 0 ? "ocker" : "stone"],
             ["Diese Woche abzuschließen", "2", "stone"],
           ].map(([l, v, tone]) => (
-            <div key={l} className="w1 border-[1.2px] border-ink bg-card px-4 py-3">
+            <div key={l} className="w1 border border-line bg-card px-4 py-3">
               <div className={`font-[family-name:var(--font-display)] text-[26px] font-medium ${tone === "terra" ? "text-terra" : tone === "ocker" ? "text-ocker" : ""}`}>{v}</div>
               <div className="text-[11px] uppercase tracking-[.14em] text-stone">{l}</div>
             </div>
@@ -245,7 +245,7 @@ export function BestatterWorkspace() {
                       <button
                         key={c.id}
                         onClick={() => { setOpenId(c.id); setTab("beteiligte"); }}
-                        className="w2 press step-in block w-full border-[1.2px] border-ink bg-card p-3 text-left transition-transform hover:-translate-y-px"
+                        className="w2 card-hover press step-in block w-full border border-line bg-card p-3 text-left transition-transform hover:-translate-y-px"
                       >
                         <div className="flex items-baseline justify-between gap-2">
                           <b className="text-[13.5px] font-semibold">{c.name}</b>
@@ -269,7 +269,7 @@ export function BestatterWorkspace() {
 
         {ai !== "closed" && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 p-5" role="dialog" aria-modal="true" aria-label="Neuer Vorgang per Schnellerfassung">
-            <div className="w2 step-in w-full max-w-[620px] border-[1.2px] border-ink bg-paper p-6">
+            <div className="w2 step-in w-full max-w-[620px] border border-line bg-paper p-6">
               <div className="mb-1 text-[11px] uppercase tracking-[.18em] text-kirsche">KI-Schnellerfassung</div>
               <h3 className="mb-4 font-[family-name:var(--font-display)] text-xl font-medium">Beschreiben Sie den Fall — wir strukturieren.</h3>
 
@@ -333,7 +333,7 @@ export function BestatterWorkspace() {
         )}
 
         {toast && (
-          <div className="w1 step-in fixed bottom-6 left-1/2 z-50 -translate-x-1/2 border-[1.2px] border-ink bg-ink px-5 py-2.5 text-sm text-paper">{toast}</div>
+          <div className="w1 step-in fixed bottom-6 left-1/2 z-50 -translate-x-1/2 border border-line bg-ink px-5 py-2.5 text-sm text-paper">{toast}</div>
         )}
       </div>
     );
@@ -344,7 +344,7 @@ export function BestatterWorkspace() {
     <div className="step-in">
       <button onClick={() => setOpenId(null)} className="wavy-link mb-4 text-sm text-stone">← Alle Vorgänge</button>
 
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b-[1.2px] border-ink pb-5">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
         <div>
           <div className="text-[11px] uppercase tracking-[.16em] text-stone">{current.id} · {current.type}</div>
           <h2 className="font-[family-name:var(--font-display)] text-[28px] font-medium">{current.name}</h2>
@@ -375,7 +375,7 @@ export function BestatterWorkspace() {
             <div key="b" className="step-in grid gap-2">
               <p className="mb-1 text-[12.5px] text-stone">Reihenfolge = Priorität. Wen zuerst kontaktieren, wen überspringen:</p>
               {current.participants.map((p, i) => (
-                <div key={p.name} className={`flex flex-wrap items-center gap-x-4 gap-y-2 border-[1.2px] px-3.5 py-2.5 ${p.contact === "skipped" ? "border-hair bg-paper opacity-60" : "border-ink bg-card"}`}>
+                <div key={p.name} className={`flex flex-wrap items-center gap-x-4 gap-y-2 border px-3.5 py-2.5 ${p.contact === "skipped" ? "border-line bg-paper opacity-60" : "border-line bg-card"}`}>
                   <div className="flex flex-col">
                     <b className="text-[13.5px] font-semibold">{p.name}</b>
                     <span className="text-[11px] text-stone">{p.role} · {p.joined ? "beigetreten" : "noch nicht beigetreten"}</span>
@@ -423,7 +423,7 @@ export function BestatterWorkspace() {
         </div>
 
         <aside>
-          <div className="w3 border-[1.2px] border-ink bg-card p-4">
+          <div className="w3 border border-line bg-card p-4">
             <div className="mb-2.5 text-[11px] uppercase tracking-[.16em] text-stone">Aufgaben</div>
             <div className="grid gap-2">
               {current.tasks.length === 0 && <span className="text-[12.5px] text-stone">Keine offenen Aufgaben ✓</span>}
@@ -444,7 +444,7 @@ export function BestatterWorkspace() {
       </div>
 
       {toast && (
-        <div className="w1 step-in fixed bottom-6 left-1/2 z-50 -translate-x-1/2 border-[1.2px] border-ink bg-ink px-5 py-2.5 text-sm text-paper">
+        <div className="w1 step-in fixed bottom-6 left-1/2 z-50 -translate-x-1/2 border border-line bg-ink px-5 py-2.5 text-sm text-paper">
           <span className="mr-1.5 inline-block align-[-2px]"><IconCheck className="h-4 w-4" /></span>{toast}
         </div>
       )}

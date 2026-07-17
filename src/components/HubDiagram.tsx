@@ -52,7 +52,7 @@ export function HubDiagram() {
       <svg className="absolute inset-0 hidden h-full w-full md:block" viewBox="0 0 560 460" aria-hidden="true">
         <circle cx="280" cy="230" r="122" fill="none" stroke="#E6E2D9" strokeWidth="1" />
         <circle cx="280" cy="230" r="178" fill="none" stroke="#ECE8E0" strokeWidth="1" />
-        <g className="dash-anim" stroke="#8B877D" strokeWidth="1" strokeDasharray="4 4" strokeLinecap="round">
+        <g stroke="#8B877D" strokeWidth="1" strokeDasharray="4 4" strokeLinecap="round">
           {lines.map(([x1, y1, x2, y2], i) => (
             <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />
           ))}
@@ -66,7 +66,7 @@ export function HubDiagram() {
       </svg>
 
       <div className="order-first col-span-2 md:absolute md:left-1/2 md:top-1/2 md:w-[190px] md:-translate-x-1/2 md:-translate-y-1/2">
-        <div className="hatch hatch-strong bg-ink px-4 py-5 text-center text-paper" style={{ borderRadius: "16px 7px 18px 8px / 8px 17px 7px 16px" }}>
+        <div className="rounded-2xl bg-ink px-4 py-5 text-center text-paper shadow-[0_8px_24px_rgba(26,26,26,0.18)]">
           <Logo className="mx-auto mb-2.5 h-[26px] w-[29px]" fill="#F7F5F1" />
           <b className="block text-[17px] font-semibold">MementoOS</b>
           <span className="mt-1 block text-[11.5px] text-ash">Ein Fall. Alle Beteiligten.</span>
@@ -74,7 +74,7 @@ export function HubDiagram() {
       </div>
 
       {nodes.map((n) => (
-        <div key={n.label} className={`${n.wobble} border-[1.2px] border-ink bg-card px-2 py-2.5 text-center md:absolute md:w-[118px] ${n.pos}`}>
+        <div key={n.label} className={`${n.wobble} card-hover border border-line bg-card px-2 py-2.5 text-center md:absolute md:w-[118px] ${n.pos}`}>
           <span className="mx-auto mb-1 block w-fit text-ink">{n.icon}</span>
           <b className="block text-[12.5px] font-semibold">{n.label}</b>
           <span className="mt-0.5 inline-flex items-center gap-1.5 text-[10px] text-stone">

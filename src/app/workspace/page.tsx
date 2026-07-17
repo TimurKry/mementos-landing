@@ -12,14 +12,14 @@ export const metadata: Metadata = {
 export default function WorkspacePage() {
   return (
     <>
-      <header className="sticky top-0 z-40 border-b-[1.3px] border-ink bg-paper/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur-sm">
         <div className="mx-auto flex h-[68px] max-w-[1240px] items-center justify-between gap-6 px-7">
           <Link href="/" className="flex items-center gap-2.5 text-[17px] font-semibold" aria-label="Zurück zur Startseite">
             <Logo className="h-[26px] w-[30px]" />
             MementoOS
           </Link>
           <div className="flex items-center gap-5 text-sm">
-            <span className="w-pill hidden border border-ink bg-card px-3 py-1 text-[10.5px] uppercase tracking-[.16em] text-stone sm:inline-block">
+            <span className="w-pill hidden border border-line bg-card px-3 py-1 text-[10.5px] uppercase tracking-[.16em] text-stone sm:inline-block">
               Konzept-Mockup · Beispieldaten
             </span>
             <Link href="/demo/" className="wavy-link text-stone">Prozess-Demo</Link>

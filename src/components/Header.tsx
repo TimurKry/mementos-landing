@@ -10,7 +10,7 @@ const links = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b-[1.3px] border-ink bg-paper/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 border-b border-line bg-paper/95 backdrop-blur-sm">
       <div className="mx-auto flex h-[68px] max-w-[1180px] items-center gap-8 px-7">
         <a href="#top" className="flex items-center gap-2.5 text-[17px] font-semibold" aria-label="MementoOS Startseite">
           <Logo className="h-[26px] w-[30px]" />
@@ -29,7 +29,7 @@ export function Header() {
             )
           )}
         </nav>
-        <a href="#kontakt" className="w-btn kirsche-hover ml-2 border-[1.3px] border-ink bg-ink px-4 py-2.5 text-sm font-medium text-paper hover:-translate-x-px hover:-translate-y-px">
+        <a href="#kontakt" className="w-btn kirsche-hover ml-2 border border-transparent bg-ink px-4 py-2.5 text-sm font-medium text-paper hover:-translate-x-px hover:-translate-y-px">
           Demo anfragen <span aria-hidden="true">↗</span>
         </a>
       </div>

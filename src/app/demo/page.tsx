@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function DemoPage() {
   return (
     <>
-      <header className="sticky top-0 z-50 border-b-[1.3px] border-ink bg-paper/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-line bg-paper/95 backdrop-blur-sm">
         <div className="mx-auto flex h-[68px] max-w-[1180px] items-center justify-between gap-8 px-7">
           <Link href="/" className="flex items-center gap-2.5 text-[17px] font-semibold" aria-label="Zurück zur Startseite">
             <Logo className="h-[26px] w-[30px]" />
@@ -26,7 +26,7 @@ export default function DemoPage() {
       </header>
       <main>
         <div className="mx-auto max-w-[880px] px-7 pb-8 pt-14 text-center">
-          <span className="w-pill inline-block border border-ink bg-card px-3.5 py-1.5 text-[11px] uppercase tracking-[.18em] text-stone">
+          <span className="w-pill inline-block border border-line bg-card px-3.5 py-1.5 text-[11px] uppercase tracking-[.18em] text-stone">
             Testversion · Beispieldaten
           </span>
           <h1 className="mt-5 text-balance font-[family-name:var(--font-display)] text-[32px] font-medium leading-tight md:text-[40px]">

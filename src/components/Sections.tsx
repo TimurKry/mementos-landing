@@ -40,8 +40,8 @@ export function Why() {
       <SectionHead kicker="Warum MementoOS" title="Für Klarheit gebaut. Mit Würde gestaltet." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {whyItems.map((it, i) => (
-          <div key={it.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`${it.w} flex items-start gap-3.5 border-[1.2px] border-ink bg-card p-5`}>
-            <div className="w-circle flex h-10 w-10 flex-none items-center justify-center border-[1.1px] border-ink text-ink">
+          <div key={it.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`${it.w} flex items-start gap-3.5 border border-line bg-card p-5`}>
+            <div className="w-circle flex h-10 w-10 flex-none items-center justify-center border border-line text-ink">
               {it.icon}
             </div>
             <div>
@@ -66,16 +66,15 @@ const steps = [
 export function Process() {
   return (
     <section id="ablauf" className="mx-auto max-w-[1180px] px-7 py-16">
-      <div className="w2 relative border-[1.2px] border-ink bg-[#EFECE4] px-7 py-12 md:px-10">
-        <div className="pointer-events-none absolute inset-2 rounded-[inherit] border border-dashed border-ink/25" />
+      <div className="w2 relative border border-line bg-card px-7 py-12 md:px-10">
         <SectionHead kicker="Der Ablauf" title="Eine Plattform. Jeder Schritt. Alle verbunden." />
         <div className="grid gap-7 md:grid-cols-5 md:gap-4">
           {steps.map((s, i) => (
             <div key={s.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }} className="relative text-center">
-              <div className="w-circle mx-auto mb-3.5 flex h-[66px] w-[66px] items-center justify-center border-[1.2px] border-ink bg-card text-ink">
+              <div className="w-circle mx-auto mb-3.5 flex h-[66px] w-[66px] items-center justify-center border border-line bg-card text-ink">
                 {s.icon}
               </div>
-              <span className="absolute left-[calc(50%+16px)] top-11 hidden h-[21px] w-[21px] items-center justify-center rounded-[50%_44%_52%_46%] bg-ink text-[11px] font-semibold text-paper md:flex">
+              <span className="absolute left-[calc(50%+16px)] top-11 hidden h-[21px] w-[21px] items-center justify-center rounded-full bg-ink text-[11px] font-semibold text-paper md:flex">
                 {i + 1}
               </span>
               <b className="mb-1 block text-sm font-semibold">{s.title}</b>
@@ -84,7 +83,7 @@ export function Process() {
           ))}
         </div>
         <div className="mt-9 text-center">
-          <Link href="/demo/" className="w-btn inline-flex items-center gap-2.5 border-[1.3px] border-ink bg-card px-5 py-3 text-sm font-medium transition-transform hover:-translate-x-px hover:-translate-y-px">
+          <Link href="/demo/" className="w-btn inline-flex items-center gap-2.5 border border-line bg-card px-5 py-3 text-sm font-medium transition-transform hover:-translate-x-px hover:-translate-y-px">
             Den Ablauf im Demo durchspielen <span aria-hidden="true">→</span>
           </Link>
         </div>
@@ -103,7 +102,7 @@ const bandItems = [
 export function ValueBand() {
   return (
     <section className="mx-auto max-w-[1180px] px-7 py-16">
-      <div data-reveal className="w1 hatch grid gap-7 border-[1.2px] border-ink bg-ink p-7 text-paper sm:grid-cols-2 lg:grid-cols-4 md:p-10">
+      <div data-reveal className="w1 grid gap-7 border border-line bg-ink p-7 text-paper sm:grid-cols-2 lg:grid-cols-4 md:p-10">
         {bandItems.map((b) => (
           <div key={b.title}>
             <span className="mb-2.5 block text-ash">{b.icon}</span>
@@ -130,8 +129,8 @@ export function Audiences() {
       <SectionHead kicker="Für wen" title="Gebaut für jede Organisation der Branche." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {audiences.map((a, i) => (
-          <div key={a.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`overflow-hidden border-[1.2px] border-ink bg-card pb-5 text-center ${i % 2 ? "rotate-[.35deg]" : "-rotate-[.35deg]"}`}>
-            <div className="hatch-bg flex h-28 items-center justify-center border-b-[1.2px] border-ink bg-[#F1EEE7] text-ink">
+          <div key={a.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`overflow-hidden border border-line bg-card pb-5 text-center`}>
+            <div className="flex h-28 items-center justify-center border-b border-line bg-paper text-ink">
               {a.icon}
             </div>
             <b className="mx-3 mb-1 mt-4 block text-sm font-semibold">{a.title}</b>
@@ -153,7 +152,7 @@ export function ContactCta() {
       <p className="mb-7 text-stone">Wir zeigen MementoOS in 20 Minuten — ruhig, konkret, ohne Verkaufsdruck.</p>
       <a
         href="mailto:timurkry.dev@gmail.com?subject=MementoOS%20Demo"
-        className="w-btn hatch kirsche-hover inline-flex items-center gap-2.5 border-[1.3px] border-ink bg-ink px-5 py-3 text-sm font-medium text-paper hover:-translate-x-px hover:-translate-y-px"
+        className="w-btn kirsche-hover inline-flex items-center gap-2.5 border border-transparent bg-ink px-5 py-3 text-sm font-medium text-paper hover:-translate-x-px hover:-translate-y-px"
       >
         Demo anfragen <span aria-hidden="true">↗</span>
       </a>

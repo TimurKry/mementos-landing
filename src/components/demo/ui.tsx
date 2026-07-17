@@ -22,7 +22,7 @@ export function Pill({ tone, children }: { tone: PillTone; children: React.React
 }
 
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <div className={`w2 border-[1.2px] border-ink bg-card ${className}`}>{children}</div>;
+  return <div className={`w2 border border-line bg-card ${className}`}>{children}</div>;
 }
 
 export function PrimaryBtn({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) {
@@ -30,7 +30,7 @@ export function PrimaryBtn({ children, onClick, disabled }: { children: React.Re
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-btn hatch kirsche-hover press inline-flex items-center gap-2.5 border-[1.3px] border-ink bg-ink px-5 py-3 text-sm font-medium text-paper enabled:hover:-translate-x-px enabled:hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ink disabled:hover:border-ink"
+      className="w-btn kirsche-hover press inline-flex items-center gap-2.5 border border-transparent bg-ink px-5 py-3 text-sm font-medium text-paper enabled:hover:-translate-x-px enabled:hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ink disabled:hover:border-ink"
     >
       {children}
     </button>
@@ -41,7 +41,7 @@ export function GhostBtn({ children, onClick, small }: { children: React.ReactNo
   return (
     <button
       onClick={onClick}
-      className={`w-btn press inline-flex items-center gap-2 border-[1.3px] border-ink font-medium transition-transform hover:-translate-x-px hover:-translate-y-px ${small ? "px-3 py-1.5 text-[12.5px]" : "px-5 py-3 text-sm"}`}
+      className={`w-btn press inline-flex items-center gap-2 border border-line font-medium transition-transform hover:-translate-x-px hover:-translate-y-px ${small ? "px-3 py-1.5 text-[12.5px]" : "px-5 py-3 text-sm"}`}
     >
       {children}
     </button>

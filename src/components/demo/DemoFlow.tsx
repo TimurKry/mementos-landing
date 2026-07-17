@@ -48,7 +48,7 @@ export function DemoFlow() {
               className={`flex items-center gap-2 text-[12px] uppercase tracking-[.14em] ${i === step ? "font-semibold text-ink" : i < step ? "text-stone hover:text-ink" : "cursor-default text-hair"}`}
               aria-current={i === step ? "step" : undefined}
             >
-              <span className={`flex h-[22px] w-[22px] items-center justify-center rounded-[50%_44%_52%_46%] border text-[11px] ${i < step ? "border-wald bg-wald text-paper" : i === step ? "border-ink bg-ink text-paper" : "border-hair text-stone"}`}>
+              <span className={`flex h-[22px] w-[22px] items-center justify-center rounded-full border text-[11px] ${i < step ? "border-wald bg-wald text-paper" : i === step ? "border-ink bg-ink text-paper" : "border-hair text-stone"}`}>
                 {i < step ? "✓" : i + 1}
               </span>
               <span className="hidden sm:inline">{l}</span>
@@ -94,7 +94,7 @@ export function DemoFlow() {
               <p className="text-[11px] uppercase tracking-[.14em] text-stone">Von: Krematorium Südstadt</p>
               <p className="mb-3 mt-1 text-sm font-medium">Termin bestätigt: Fr, 24. Juli, 10:30 — Fall M-2026-0147</p>
               <p className="mb-4 text-sm text-stone">Bitte ergänzen Sie die Angaben zur verstorbenen Person über den folgenden Zugang:</p>
-              <div className="inline-flex items-center gap-2 border border-dashed border-ink px-3.5 py-2 text-[13px]">
+              <div className="inline-flex items-center gap-2 border border-dashed border-hair px-3.5 py-2 text-[13px]">
                 <Logo className="h-3.5 w-4" /> mementos.app/fall/M-2026-0147
               </div>
             </div>
@@ -174,7 +174,7 @@ export function DemoFlow() {
                   <button
                     key={label}
                     onClick={() => setJoined(active ? joined.filter((j) => j !== label) : [...joined, label])}
-                    className={`w1 border-[1.2px] p-4 text-center transition-colors ${active ? "border-wald bg-[#E7ECE5]" : "border-ink bg-card hover:bg-paper"}`}
+                    className={`w1 border p-4 text-center transition-colors ${active ? "border-wald bg-[#E7ECE5]" : "border-line bg-card hover:bg-paper"}`}
                   >
                     <span className="mx-auto mb-1.5 block w-fit">{icon}</span>
                     <b className="block text-sm font-semibold">{label}</b>
@@ -250,7 +250,7 @@ export function DemoFlow() {
               <GhostBtn onClick={() => { setStep(0); setName(""); setGroesse(""); setSchrittmacher(false); setDocs({ tb: false, ausweis: false, vollmacht: false }); setJoined([]); }}>
                 Demo neu starten
               </GhostBtn>
-              <Link href="/#kontakt" className="w-btn hatch inline-flex items-center gap-2.5 border-[1.3px] border-ink bg-ink px-5 py-3 text-sm font-medium text-paper">
+              <Link href="/#kontakt" className="w-btn inline-flex items-center gap-2.5 border border-transparent bg-ink px-5 py-3 text-sm font-medium text-paper">
                 Demo anfragen <span aria-hidden="true">↗</span>
               </Link>
             </div>

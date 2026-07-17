@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="bg-ink pb-7 pt-13 text-[13px] text-ash">
       <div className="mx-auto max-w-[1180px] px-7">
-        <div className="grid gap-9 border-b border-dashed border-[#4a4a46] pb-9 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.4fr]">
+        <div className="grid gap-9 border-b border-[#3a3a38] pb-9 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.4fr]">
           <div>
             <a href="#top" className="flex items-center gap-2.5 text-[17px] font-semibold text-paper">
               <Logo className="h-6 w-7" fill="#F7F5F1" />
