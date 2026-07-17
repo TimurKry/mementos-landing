@@ -18,9 +18,10 @@ export default function DemoPage() {
             <Logo className="h-[26px] w-[30px]" />
             MementoOS
           </Link>
-          <Link href="/" className="wavy-link text-sm text-stone hover:text-ink">
-            ← Zurück zur Startseite
-          </Link>
+          <div className="flex items-center gap-5 text-sm">
+            <Link href="/workspace/" className="wavy-link text-stone">Bestatter-Cockpit</Link>
+            <Link href="/" className="wavy-link text-stone">← Startseite</Link>
+          </div>
         </div>
       </header>
       <main>

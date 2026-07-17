@@ -68,6 +68,12 @@ body {
   text-underline-offset: 5px;
 }
 
+/* мгновенный отклик на нажатие (Apple: feedback on pointer-down) */
+.press:active {
+  transform: scale(0.975);
+  transition: transform 90ms ease-out;
+}
+
 .kirsche-hover {
   transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
 }
