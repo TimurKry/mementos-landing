@@ -270,7 +270,7 @@ export function BestatterWorkspace() {
         {ai !== "closed" && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 p-5" role="dialog" aria-modal="true" aria-label="Neuer Vorgang per Schnellerfassung">
             <div className="w2 step-in w-full max-w-[620px] border border-line bg-paper p-6">
-              <div className="mb-1 text-[11px] uppercase tracking-[.18em] text-kirsche">KI-Schnellerfassung</div>
+              <div className="mb-1 mono-label text-[11px] text-ink">KI-Schnellerfassung</div>
               <h3 className="mb-4 font-[family-name:var(--font-display)] text-xl font-medium">Beschreiben Sie den Fall — wir strukturieren.</h3>
 
               {ai === "input" && (

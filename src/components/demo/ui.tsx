@@ -15,7 +15,7 @@ const pillTones: Record<PillTone, string> = {
 
 export function Pill({ tone, children }: { tone: PillTone; children: React.ReactNode }) {
   return (
-    <span className={`inline-block whitespace-nowrap border px-2.5 py-0.5 text-[11px] uppercase tracking-[.12em] ${pillTones[tone]}`}>
+    <span className={`mono-label inline-block whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[10.5px] ${pillTones[tone]}`}>
       {children}
     </span>
   );

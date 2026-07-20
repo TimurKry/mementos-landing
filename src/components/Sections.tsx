@@ -19,7 +19,7 @@ import {
 function SectionHead({ kicker, title }: { kicker: string; title: string }) {
   return (
     <div className="text-center" data-reveal>
-      <div className="text-[11px] uppercase tracking-[.2em] text-kirsche">{kicker}</div>
+      <div className="mono-label text-[11px] text-ink">{kicker}</div>
       <h2 className="mb-9 mt-3 text-balance font-[family-name:var(--font-display)] text-[28px] font-medium md:text-[32px]">
         {title}
       </h2>
@@ -40,8 +40,8 @@ export function Why() {
       <SectionHead kicker="Warum MementoOS" title="Für Klarheit gebaut. Mit Würde gestaltet." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {whyItems.map((it, i) => (
-          <div key={it.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`${it.w} flex items-start gap-3.5 border border-line bg-card p-5`}>
-            <div className="w-circle flex h-10 w-10 flex-none items-center justify-center border border-line text-ink">
+          <div key={it.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`${it.w} flex items-start gap-3.5 bg-keylime p-6`}>
+            <div className="w-circle flex h-10 w-10 flex-none items-center justify-center bg-paper text-ink">
               {it.icon}
             </div>
             <div>
@@ -66,12 +66,12 @@ const steps = [
 export function Process() {
   return (
     <section id="ablauf" className="mx-auto max-w-[1180px] px-7 py-16">
-      <div className="w2 relative border border-line bg-card px-7 py-12 md:px-10">
+      <div className="w2 relative rounded-[20px] bg-mint px-7 py-12 md:px-10">
         <SectionHead kicker="Der Ablauf" title="Eine Plattform. Jeder Schritt. Alle verbunden." />
         <div className="grid gap-7 md:grid-cols-5 md:gap-4">
           {steps.map((s, i) => (
             <div key={s.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }} className="relative text-center">
-              <div className="w-circle mx-auto mb-3.5 flex h-[66px] w-[66px] items-center justify-center border border-line bg-card text-ink">
+              <div className="w-circle mx-auto mb-3.5 flex h-[66px] w-[66px] items-center justify-center bg-paper text-ink">
                 {s.icon}
               </div>
               <span className="absolute left-[calc(50%+16px)] top-11 hidden h-[21px] w-[21px] items-center justify-center rounded-full bg-ink text-[11px] font-semibold text-paper md:flex">
@@ -83,7 +83,7 @@ export function Process() {
           ))}
         </div>
         <div className="mt-9 text-center">
-          <Link href="/demo/" className="w-btn inline-flex items-center gap-2.5 border border-line bg-card px-5 py-3 text-sm font-medium transition-transform hover:-translate-x-px hover:-translate-y-px">
+          <Link href="/demo/" className="w-btn press inline-flex items-center gap-2.5 border border-ink/50 px-6 py-3 text-ink hover:bg-paper text-sm font-medium transition-transform hover:-translate-x-px hover:-translate-y-px">
             Den Ablauf im Demo durchspielen <span aria-hidden="true">→</span>
           </Link>
         </div>
@@ -102,7 +102,7 @@ const bandItems = [
 export function ValueBand() {
   return (
     <section className="mx-auto max-w-[1180px] px-7 py-16">
-      <div data-reveal className="w1 grid gap-7 border border-line bg-ink p-7 text-paper sm:grid-cols-2 lg:grid-cols-4 md:p-10">
+      <div data-reveal className="w1 grid gap-7 rounded-[20px] bg-forest-deep p-7 text-paper sm:grid-cols-2 lg:grid-cols-4 md:p-10">
         {bandItems.map((b) => (
           <div key={b.title}>
             <span className="mb-2.5 block text-ash">{b.icon}</span>
@@ -129,8 +129,8 @@ export function Audiences() {
       <SectionHead kicker="Für wen" title="Gebaut für jede Organisation der Branche." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {audiences.map((a, i) => (
-          <div key={a.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`overflow-hidden border border-line bg-card pb-5 text-center`}>
-            <div className="flex h-28 items-center justify-center border-b border-line bg-paper text-ink">
+          <div key={a.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`overflow-hidden rounded-[14px] bg-card pb-5 text-center elev-md`}>
+            <div className="flex h-28 items-center justify-center bg-keylime text-ink">
               {a.icon}
             </div>
             <b className="mx-3 mb-1 mt-4 block text-sm font-semibold">{a.title}</b>
@@ -145,7 +145,7 @@ export function Audiences() {
 export function ContactCta() {
   return (
     <section id="kontakt" data-reveal className="mx-auto max-w-[1180px] px-7 pb-20 pt-16 text-center">
-      <div className="text-[11px] uppercase tracking-[.2em] text-kirsche">Kontakt</div>
+      <div className="mono-label text-[11px] text-ink">Kontakt</div>
       <h2 className="mb-3 mt-3 text-balance font-[family-name:var(--font-display)] text-[28px] font-medium md:text-[32px]">
         Sehen, wie ein gemeinsamer Vorgang aussieht?
       </h2>

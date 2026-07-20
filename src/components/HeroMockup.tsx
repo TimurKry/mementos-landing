@@ -63,7 +63,7 @@ export function HeroMockup() {
 
   return (
     <div ref={sceneRef} className="tilt-scene relative mx-auto w-full max-w-[520px]">
-      <div ref={cardRef} className="tilt-card border border-line bg-card">
+      <div ref={cardRef} className="tilt-card soft-ambient bg-paper">
         {/* панель окна */}
         <div className="flex items-center gap-2 border-b border-line px-4 py-3">
           <Logo className="h-4 w-[18px]" />
@@ -75,13 +75,13 @@ export function HeroMockup() {
 
         {/* KPI */}
         <div className="grid grid-cols-2 gap-3 p-4">
-          <div className="rounded-xl border border-line bg-paper px-3.5 py-3">
+          <div className="rounded-xl bg-keylime px-3.5 py-3">
             <div className="font-[family-name:var(--font-display)] text-[30px] font-medium leading-none tabular-nums">{aktiv}</div>
-            <div className="mt-1 text-[10.5px] uppercase tracking-[.14em] text-stone">Aktive Vorgänge</div>
+            <div className="mt-1 mono-label text-[10px] text-stone">Aktive Vorgänge</div>
           </div>
-          <div className="rounded-xl border border-line bg-paper px-3.5 py-3">
+          <div className="rounded-xl bg-keylime px-3.5 py-3">
             <div className="font-[family-name:var(--font-display)] text-[30px] font-medium leading-none tabular-nums text-terra">{faellig}</div>
-            <div className="mt-1 text-[10.5px] uppercase tracking-[.14em] text-stone">Heute fällig</div>
+            <div className="mt-1 mono-label text-[10px] text-stone">Heute fällig</div>
           </div>
         </div>
 
@@ -92,8 +92,8 @@ export function HeroMockup() {
             ["Hannelore Schmidt", "Einäscherung", "Bestätigt", "border-wald text-wald bg-[#E7ECE5]"],
             ["Theodor Krüger", "Erdbestattung", "Neu", "border-line text-stone bg-paper"],
           ].map(([name, type, label, cls]) => (
-            <div key={name} className="flex items-center gap-3 rounded-lg border border-line bg-card px-3 py-2.5">
-              <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-paper text-[11px] font-semibold text-stone">
+            <div key={name} className="flex items-center gap-3 rounded-lg bg-card px-3 py-2.5">
+              <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-mint text-[11px] font-semibold text-ink">
                 {(name as string).split(" ").map((w) => w[0]).join("")}
               </span>
               <div className="min-w-0">
@@ -107,10 +107,10 @@ export function HeroMockup() {
       </div>
 
       {/* парящие чипы поверх */}
-      <div className="float-a elev-lg absolute -left-4 top-[38%] hidden items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-[11.5px] font-medium sm:flex">
+      <div className="float-a elev-lg absolute -left-4 top-[38%] hidden items-center gap-2 rounded-full bg-paper px-4 py-2 text-[11.5px] font-medium sm:flex">
         <IconCheck className="h-4 w-4 text-wald" /> Familie eingebunden
       </div>
-      <div className="float-b elev-lg absolute -right-3 -bottom-3 hidden items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-[11.5px] font-medium sm:flex">
+      <div className="float-b elev-lg absolute -right-3 -bottom-3 hidden items-center gap-2 rounded-full bg-paper px-4 py-2 text-[11.5px] font-medium sm:flex">
         <IconKalender className="h-4 w-4 text-ink" /> Termin: Fr, 10:30
       </div>
     </div>

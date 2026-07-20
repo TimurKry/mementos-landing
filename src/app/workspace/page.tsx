@@ -29,7 +29,7 @@ export default function WorkspacePage() {
       </header>
       <main className="mx-auto max-w-[1240px] px-7 pb-24 pt-10">
         <div className="mb-8">
-          <div className="text-[11px] uppercase tracking-[.2em] text-kirsche">Bestatter-Cockpit</div>
+          <div className="mono-label text-[11px] text-ink">Bestatter-Cockpit</div>
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-[30px] font-medium leading-tight">
             Guten Morgen. Hier steht alles.
           </h1>

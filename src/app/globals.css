@@ -1,149 +1,118 @@
 @import "tailwindcss";
 
+/* ─── MementoOS Design System v3 ───────────────────────────────
+   База: Ease Health (botanical greenhouse on cream paper)
+   Структура: Monad (editorial tech journal — mono labels, pills)
+   Токен-имена сохранены (ink/paper/line/…) — значения новые.   */
+
 @theme {
-  --color-paper: #f7f6f3;
-  --color-card: #ffffff;
-  --color-ink: #1a1a1a;
-  --color-stone: #6e6b64;
-  --color-line: #e7e5df;
-  --color-hair: #d8d3c8;
-  --color-hairlight: #eeece7;
-  --color-wald: #3e5c41;
+  /* холст и поверхности */
+  --color-paper: #fffefc;        /* Cream Paper — страница */
+  --color-card: #ffffff;         /* внутренние карточки */
+  --color-keylime: #e1f4df;      /* светлая панель */
+  --color-mint: #cfe7d3;         /* средняя панель */
+  --color-sage: #b1dbb8;         /* тяжёлая панель */
+  --color-slate: #b6ced5;        /* прохладная панель для продукт-скринов */
+
+  /* чернила */
+  --color-ink: #0f3e17;          /* Forest Ink — заголовки, кнопки, ссылки */
+  --color-forest-deep: #0c2f10;  /* hover / тёмная полоса */
+  --color-charcoal: #222222;     /* основной текст */
+  --color-stone: #6b6f66;        /* вторичный текст */
+  --color-ash: #cfe7d3;          /* светлый текст на тёмном */
+
+  /* линии */
+  --color-line: #efeeeb;         /* Border Mist — hairline */
+  --color-hair: #e2e0da;
+
+  /* статусные (сохранены, слегка гармонизированы) */
+  --color-wald: #0f3e17;
   --color-ocker: #8f6a24;
   --color-terra: #8f4527;
-  --color-kirsche: #7c1d2e;
-  --color-ash: #b9b6ae;
-  --font-display: var(--font-playfair), Georgia, serif;
+  --color-kirsche: #0f3e17;      /* бывший акцент → Forest Ink (kickers/эмфаза) */
+
+  --font-display: var(--font-playfair), "Cormorant Garamond", Georgia, serif;
   --font-body: var(--font-inter), "Segoe UI", Arial, sans-serif;
+  --font-label: var(--font-mono), ui-monospace, "JetBrains Mono", monospace;
 }
 
 body {
   background: var(--color-paper);
-  color: var(--color-ink);
+  color: var(--color-charcoal);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Clean SaaS: единые радиусы и мягкая элевация (ex-sketch классы переопределены) */
-.w1, .w2, .w3 {
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(26, 26, 26, 0.04);
+h1, h2, h3 { color: var(--color-ink); }
+
+/* серифы — только лёгкие, никогда bold (сигнатура системы) */
+.font-\[family-name\:var\(--font-display\)\] { font-weight: 300; }
+
+/* моно-лейблы: eyebrow, kickers, пилюли, мета */
+.mono-label {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
-.w-btn { border-radius: 8px; }
+
+/* радиусы системы: карточки 14, кнопки/пилюли full */
+.w1, .w2, .w3 { border-radius: 14px; }
+.w-btn { border-radius: 999px; }
 .w-pill { border-radius: 999px; }
 .w-circle { border-radius: 50%; }
 
-.card-hover {
-  transition: box-shadow 0.18s ease, transform 0.12s ease;
-}
-.card-hover:hover {
-  box-shadow: 0 6px 16px rgba(26, 26, 26, 0.07);
-}
+/* глубина — слоями цвета, не тенями; единственная разрешённая мягкая */
+.soft-ambient { box-shadow: rgba(15, 62, 23, 0.10) 0px 0px 10px 0px; }
 
-/* мгновенный отклик на нажатие */
+.card-hover { transition: transform 0.16s ease, background-color 0.2s ease; }
+.card-hover:hover { transform: translateY(-2px); }
+
 .press:active {
   transform: scale(0.98);
   transition: transform 90ms ease-out;
 }
 
-.kirsche-hover {
-  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+/* primary: Forest pill (Ease «Primary Forest Button») */
+.btn-premium {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-radius: 999px;
+  transition: background-color 0.2s ease, transform 0.14s ease;
 }
-.kirsche-hover:hover {
-  background: var(--color-kirsche);
-  border-color: var(--color-kirsche);
-}
+.btn-premium:hover { background: var(--color-forest-deep); transform: translateY(-1px); }
+.btn-premium:active { transform: translateY(0); }
 
-.wavy-link {
-  transition: color 0.15s ease;
-}
-.wavy-link:hover {
-  color: var(--color-kirsche);
-}
+.kirsche-hover { transition: background-color 0.2s ease, transform 0.12s ease; }
+.kirsche-hover:hover { background: var(--color-forest-deep); border-color: var(--color-forest-deep); }
 
-/* scroll-reveal */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-[data-reveal].revealed {
-  opacity: 1;
-  transform: none;
-}
+.wavy-link { transition: color 0.15s ease; }
+.wavy-link:hover { color: var(--color-ink); }
 
-@keyframes step-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.step-in { animation: step-in 0.24s ease-out; }
-
-/* ── Premium layer (Stripe/Linear-Klasse: Tiefe, Glas, ein Akzent) ── */
-:root {
-  --shadow-sm: 0 1px 2px rgba(26, 22, 20, 0.05);
-  --shadow-md: 0 4px 14px rgba(26, 22, 20, 0.08);
-  --shadow-lg: 0 18px 40px -12px rgba(26, 22, 20, 0.18);
-  --shadow-xl: 0 40px 80px -24px rgba(60, 20, 28, 0.28);
-  --accent: #7c1d2e;
-  --accent-2: #a23a4b;
-}
-
-/* мягкое фирменное свечение под hero — глубина без пестроты */
-.hero-glow {
-  position: relative;
-  isolation: isolate;
-}
+/* атмосферные размывы (Monad) в оранжерейных тонах */
+.hero-glow { position: relative; isolation: isolate; }
 .hero-glow::before {
   content: "";
-  position: absolute;
-  z-index: -1;
-  top: -12%;
-  right: -6%;
-  width: 46rem;
-  height: 46rem;
-  border-radius: 50%;
-  background: radial-gradient(circle at 60% 40%, rgba(124, 29, 46, 0.10), rgba(124, 29, 46, 0) 62%);
-  pointer-events: none;
+  position: absolute; z-index: -1; top: -10%; right: -8%;
+  width: 44rem; height: 44rem; border-radius: 50%;
+  background: radial-gradient(circle at 55% 45%, rgba(177, 219, 184, 0.55), rgba(177, 219, 184, 0) 65%);
+  filter: blur(60px); pointer-events: none;
 }
 .hero-glow::after {
   content: "";
-  position: absolute;
-  z-index: -1;
-  bottom: -20%;
-  left: -10%;
-  width: 34rem;
-  height: 34rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(62, 92, 65, 0.07), rgba(62, 92, 65, 0) 60%);
-  pointer-events: none;
+  position: absolute; z-index: -1; bottom: -18%; left: -10%;
+  width: 32rem; height: 32rem; border-radius: 50%;
+  background: radial-gradient(circle, rgba(182, 206, 213, 0.5), rgba(182, 206, 213, 0) 62%);
+  filter: blur(55px); pointer-events: none;
 }
 
-/* премиум primary-кнопка: глубина + тонкий верхний блик */
-.btn-premium {
-  background: linear-gradient(180deg, #2a2a2a 0%, var(--color-ink) 100%);
-  color: var(--color-paper);
-  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  transition: box-shadow 0.22s ease, transform 0.14s ease, background 0.22s ease;
-}
-.btn-premium:hover {
-  transform: translateY(-1.5px);
-  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  background: linear-gradient(180deg, #3a1720 0%, var(--accent) 100%);
-}
-.btn-premium:active { transform: translateY(0); }
-
-/* плавающий продуктовый мокап: 3D-сцена + слоистая тень */
+/* 3D-сцена мокапа (сохранена — движение остаётся) */
 .tilt-scene { perspective: 1400px; }
 .tilt-card {
   transform-style: preserve-3d;
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: var(--shadow-xl);
-  border-radius: 16px;
+  border-radius: 14px;
 }
-.tilt-float { transform: translateZ(60px); }
 
-/* парящие чипы */
 @keyframes floaty {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-7px); }
@@ -151,15 +120,27 @@ body {
 .float-a { animation: floaty 4.5s ease-in-out infinite; }
 .float-b { animation: floaty 5.5s ease-in-out infinite 0.6s; }
 
-/* мягкая пульсация «живого» индикатора */
 @keyframes livepulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(62, 92, 65, 0.5); }
-  50% { opacity: 0.85; box-shadow: 0 0 0 4px rgba(62, 92, 65, 0); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(15, 62, 23, 0.4); }
+  50% { opacity: 0.85; box-shadow: 0 0 0 4px rgba(15, 62, 23, 0); }
 }
 .live-dot { animation: livepulse 2.4s ease-in-out infinite; }
 
-.elev-md { box-shadow: var(--shadow-md); }
-.elev-lg { box-shadow: var(--shadow-lg); }
+.elev-md { box-shadow: rgba(15, 62, 23, 0.08) 0px 0px 8px 0px; }
+.elev-lg { box-shadow: rgba(15, 62, 23, 0.12) 0px 2px 14px 0px; }
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+[data-reveal].revealed { opacity: 1; transform: none; }
+
+@keyframes step-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.step-in { animation: step-in 0.24s ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
