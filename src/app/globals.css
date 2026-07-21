@@ -398,6 +398,99 @@ body::after {
 .quiet-link { text-decoration: none; }
 .quiet-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 
+/* ── «Default» dark-CRM (/workspace): mission control behind
+   frosted glass — void-холст, графит, hairline 0.5px, Inter 400 ── */
+
+.dk {
+  background: #0b0c0e;
+  color: #ffffff;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01" on, "ss03" on;
+  letter-spacing: -0.023em;
+}
+.dk h1, .dk h2, .dk h3 { color: #ffffff; }
+
+/* поверхность 1: карта — inset-подсветка + hairline вместо тени */
+.dk-card {
+  background: #131416;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 0.5px rgba(255, 255, 255, 0.07);
+}
+
+/* приподнятая панель (модалка, hero-мокап) */
+.dk-panel {
+  background: #131416;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 0 0 0.5px rgba(255, 255, 255, 0.07),
+    0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+.dk-card-hover {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
+}
+.dk-card-hover:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(147, 197, 253, 0.35);
+}
+
+/* primary: костяная пилюля — единственный яркий элемент */
+.btn-bone {
+  background: #f2f2f2;
+  color: #333333;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.15s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-bone:hover:enabled, a.btn-bone:hover { background: #ffffff; transform: translateY(-1px); }
+.btn-bone:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* secondary: шёпот-призрак */
+.btn-dk-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-radius: 10px;
+  transition: background-color 0.15s ease;
+}
+.btn-dk-ghost:hover { background: rgba(255, 255, 255, 0.09); }
+
+/* статус-бейджи: тонкий контур + текст, архитектурно, не заливкой */
+.badge-dk {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 5.26px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.badge-dk-green { color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.55); box-shadow: 0 0 4px rgba(34, 197, 94, 0.25); }
+.badge-dk-blue { color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.55); }
+.badge-dk-red { color: #f87171; border: 1px solid rgba(248, 113, 113, 0.5); }
+.badge-dk-dim { color: #9d9e9f; border: 1px solid rgba(255, 255, 255, 0.14); }
+
+/* фокус-кольцо ввода — signal blue на 1.5px */
+.dk-input {
+  background: #1f1f21;
+  border-radius: 10px;
+  box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+.dk-input::placeholder { color: #71717a; }
+.dk-input:focus-visible {
+  outline: none;
+  box-shadow: rgba(59, 130, 246, 0.25) 0px 0px 0px 1.5px;
+}
+
+.dk ::selection { background: rgba(59, 130, 246, 0.35); }
+
 /* ── FAQ-аккордеон ──────────────────────────────────────────── */
 
 .faq-answer {

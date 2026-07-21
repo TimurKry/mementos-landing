@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Pill, GhostBtn, PrimaryBtn, type PillTone } from "../demo/ui";
-import { IconKerze, IconDokument, IconCheck } from "../icons";
+import { IconKerze, IconDokument } from "../icons";
 
-/* ── типы и Beispieldaten (всё вымышленное) ─────────────────── */
+/* «Default» dark-CRM: void-холст, графитовые панели, hairline 0.5px,
+   Inter weight 400, костяная CTA, синий — только активные состояния,
+   зелёный/красный — только семантика. Все данные — Beispieldaten. */
 
 type Contact = "none" | "contacted" | "confirmed" | "skipped";
 type Col = "neu" | "unterlagen" | "bestaetigt" | "durchfuehrung" | "abschluss";
@@ -28,11 +29,11 @@ const cols: { key: Col; label: string }[] = [
   { key: "abschluss", label: "Abschluss" },
 ];
 
-const contactMeta: Record<Contact, { label: string; tone: PillTone }> = {
-  none: { label: "Nicht kontaktiert", tone: "ocker" },
-  contacted: { label: "Kontaktiert", tone: "stone" },
-  confirmed: { label: "Bestätigt", tone: "wald" },
-  skipped: { label: "Übersprungen", tone: "stone" },
+const contactMeta: Record<Contact, { label: string; cls: string }> = {
+  none: { label: "Nicht kontaktiert", cls: "badge-dk-dim" },
+  contacted: { label: "Kontaktiert", cls: "badge-dk-blue" },
+  confirmed: { label: "Bestätigt", cls: "badge-dk-green" },
+  skipped: { label: "Übersprungen", cls: "badge-dk-dim" },
 };
 
 const seed: Case[] = [
@@ -132,6 +133,33 @@ const seed: Case[] = [
 const aiExample =
   "Frau Erika Mustermann, 84, verstorben heute früh im Pflegeheim Sonnenhof. Familie wünscht Einäscherung, Beisetzung auf dem Südfriedhof. Herzschrittmacher vorhanden. Kontakt: Tochter Petra, 0176 4455…";
 
+/* ── локальные dark-примитивы ───────────────────────────────── */
+
+function BoneBtn({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button {...props} className="btn-bone press px-4 py-2 text-[13px] font-normal">
+      {children}
+    </button>
+  );
+}
+
+function GhostDk({ children, small, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { small?: boolean }) {
+  return (
+    <button {...props} className={`btn-dk-ghost press ${small ? "px-2.5 py-1 text-[11px]" : "px-3.5 py-2 text-[13px]"}`}>
+      {children}
+    </button>
+  );
+}
+
+function Badge({ cls, dot, children }: { cls: string; dot?: boolean; children: React.ReactNode }) {
+  return (
+    <span className={`badge-dk ${cls}`}>
+      {dot && <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current" />}
+      {children}
+    </span>
+  );
+}
+
 /* ── компонент ──────────────────────────────────────────────── */
 
 export function BestatterWorkspace() {
@@ -161,7 +189,7 @@ export function BestatterWorkspace() {
       ...c,
       participants: c.participants.map((p, i) =>
         i === idx
-          ? { ...p, contact: p.contact === "none" ? "contacted" : p.contact === "contacted" ? "confirmed" : p.contact === "confirmed" ? "none" : "none" }
+          ? { ...p, contact: p.contact === "none" ? "contacted" : p.contact === "contacted" ? "confirmed" : "none" }
           : p
       ),
     }));
@@ -202,61 +230,77 @@ export function BestatterWorkspace() {
     ]);
     setAi("closed");
     setAiText("");
-    setToast("Vorgang M-2026-0152 angelegt ✓");
+    setToast("Vorgang M-2026-0152 angelegt");
   };
+
+  const toastEl = toast && (
+    <div className="dk-panel step-in fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 px-4 py-2.5 text-[13px] text-white">
+      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#4ade80]" style={{ boxShadow: "0 0 4px rgba(34,197,94,0.55)" }} />
+      {toast}
+    </div>
+  );
 
   /* ── дашборд ── */
   if (!current)
     return (
       <div className="step-in">
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            ["Aktive Vorgänge", String(active), "stone"],
-            ["Heute fällig", String(dueToday), dueToday > 0 ? "terra" : "stone"],
-            ["Warten auf andere", String(waiting), waiting > 0 ? "ocker" : "stone"],
-            ["Diese Woche abzuschließen", "2", "stone"],
-          ].map(([l, v, tone]) => (
-            <div key={l} className="w1 border border-line bg-card px-4 py-3">
-              <div className={`font-[family-name:var(--font-display)] text-[26px] font-medium ${tone === "terra" ? "text-terra" : tone === "ocker" ? "text-ocker" : ""}`}>{v}</div>
-              <div className="text-[11px] uppercase tracking-[.14em] text-stone">{l}</div>
+            { l: "Aktive Vorgänge", v: String(active), accent: "" },
+            { l: "Heute fällig", v: String(dueToday), accent: dueToday > 0 ? "text-[#f87171]" : "" },
+            { l: "Warten auf andere", v: String(waiting), accent: waiting > 0 ? "text-[#60a5fa]" : "" },
+            { l: "Diese Woche abzuschließen", v: "2", accent: "" },
+          ].map((s) => (
+            <div key={s.l} className="dk-card px-4 py-3.5">
+              <div className={`text-[26px] font-normal leading-tight tracking-[-0.02em] ${s.accent || "text-white"}`}>{s.v}</div>
+              <div className="mt-0.5 text-[10px] font-medium text-[#858687]">{s.l}</div>
             </div>
           ))}
         </div>
 
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <h2 className="font-[family-name:var(--font-display)] text-xl font-medium">Vorgänge</h2>
-          <PrimaryBtn onClick={() => setAi("input")}>+ Neuer Vorgang</PrimaryBtn>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-[17px] font-normal text-white">Vorgänge</h2>
+          <BoneBtn onClick={() => setAi("input")}>+ Neuer Vorgang</BoneBtn>
         </div>
 
-        <div className="grid gap-4 overflow-x-auto md:grid-cols-5">
+        <div className="grid gap-3 overflow-x-auto md:grid-cols-5">
           {cols.map((col) => {
             const items = cases.filter((c) => c.col === col.key);
             return (
               <div key={col.key} className="min-w-[200px]">
-                <div className="mb-2.5 flex items-baseline justify-between border-b border-hair pb-1.5">
-                  <span className="text-[11px] uppercase tracking-[.16em] text-stone">{col.label}</span>
-                  <span className="text-[11px] text-stone">{items.length}</span>
+                <div className="mb-2.5 flex items-baseline justify-between px-1 pb-1.5" style={{ boxShadow: "0 0.5px 0 rgba(255,255,255,0.07)" }}>
+                  <span className="text-[10px] font-medium text-[#858687]">{col.label}</span>
+                  <span className="text-[10px] text-[#71717a]">{items.length}</span>
                 </div>
-                <div className="grid gap-2.5">
-                  {items.length === 0 && <div className="border border-dashed border-hair px-3 py-4 text-center text-[12px] text-stone">—</div>}
+                <div className="grid gap-2">
+                  {items.length === 0 && (
+                    <div className="rounded-[9px] px-3 py-4 text-center text-[11px] text-[#71717a]" style={{ boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,0.1)" }}>
+                      —
+                    </div>
+                  )}
                   {items.map((c) => {
                     const docsOpen = c.docs.filter((d) => !d.done).length;
                     return (
                       <button
                         key={c.id}
                         onClick={() => { setOpenId(c.id); setTab("beteiligte"); }}
-                        className="w2 card-hover press step-in block w-full border border-line bg-card p-3 text-left transition-transform hover:-translate-y-px"
+                        className="dk-card dk-card-hover press step-in block w-full p-3 text-left"
                       >
                         <div className="flex items-baseline justify-between gap-2">
-                          <b className="text-[13.5px] font-semibold">{c.name}</b>
-                          <span className="text-[10.5px] text-stone">{c.id.slice(-4)}</span>
+                          <b className="text-[13px] font-medium text-white">{c.name}</b>
+                          <span className="text-[10px] text-[#71717a]">{c.id.slice(-4)}</span>
                         </div>
-                        <div className="mt-0.5 text-[11.5px] text-stone">{c.type}</div>
-                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                          <span className={`text-[11px] ${c.daysLeft <= 1 ? "font-medium text-terra" : "text-stone"}`}>
-                            {c.col === "abschluss" ? "abgeschlossen" : `noch ${c.daysLeft} Tag${c.daysLeft === 1 ? "" : "e"}`}
-                          </span>
-                          {docsOpen > 0 && c.col !== "abschluss" && <Pill tone="ocker">{docsOpen} Dok.</Pill>}
+                        <div className="mt-0.5 text-[11px] text-[#858687]">{c.type}</div>
+                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                          {c.col === "abschluss" ? (
+                            <Badge cls="badge-dk-green" dot>Abgeschlossen</Badge>
+                          ) : (
+                            <span className={`text-[10.5px] ${c.daysLeft <= 1 ? "text-[#f87171]" : "text-[#858687]"}`}>
+                              noch {c.daysLeft} Tag{c.daysLeft === 1 ? "" : "e"}
+                            </span>
+                          )}
+                          {docsOpen > 0 && c.col !== "abschluss" && <Badge cls="badge-dk-dim">{docsOpen} Dok.</Badge>}
+                          {c.waiting && <Badge cls="badge-dk-blue" dot>wartet</Badge>}
                         </div>
                       </button>
                     );
@@ -268,10 +312,10 @@ export function BestatterWorkspace() {
         </div>
 
         {ai !== "closed" && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 p-5" role="dialog" aria-modal="true" aria-label="Neuer Vorgang per Schnellerfassung">
-            <div className="w2 step-in w-full max-w-[620px] border border-line bg-paper p-6">
-              <div className="mb-1 mono-label text-[11px] text-ink">KI-Schnellerfassung</div>
-              <h3 className="mb-4 font-[family-name:var(--font-display)] text-xl font-medium">Beschreiben Sie den Fall — wir strukturieren.</h3>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-5 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-label="Neuer Vorgang per Schnellerfassung">
+            <div className="dk-panel step-in w-full max-w-[620px] p-6">
+              <div className="mb-1 text-[10px] font-medium text-[#3b82f6]">KI-Schnellerfassung</div>
+              <h3 className="mb-4 text-[20px] font-normal text-white">Beschreiben Sie den Fall — wir strukturieren.</h3>
 
               {ai === "input" && (
                 <>
@@ -280,51 +324,57 @@ export function BestatterWorkspace() {
                     onChange={(e) => setAiText(e.target.value)}
                     rows={5}
                     placeholder="Frei formulieren oder diktieren: Name, Alter, Bestattungsart, Besonderheiten…"
-                    className="w-full border border-hair bg-card px-3.5 py-3 text-[15px] outline-none focus-visible:border-ink"
+                    className="dk-input w-full px-3.5 py-3 text-[14px]"
                   />
                   <div className="mt-1.5 text-right">
-                    <button onClick={() => setAiText(aiExample)} className="wavy-link text-[12px] text-stone">Beispieltext einfügen</button>
+                    <button onClick={() => setAiText(aiExample)} className="press text-[11.5px] text-[#71717a] hover:text-white">
+                      Beispieltext einfügen
+                    </button>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-3">
-                    <PrimaryBtn disabled={aiText.trim().length < 20} onClick={() => { setAi("working"); setTimeout(() => setAi("draft"), 1100); }}>
-                      Analysieren <span aria-hidden="true">→</span>
-                    </PrimaryBtn>
-                    <GhostBtn onClick={() => setAi("closed")}>Abbrechen</GhostBtn>
+                  <div className="mt-3 flex flex-wrap gap-2.5">
+                    <BoneBtn disabled={aiText.trim().length < 20} onClick={() => { setAi("working"); setTimeout(() => setAi("draft"), 1100); }}>
+                      Analysieren →
+                    </BoneBtn>
+                    <GhostDk onClick={() => setAi("closed")}>Abbrechen</GhostDk>
                   </div>
                 </>
               )}
 
               {ai === "working" && (
-                <div className="flex items-center gap-3 py-8 text-sm text-stone">
-                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-[1.5px] border-hair border-t-ink" aria-hidden="true" />
+                <div className="flex items-center gap-3 py-8 text-[13px] text-[#858687]">
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-[1.5px] border-[#3c3d3e] border-t-[#3b82f6]" aria-hidden="true" />
                   Angaben werden strukturiert …
                 </div>
               )}
 
               {ai === "draft" && (
                 <div className="step-in">
-                  <p className="mb-3 text-[12.5px] text-stone">Bitte prüfen — Felder mit geringer Sicherheit sind markiert:</p>
-                  <div className="grid gap-2 text-sm">
+                  <p className="mb-3 text-[12px] text-[#858687]">Bitte prüfen — Felder mit geringer Sicherheit sind markiert:</p>
+                  <div className="grid gap-1.5 text-[13px]">
                     {([
-                      ["Verstorbene Person", "Erika Mustermann", "wald"],
-                      ["Alter", "84", "wald"],
-                      ["Bestattungsart", "Einäscherung", "wald"],
-                      ["Friedhofswunsch", "Südfriedhof Leipzig (bitte prüfen)", "ocker"],
-                      ["Kontakt Familie", "Petra Mustermann · 0176 4455…", "wald"],
-                    ] as const).map(([l, v, tone]) => (
-                      <div key={l} className={`flex items-baseline justify-between gap-4 border px-3.5 py-2 ${tone === "ocker" ? "border-ocker bg-[#F1EADA]" : "border-hair bg-card"}`}>
-                        <span className="text-[11px] uppercase tracking-[.14em] text-stone">{l}</span>
-                        <span className="text-right font-medium">{v}</span>
+                      ["Verstorbene Person", "Erika Mustermann", "ok"],
+                      ["Alter", "84", "ok"],
+                      ["Bestattungsart", "Einäscherung", "ok"],
+                      ["Friedhofswunsch", "Südfriedhof Leipzig — bitte prüfen", "check"],
+                      ["Kontakt Familie", "Petra Mustermann · 0176 4455…", "ok"],
+                    ] as const).map(([l, v, st]) => (
+                      <div
+                        key={l}
+                        className="flex items-baseline justify-between gap-4 rounded-[9px] bg-[#1f1f21] px-3.5 py-2.5"
+                        style={st === "check" ? { boxShadow: "0 0 0 1px rgba(59,130,246,0.45)" } : { boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,0.07)" }}
+                      >
+                        <span className="text-[10px] font-medium text-[#858687]">{l}</span>
+                        <span className={`text-right ${st === "check" ? "text-[#60a5fa]" : "text-[#cececf]"}`}>{v}</span>
                       </div>
                     ))}
-                    <div className="flex items-baseline justify-between gap-4 border border-terra bg-[#F2E4DD] px-3.5 py-2">
-                      <span className="text-[11px] uppercase tracking-[.14em] text-terra">Herzschrittmacher</span>
-                      <span className="text-right font-medium text-terra">Ja — Krematorium wird markiert</span>
+                    <div className="flex items-baseline justify-between gap-4 rounded-[9px] bg-[#1f1f21] px-3.5 py-2.5" style={{ boxShadow: "0 0 0 1px rgba(248,113,113,0.45)" }}>
+                      <span className="text-[10px] font-medium text-[#f87171]">Herzschrittmacher</span>
+                      <span className="text-right text-[#f87171]">Ja — Krematorium wird markiert</span>
                     </div>
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <PrimaryBtn onClick={confirmAi}>Bestätigen & Vorgang anlegen</PrimaryBtn>
-                    <GhostBtn onClick={() => setAi("input")}>← Bearbeiten</GhostBtn>
+                  <div className="mt-4 flex flex-wrap gap-2.5">
+                    <BoneBtn onClick={confirmAi}>Bestätigen & Vorgang anlegen</BoneBtn>
+                    <GhostDk onClick={() => setAi("input")}>← Bearbeiten</GhostDk>
                   </div>
                 </div>
               )}
@@ -332,9 +382,7 @@ export function BestatterWorkspace() {
           </div>
         )}
 
-        {toast && (
-          <div className="w1 step-in fixed bottom-6 left-1/2 z-50 -translate-x-1/2 border border-line bg-ink px-5 py-2.5 text-sm text-paper">{toast}</div>
-        )}
+        {toastEl}
       </div>
     );
 
@@ -342,30 +390,43 @@ export function BestatterWorkspace() {
   const docsOpen = current.docs.filter((d) => !d.done).length;
   return (
     <div className="step-in">
-      <button onClick={() => setOpenId(null)} className="wavy-link mb-4 text-sm text-stone">← Alle Vorgänge</button>
+      <button onClick={() => setOpenId(null)} className="press mb-5 text-[13px] text-[#858687] hover:text-white">
+        ← Alle Vorgänge
+      </button>
 
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4 pb-5" style={{ boxShadow: "0 0.5px 0 rgba(255,255,255,0.07)" }}>
         <div>
-          <div className="text-[11px] uppercase tracking-[.16em] text-stone">{current.id} · {current.type}</div>
-          <h2 className="font-[family-name:var(--font-display)] text-[28px] font-medium">{current.name}</h2>
+          <div className="text-[10px] font-medium text-[#858687]">{current.id} · {current.type}</div>
+          <h2 className="mt-1 text-[28px] font-normal leading-tight tracking-[-0.02em] text-white">{current.name}</h2>
         </div>
         <div className="min-w-[220px]">
-          <div className="mb-1 flex justify-between text-[11px] text-stone">
+          <div className="mb-1.5 flex justify-between text-[10.5px] text-[#858687]">
             <span>Erstellt: {current.created}</span>
-            <span className={current.daysLeft <= 1 ? "font-medium text-terra" : ""}>Ziel: {current.target}</span>
+            <span className={current.daysLeft <= 1 ? "text-[#f87171]" : ""}>Ziel: {current.target}</span>
           </div>
-          <div className="h-1 w-full bg-hairlight">
-            <div className={`h-1 ${current.daysLeft <= 1 ? "bg-terra" : "bg-ink"}`} style={{ width: `${Math.min(100, 100 - current.daysLeft * 6)}%` }} />
+          <div className="h-1 w-full overflow-hidden rounded-full bg-[#1f1f21]">
+            <div
+              className={`h-1 rounded-full ${current.daysLeft <= 1 ? "bg-[#f87171]" : "bg-[#3b82f6]"}`}
+              style={{ width: `${Math.min(100, 100 - current.daysLeft * 6)}%` }}
+            />
           </div>
         </div>
-        <Pill tone={docsOpen === 0 ? "wald" : "ocker"}>{docsOpen === 0 ? "Unterlagen vollständig" : `${docsOpen} Unterlagen ausstehend`}</Pill>
+        {docsOpen === 0 ? (
+          <Badge cls="badge-dk-green" dot>Unterlagen vollständig</Badge>
+        ) : (
+          <Badge cls="badge-dk-dim">{docsOpen} Unterlagen ausstehend</Badge>
+        )}
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_260px]">
         <div>
-          <div className="mb-4 flex gap-5 border-b border-hair text-[13px]">
+          <div className="mb-4 flex gap-5 text-[12px]" style={{ boxShadow: "0 0.5px 0 rgba(255,255,255,0.07)" }}>
             {([["beteiligte", "Beteiligte"], ["unterlagen", "Unterlagen"], ["verlauf", "Verlauf"]] as const).map(([k, l]) => (
-              <button key={k} onClick={() => setTab(k)} className={`press -mb-px border-b-2 pb-2 uppercase tracking-[.12em] ${tab === k ? "border-kirsche font-semibold text-ink" : "border-transparent text-stone hover:text-ink"}`}>
+              <button
+                key={k}
+                onClick={() => setTab(k)}
+                className={`press -mb-px border-b-2 pb-2 font-medium ${tab === k ? "border-[#3b82f6] text-white" : "border-transparent text-[#858687] hover:text-white"}`}
+              >
                 {l}
               </button>
             ))}
@@ -373,20 +434,20 @@ export function BestatterWorkspace() {
 
           {tab === "beteiligte" && (
             <div key="b" className="step-in grid gap-2">
-              <p className="mb-1 text-[12.5px] text-stone">Reihenfolge = Priorität. Wen zuerst kontaktieren, wen überspringen:</p>
+              <p className="mb-1 text-[12px] text-[#858687]">Reihenfolge = Priorität. Wen zuerst kontaktieren, wen überspringen:</p>
               {current.participants.map((p, i) => (
-                <div key={p.name} className={`flex flex-wrap items-center gap-x-4 gap-y-2 border px-3.5 py-2.5 ${p.contact === "skipped" ? "border-line bg-paper opacity-60" : "border-line bg-card"}`}>
+                <div key={p.name} className={`dk-card flex flex-wrap items-center gap-x-4 gap-y-2 px-3.5 py-2.5 ${p.contact === "skipped" ? "opacity-50" : ""}`}>
                   <div className="flex flex-col">
-                    <b className="text-[13.5px] font-semibold">{p.name}</b>
-                    <span className="text-[11px] text-stone">{p.role} · {p.joined ? "beigetreten" : "noch nicht beigetreten"}</span>
+                    <b className="text-[13px] font-medium text-white">{p.name}</b>
+                    <span className="text-[10.5px] text-[#858687]">{p.role} · {p.joined ? "beigetreten" : "noch nicht beigetreten"}</span>
                   </div>
                   <div className="ml-auto flex flex-wrap items-center gap-2">
-                    <Pill tone={contactMeta[p.contact].tone}>{contactMeta[p.contact].label}</Pill>
-                    {p.contact !== "skipped" && <GhostBtn small onClick={() => cycleContact(current.id, i)}>Status ändern</GhostBtn>}
-                    <GhostBtn small onClick={() => toggleSkip(current.id, i)}>{p.contact === "skipped" ? "Aktivieren" : "Überspringen"}</GhostBtn>
+                    <Badge cls={contactMeta[p.contact].cls} dot={p.contact === "confirmed"}>{contactMeta[p.contact].label}</Badge>
+                    {p.contact !== "skipped" && <GhostDk small onClick={() => cycleContact(current.id, i)}>Status ändern</GhostDk>}
+                    <GhostDk small onClick={() => toggleSkip(current.id, i)}>{p.contact === "skipped" ? "Aktivieren" : "Überspringen"}</GhostDk>
                     <span className="flex flex-col">
-                      <button aria-label="Priorität hoch" onClick={() => movePrio(current.id, i, -1)} className="press px-1 text-[11px] text-stone hover:text-ink">▲</button>
-                      <button aria-label="Priorität runter" onClick={() => movePrio(current.id, i, 1)} className="press px-1 text-[11px] text-stone hover:text-ink">▼</button>
+                      <button aria-label="Priorität hoch" onClick={() => movePrio(current.id, i, -1)} className="press px-1 text-[10px] text-[#71717a] hover:text-white">▲</button>
+                      <button aria-label="Priorität runter" onClick={() => movePrio(current.id, i, 1)} className="press px-1 text-[10px] text-[#71717a] hover:text-white">▼</button>
                     </span>
                   </div>
                 </div>
@@ -397,25 +458,38 @@ export function BestatterWorkspace() {
           {tab === "unterlagen" && (
             <div key="u" className="step-in grid gap-2">
               {current.docs.map((d, i) => (
-                <label key={d.label} className="flex cursor-pointer items-center justify-between gap-3 border border-hair bg-card px-3.5 py-2.5">
-                  <span className="flex items-center gap-3 text-sm">
-                    <input type="checkbox" checked={d.done} onChange={() => patch(current.id, (c) => ({ ...c, docs: c.docs.map((x, j) => (j === i ? { ...x, done: !x.done } : x)) }))} className="h-4 w-4 accent-ink" />
+                <label key={d.label} className="dk-card flex cursor-pointer items-center justify-between gap-3 px-3.5 py-2.5">
+                  <span className="flex items-center gap-3 text-[13px] text-[#cececf]">
+                    <input
+                      type="checkbox"
+                      checked={d.done}
+                      onChange={() => patch(current.id, (c) => ({ ...c, docs: c.docs.map((x, j) => (j === i ? { ...x, done: !x.done } : x)) }))}
+                      className="h-4 w-4 accent-[#3b82f6]"
+                    />
                     {d.label}
                   </span>
-                  <Pill tone={d.done ? "wald" : "ocker"}>{d.done ? "Verifiziert" : "Ausstehend"}</Pill>
+                  {d.done ? <Badge cls="badge-dk-green" dot>Verifiziert</Badge> : <Badge cls="badge-dk-dim">Ausstehend</Badge>}
                 </label>
               ))}
-              <p className="mt-1 flex items-center gap-2 text-[12px] text-stone"><IconDokument className="h-3.5 w-3.5" /> Erforderlich nach Landesrecht Sachsen — automatisch ermittelt.</p>
+              <p className="mt-1 flex items-center gap-2 text-[11.5px] text-[#71717a]">
+                <IconDokument className="h-3.5 w-3.5" /> Erforderlich nach Landesrecht Sachsen — automatisch ermittelt.
+              </p>
             </div>
           )}
 
           {tab === "verlauf" && (
-            <ol key="v" className="step-in relative ml-2 grid gap-3.5 border-l border-dashed border-hair pl-5">
+            <ol key="v" className="step-in relative ml-2 grid gap-3.5 border-l border-dashed border-white/15 pl-5">
               {current.events.map((e, i) => (
                 <li key={i}>
-                  <span className="absolute -left-[5px] mt-1.5 h-2.5 w-2.5 rounded-full bg-wald" style={{ marginTop: 6 }} />
-                  <div className="flex flex-wrap justify-between gap-x-4 text-sm"><b className="font-semibold">{e.t}</b><span className="text-[11.5px] text-stone">{e.when}</span></div>
-                  <span className="text-[12px] text-stone">{e.who}</span>
+                  <span
+                    className="absolute -left-[5px] h-2.5 w-2.5 rounded-full bg-[#4ade80]"
+                    style={{ marginTop: 6, boxShadow: "0 0 4px rgba(34,197,94,0.55)" }}
+                  />
+                  <div className="flex flex-wrap justify-between gap-x-4 text-[13px]">
+                    <b className="font-medium text-white">{e.t}</b>
+                    <span className="text-[10.5px] text-[#71717a]">{e.when}</span>
+                  </div>
+                  <span className="text-[11.5px] text-[#858687]">{e.who}</span>
                 </li>
               ))}
             </ol>
@@ -423,31 +497,36 @@ export function BestatterWorkspace() {
         </div>
 
         <aside>
-          <div className="w3 border border-line bg-card p-4">
-            <div className="mb-2.5 text-[11px] uppercase tracking-[.16em] text-stone">Aufgaben</div>
+          <div className="dk-card p-4">
+            <div className="mb-3 text-[10px] font-medium text-[#858687]">Aufgaben</div>
             <div className="grid gap-2">
-              {current.tasks.length === 0 && <span className="text-[12.5px] text-stone">Keine offenen Aufgaben ✓</span>}
+              {current.tasks.length === 0 && <span className="text-[12px] text-[#4ade80]">Keine offenen Aufgaben ✓</span>}
               {current.tasks.map((t, i) => (
-                <label key={t.title} className="flex cursor-pointer items-start gap-2.5 text-[13px]">
-                  <input type="checkbox" checked={t.done} onChange={() => patch(current.id, (c) => ({ ...c, tasks: c.tasks.map((x, j) => (j === i ? { ...x, done: !x.done } : x)) }))} className="mt-0.5 h-4 w-4 accent-ink" />
-                  <span className={t.done ? "text-stone line-through" : ""}>{t.title} <span className="text-[11px] text-stone">· {t.due}</span></span>
+                <label key={t.title} className="flex cursor-pointer items-start gap-2.5 text-[12.5px] text-[#cececf]">
+                  <input
+                    type="checkbox"
+                    checked={t.done}
+                    onChange={() => patch(current.id, (c) => ({ ...c, tasks: c.tasks.map((x, j) => (j === i ? { ...x, done: !x.done } : x)) }))}
+                    className="mt-0.5 h-4 w-4 accent-[#3b82f6]"
+                  />
+                  <span className={t.done ? "text-[#71717a] line-through" : ""}>
+                    {t.title} <span className="text-[10.5px] text-[#71717a]">· {t.due}</span>
+                  </span>
                 </label>
               ))}
             </div>
           </div>
           <div className="mt-3 grid gap-2">
-            <PrimaryBtn onClick={() => setToast("Status-Link an die Familie gesendet ✓")}>Familien-Link senden</PrimaryBtn>
-            <GhostBtn onClick={() => setToast("Einladung versendet ✓")}>Beteiligten einladen</GhostBtn>
+            <BoneBtn onClick={() => setToast("Status-Link an die Familie gesendet")}>Familien-Link senden</BoneBtn>
+            <GhostDk onClick={() => setToast("Einladung versendet")}>Beteiligten einladen</GhostDk>
           </div>
-          <p className="mt-3 flex items-center gap-2 text-[11.5px] text-stone"><IconKerze className="h-3.5 w-3.5" /> Jede Änderung wird protokolliert.</p>
+          <p className="mt-3.5 flex items-center gap-2 text-[11px] text-[#71717a]">
+            <IconKerze className="h-3.5 w-3.5" /> Jede Änderung wird protokolliert.
+          </p>
         </aside>
       </div>
 
-      {toast && (
-        <div className="w1 step-in fixed bottom-6 left-1/2 z-50 -translate-x-1/2 border border-line bg-ink px-5 py-2.5 text-sm text-paper">
-          <span className="mr-1.5 inline-block align-[-2px]"><IconCheck className="h-4 w-4" /></span>{toast}
-        </div>
-      )}
+      {toastEl}
     </div>
   );
 }
