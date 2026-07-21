@@ -10,7 +10,7 @@ const pillTones: Record<PillTone, string> = {
   ocker: "border-ocker text-ocker bg-[#F1EADA]",
   terra: "border-terra text-terra bg-[#F2E4DD]",
   stone: "border-hair text-stone bg-transparent",
-  kirsche: "border-kirsche text-kirsche bg-[#F3E2E5]",
+  kirsche: "border-kirsche text-kirsche bg-[#e4eafa]",
 };
 
 export function Pill({ tone, children }: { tone: PillTone; children: React.ReactNode }) {

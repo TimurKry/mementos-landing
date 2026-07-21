@@ -1,52 +1,65 @@
 @import "tailwindcss";
 
-/* ─── MementoOS Design System v3 ───────────────────────────────
-   База: Ease Health (botanical greenhouse on cream paper)
-   Структура: Monad (editorial tech journal — mono labels, pills)
-   Токен-имена сохранены (ink/paper/line/…) — значения новые.   */
+/* ─── MementoOS Design System v4 — «Monad» ─────────────────────
+   Editorial tech journal on warm parchment:
+   serif announces (400, never bold), mono instructs (all UI),
+   pill containers, 1px ash hairlines, единственный акцент —
+   Lake Blue для primary action. Токен-имена v3 сохранены для
+   /demo и /workspace — значения гармонизированы под палитру.   */
 
 @theme {
   /* холст и поверхности */
-  --color-paper: #fffefc;        /* Cream Paper — страница */
-  --color-card: #ffffff;         /* внутренние карточки */
-  --color-keylime: #e1f4df;      /* светлая панель */
-  --color-mint: #cfe7d3;         /* средняя панель */
-  --color-sage: #b1dbb8;         /* тяжёлая панель */
-  --color-slate: #b6ced5;        /* прохладная панель для продукт-скринов */
+  --color-paper: #f6f3f1;        /* Parchment — страница */
+  --color-card: #fbf9f7;         /* внутренние карточки чуть светлее холста */
+  --color-periwinkle: #cfdaf5;   /* единственная цветная карточка-акцент */
 
   /* чернила */
-  --color-ink: #0f3e17;          /* Forest Ink — заголовки, кнопки, ссылки */
-  --color-forest-deep: #0c2f10;  /* hover / тёмная полоса */
-  --color-charcoal: #222222;     /* основной текст */
-  --color-stone: #6b6f66;        /* вторичный текст */
-  --color-ash: #cfe7d3;          /* светлый текст на тёмном */
+  --color-ink: #242424;          /* Off-Black — заголовки, кнопки */
+  --color-forest-deep: #000000;  /* hover тёмных элементов / футер */
+  --color-charcoal: #2e2d2c;     /* усиленный текст */
+  --color-graphite: #4e4d4d;     /* основной текст */
+  --color-stone: #797776;        /* вторичный текст (Smoke) */
+  --color-ash: #d8d4d1;          /* светлый текст на тёмном */
 
   /* линии */
-  --color-line: #efeeeb;         /* Border Mist — hairline */
-  --color-hair: #e2e0da;
+  --color-line: #e8e4e1;         /* мягкий hairline */
+  --color-hair: #cecac8;         /* Ash — границы карточек, схема */
 
-  /* статусные (сохранены, слегка гармонизированы) */
-  --color-wald: #0f3e17;
+  /* акцент — только primary action */
+  --color-blue: #2b59d1;         /* Lake Blue */
+  --color-kirsche: #2b59d1;      /* legacy-алиас для /demo */
+
+  /* декоративная пастель — только в заливках и иллюстрациях */
+  --color-sky: #a0b5eb;
+  --color-minted: #a7fccd;
+  --color-coral: #ff9473;
+  --color-gold: #ecda98;
+
+  /* статусные (/demo, /workspace) */
+  --color-wald: #3e5c41;
   --color-ocker: #8f6a24;
   --color-terra: #8f4527;
-  --color-kirsche: #0f3e17;      /* бывший акцент → Forest Ink (kickers/эмфаза) */
 
-  --font-display: var(--font-playfair), "Cormorant Garamond", Georgia, serif;
-  --font-body: var(--font-inter), "Segoe UI", Arial, sans-serif;
+  --font-display: var(--font-serif), "Georgia", "Times New Roman", serif;
+  --font-body: var(--font-mono), ui-monospace, "JetBrains Mono", monospace;
   --font-label: var(--font-mono), ui-monospace, "JetBrains Mono", monospace;
 }
 
 body {
   background: var(--color-paper);
-  color: var(--color-charcoal);
+  color: var(--color-graphite);
   font-family: var(--font-body);
+  letter-spacing: -0.02em;
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3 { color: var(--color-ink); }
 
-/* серифы — только лёгкие, никогда bold (сигнатура системы) */
-.font-\[family-name\:var\(--font-display\)\] { font-weight: 300; }
+/* серифы всегда 400 — вес несёт контраст штриха, не жирность */
+.font-\[family-name\:var\(--font-display\)\] {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
 
 /* моно-лейблы: eyebrow, kickers, пилюли, мета */
 .mono-label {
@@ -55,86 +68,200 @@ h1, h2, h3 { color: var(--color-ink); }
   letter-spacing: 0.08em;
 }
 
-/* радиусы системы: карточки 14, кнопки/пилюли full */
-.w1, .w2, .w3 { border-radius: 14px; }
+/* радиусы системы: карточки soft-rect, всё остальное pill */
+.w1, .w2, .w3 { border-radius: 16px; }
 .w-btn { border-radius: 999px; }
 .w-pill { border-radius: 999px; }
 .w-circle { border-radius: 50%; }
 
-/* глубина — слоями цвета, не тенями; единственная разрешённая мягкая */
-.soft-ambient { box-shadow: rgba(15, 62, 23, 0.10) 0px 0px 10px 0px; }
+/* глубина — hairlines и слои цвета; единственная мягкая тень */
+.soft-ambient { box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px 0px; }
+.elev-md { box-shadow: rgba(0, 0, 0, 0.06) 0px 0px 8px 0px; }
+.elev-lg { box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 14px 0px; }
 
-.card-hover { transition: transform 0.16s ease, background-color 0.2s ease; }
-.card-hover:hover { transform: translateY(-2px); }
+.card-hover {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease, background-color 0.25s ease;
+}
+.card-hover:hover { transform: translateY(-3px); border-color: var(--color-ink); }
 
 .press:active {
   transform: scale(0.98);
   transition: transform 90ms ease-out;
 }
 
-/* primary: Forest pill (Ease «Primary Forest Button») */
-.btn-premium {
+/* ── кнопки-пилюли ──────────────────────────────────────────── */
+
+/* primary: Lake Blue — единственная насыщенная заливка на экране */
+.btn-blue {
+  background: var(--color-blue);
+  color: #ffffff;
+  border-radius: 999px;
+  transition: background-color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-blue:hover { background: #1e46b5; transform: translateY(-1px); }
+.btn-blue:active { transform: translateY(0); }
+
+/* secondary: Off-Black */
+.btn-black {
   background: var(--color-ink);
   color: var(--color-paper);
   border-radius: 999px;
-  transition: background-color 0.2s ease, transform 0.14s ease;
+  transition: background-color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.btn-premium:hover { background: var(--color-forest-deep); transform: translateY(-1px); }
-.btn-premium:active { transform: translateY(0); }
+.btn-black:hover { background: var(--color-forest-deep); transform: translateY(-1px); }
 
+/* ghost: hairline-контур */
+.btn-ghost {
+  border: 1px solid var(--color-ink);
+  color: var(--color-ink);
+  border-radius: 999px;
+  transition: background-color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-ghost:hover { background: rgba(36, 36, 36, 0.05); transform: translateY(-1px); }
+
+/* стрелка внутри кнопок/ссылок уезжает вправо на hover */
+.arrow-shift span[aria-hidden] {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.arrow-shift:hover span[aria-hidden] { transform: translateX(4px); }
+
+/* legacy (/demo): тёмный hover primary-кнопки */
 .kirsche-hover { transition: background-color 0.2s ease, transform 0.12s ease; }
 .kirsche-hover:hover { background: var(--color-forest-deep); border-color: var(--color-forest-deep); }
 
 .wavy-link { transition: color 0.15s ease; }
 .wavy-link:hover { color: var(--color-ink); }
 
-/* атмосферные размывы (Monad) в оранжерейных тонах */
+/* ── атмосферные заливки (Monad gradient washes) ────────────── */
+
 .hero-glow { position: relative; isolation: isolate; }
 .hero-glow::before {
   content: "";
-  position: absolute; z-index: -1; top: -10%; right: -8%;
-  width: 44rem; height: 44rem; border-radius: 50%;
-  background: radial-gradient(circle at 55% 45%, rgba(177, 219, 184, 0.55), rgba(177, 219, 184, 0) 65%);
-  filter: blur(60px); pointer-events: none;
+  position: absolute; z-index: -1; top: -14%; right: -6%;
+  width: 46rem; height: 46rem; border-radius: 50%;
+  background: radial-gradient(circle at 60% 40%,
+    rgba(255, 148, 115, 0.4), rgba(160, 181, 235, 0.35) 55%,
+    rgba(160, 181, 235, 0) 72%);
+  filter: blur(64px); pointer-events: none;
+  animation: drift-a 16s ease-in-out infinite alternate;
 }
 .hero-glow::after {
   content: "";
-  position: absolute; z-index: -1; bottom: -18%; left: -10%;
-  width: 32rem; height: 32rem; border-radius: 50%;
-  background: radial-gradient(circle, rgba(182, 206, 213, 0.5), rgba(182, 206, 213, 0) 62%);
-  filter: blur(55px); pointer-events: none;
+  position: absolute; z-index: -1; bottom: -20%; left: -12%;
+  width: 36rem; height: 36rem; border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(160, 181, 235, 0.42), rgba(167, 252, 205, 0.3) 55%,
+    rgba(167, 252, 205, 0) 70%);
+  filter: blur(58px); pointer-events: none;
+  animation: drift-b 20s ease-in-out infinite alternate;
 }
 
-/* 3D-сцена мокапа (сохранена — движение остаётся) */
-.tilt-scene { perspective: 1400px; }
-.tilt-card {
-  transform-style: preserve-3d;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  border-radius: 14px;
+@keyframes drift-a {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(-4rem, 3rem) scale(1.08); }
+}
+@keyframes drift-b {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(3rem, -2.5rem) scale(1.06); }
 }
 
-@keyframes floaty {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
-}
-.float-a { animation: floaty 4.5s ease-in-out infinite; }
-.float-b { animation: floaty 5.5s ease-in-out infinite 0.6s; }
+/* ── появление hero при загрузке ────────────────────────────── */
 
-@keyframes livepulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(15, 62, 23, 0.4); }
-  50% { opacity: 0.85; box-shadow: 0 0 0 4px rgba(15, 62, 23, 0); }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.live-dot { animation: livepulse 2.4s ease-in-out infinite; }
+.rise {
+  animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--rise-delay, 0s);
+}
 
-.elev-md { box-shadow: rgba(15, 62, 23, 0.08) 0px 0px 8px 0px; }
-.elev-lg { box-shadow: rgba(15, 62, 23, 0.12) 0px 2px 14px 0px; }
+/* ── scroll-reveal ──────────────────────────────────────────── */
 
 [data-reveal] {
   opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(20px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 [data-reveal].revealed { opacity: 1; transform: none; }
+
+/* ── схемография: рисование линий и пульс хаба ──────────────── */
+
+/* каждая кривая имеет pathLength=1 — рисуется после reveal */
+.diagram-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.revealed .diagram-path {
+  animation: draw 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: var(--draw-delay, 0s);
+}
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.diagram-dot {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  transition-delay: 1.2s;
+}
+.revealed .diagram-dot { opacity: 1; }
+
+/* пакеты данных, бегущие по кривым — включаются после отрисовки */
+.flow-dot { opacity: 0; }
+.revealed .flow-dot { animation: flow-in 0.6s ease 1.6s forwards; }
+@keyframes flow-in {
+  to { opacity: 1; }
+}
+
+/* узлы схемы проявляются каскадом */
+.diagram-node {
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease;
+  transition-delay: var(--node-delay, 0s), var(--node-delay, 0s), 0s;
+}
+.revealed .diagram-node { opacity: 1; transform: none; }
+.diagram-node:hover { border-color: var(--color-ink); }
+
+@keyframes hub-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+.hub-glow { animation: hub-pulse 5s ease-in-out infinite; transform-origin: center; }
+
+@keyframes livepulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(43, 89, 209, 0.4); }
+  50% { opacity: 0.85; box-shadow: 0 0 0 4px rgba(43, 89, 209, 0); }
+}
+.live-dot { animation: livepulse 2.4s ease-in-out infinite; }
+
+/* горизонтальная линия процесса рисуется слева направо */
+.process-line {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+}
+.revealed .process-line { transform: scaleX(1); }
+
+/* ── FAQ-аккордеон ──────────────────────────────────────────── */
+
+.faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.faq-answer[data-open="true"] { grid-template-rows: 1fr; }
+.faq-answer > div { overflow: hidden; }
+.faq-chevron { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+.faq-chevron[data-open="true"] { transform: rotate(180deg); }
+
+/* ── переход шагов демо ─────────────────────────────────────── */
 
 @keyframes step-in {
   from { opacity: 0; transform: translateY(8px); }
@@ -147,6 +274,7 @@ h1, h2, h3 { color: var(--color-ink); }
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
-  .float-a, .float-b, .live-dot { animation: none !important; }
-  .tilt-card { transform: none !important; }
+  .live-dot, .hub-glow, .hero-glow::before, .hero-glow::after { animation: none !important; }
+  .diagram-path { stroke-dashoffset: 0; }
+  .flow-dot, .flow-dot * { display: none; }
 }

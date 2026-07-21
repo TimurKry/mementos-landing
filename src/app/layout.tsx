@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter, JetBrains_Mono } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Reveal } from "@/components/Reveal";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
+/* Пара «serif объявляет, mono инструктирует» — сигнатура системы.
+   Instrument Serif только в 400 — заголовки никогда не жирные. */
+const serif = Instrument_Serif({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-playfair",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-inter",
+  weight: "400",
+  variable: "--font-serif",
 });
 
 const mono = JetBrains_Mono({
@@ -31,7 +27,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="de" className={`${cormorant.variable} ${inter.variable} ${mono.variable}`}>
+    <html lang="de" className={`${serif.variable} ${mono.variable}`}>
       <body>
         <Reveal />
         {children}

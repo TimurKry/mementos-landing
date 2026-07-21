@@ -4,7 +4,6 @@ import {
   IconPhone,
   IconKerze,
   IconDokument,
-  IconKalender,
   IconBrief,
   IconKurve,
   IconSchild,
@@ -19,8 +18,8 @@ import {
 function SectionHead({ kicker, title }: { kicker: string; title: string }) {
   return (
     <div className="text-center" data-reveal>
-      <div className="mono-label text-[11px] text-ink">{kicker}</div>
-      <h2 className="mb-9 mt-3 text-balance font-[family-name:var(--font-display)] text-[28px] font-medium md:text-[32px]">
+      <div className="mono-label text-[12px] text-stone">{kicker}</div>
+      <h2 className="mb-12 mt-4 text-balance font-[family-name:var(--font-display)] text-[34px] leading-[1.15] md:text-[44px]">
         {title}
       </h2>
     </div>
@@ -28,26 +27,33 @@ function SectionHead({ kicker, title }: { kicker: string; title: string }) {
 }
 
 const whyItems = [
-  { icon: <IconHandshake className="h-[22px] w-[22px]" />, title: "Ein gemeinsamer Vorgang", text: "Alle Beteiligten und jeder Schritt in einem digitalen Fall — statt verteilter Zettel, Mails und Anrufe.", w: "w1" },
-  { icon: <IconPhone className="h-[22px] w-[22px]" />, title: "Weniger Telefonketten", text: "Statusänderungen, Freigaben und Benachrichtigungen laufen automatisch an die richtigen Stellen.", w: "w2" },
-  { icon: <IconKerze className="h-[22px] w-[22px]" />, title: "Familien eingebunden", text: "Angehörige sehen den Stand und ergänzen Angaben über einen einfachen Link — ohne Registrierung.", w: "w3" },
-  { icon: <IconDokument className="h-[22px] w-[22px]" />, title: "Lückenlos dokumentiert", text: "Jede Änderung wird protokolliert. Unterlagen und Zuständigkeiten sind jederzeit nachvollziehbar.", w: "w1" },
+  { icon: <IconHandshake className="h-5 w-5" />, title: "Ein gemeinsamer Vorgang", text: "Alle Beteiligten und jeder Schritt in einem digitalen Fall — statt verteilter Zettel, Mails und Anrufe.", accent: true },
+  { icon: <IconPhone className="h-5 w-5" />, title: "Weniger Telefonketten", text: "Statusänderungen, Freigaben und Benachrichtigungen laufen automatisch an die richtigen Stellen.", accent: false },
+  { icon: <IconKerze className="h-5 w-5" />, title: "Familien eingebunden", text: "Angehörige sehen den Stand und ergänzen Angaben über einen einfachen Link — ohne Registrierung.", accent: false },
+  { icon: <IconDokument className="h-5 w-5" />, title: "Lückenlos dokumentiert", text: "Jede Änderung wird protokolliert. Unterlagen und Zuständigkeiten sind jederzeit nachvollziehbar.", accent: false },
 ];
 
 export function Why() {
   return (
-    <section id="warum" className="mx-auto max-w-[1180px] px-7 py-16">
+    <section id="warum" className="mx-auto max-w-[1200px] px-6 py-20">
       <SectionHead kicker="Warum MementoOS" title="Für Klarheit gebaut. Mit Würde gestaltet." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {whyItems.map((it, i) => (
-          <div key={it.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`${it.w} flex items-start gap-3.5 bg-keylime p-6`}>
-            <div className="w-circle flex h-10 w-10 flex-none items-center justify-center bg-paper text-ink">
-              {it.icon}
-            </div>
-            <div>
-              <b className="mb-1 block text-[14.5px] font-semibold">{it.title}</b>
-              <p className="text-[13px] leading-relaxed text-stone">{it.text}</p>
-            </div>
+          <div
+            key={it.title}
+            data-reveal
+            style={{ transitionDelay: `${i * 80}ms` }}
+            className={`card-hover rounded-[28px] p-7 ${
+              it.accent
+                ? "bg-periwinkle"
+                : "border border-hair bg-transparent"
+            }`}
+          >
+            <div className="mb-5 text-ink">{it.icon}</div>
+            <h3 className="mb-2.5 font-[family-name:var(--font-display)] text-[22px] leading-snug">
+              {it.title}
+            </h3>
+            <p className="text-[13.5px] leading-relaxed text-graphite">{it.text}</p>
           </div>
         ))}
       </div>
@@ -56,34 +62,44 @@ export function Why() {
 }
 
 const steps = [
-  { icon: <IconKalender className="h-[26px] w-[26px]" />, title: "Buchung beim Krematorium", text: "Der Termin wird bestätigt — und der Fall entsteht mit einem Link." },
-  { icon: <IconBestatter className="h-[24px] w-[24px]" />, title: "Bestatter füllt den Vorgang", text: "Strukturierte Angaben statt Fax: alles, was für eine sichere Einäscherung nötig ist." },
-  { icon: <IconHandshake className="h-[26px] w-[26px]" />, title: "Partner über einen Link", text: "Transport, Floristik, Zulieferer treten ohne Registrierung bei und bestätigen ihren Teil." },
-  { icon: <IconDokument className="h-[26px] w-[26px]" />, title: "Unterlagen & Status", text: "Fehlende Dokumente fallen sofort auf — nicht erst vor Ort. Jeder sieht, was aussteht." },
-  { icon: <IconKerze className="h-[26px] w-[26px]" />, title: "Würdevoller Abschluss", text: "Der Fall wird abgeschlossen, dokumentiert und archiviert — vollständig und nachvollziehbar." },
+  { title: "Buchung beim Krematorium", text: "Der Termin wird bestätigt — und der Fall entsteht mit einem Link." },
+  { title: "Bestatter füllt den Vorgang", text: "Strukturierte Angaben statt Fax: alles, was für eine sichere Einäscherung nötig ist." },
+  { title: "Partner über einen Link", text: "Transport, Floristik, Zulieferer treten ohne Registrierung bei und bestätigen ihren Teil." },
+  { title: "Unterlagen & Status", text: "Fehlende Dokumente fallen sofort auf — nicht erst vor Ort. Jeder sieht, was aussteht." },
+  { title: "Würdevoller Abschluss", text: "Der Fall wird abgeschlossen, dokumentiert und archiviert — vollständig und nachvollziehbar." },
 ];
 
 export function Process() {
   return (
-    <section id="ablauf" className="mx-auto max-w-[1180px] px-7 py-16">
-      <div className="w2 relative rounded-[20px] bg-mint px-7 py-12 md:px-10">
+    <section id="ablauf" className="border-y border-line">
+      <div className="mx-auto max-w-[1200px] px-6 py-20">
         <SectionHead kicker="Der Ablauf" title="Eine Plattform. Jeder Schritt. Alle verbunden." />
-        <div className="grid gap-7 md:grid-cols-5 md:gap-4">
-          {steps.map((s, i) => (
-            <div key={s.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }} className="relative text-center">
-              <div className="w-circle mx-auto mb-3.5 flex h-[66px] w-[66px] items-center justify-center bg-paper text-ink">
-                {s.icon}
+        <div data-reveal className="relative">
+          {/* линия процесса рисуется слева направо при появлении */}
+          <div className="process-line absolute left-0 right-0 top-[19px] hidden h-px bg-hair md:block" aria-hidden="true" />
+          <div className="grid gap-9 md:grid-cols-5 md:gap-5">
+            {steps.map((s, i) => (
+              <div
+                key={s.title}
+                className="diagram-node relative md:text-left"
+                style={{ "--node-delay": `${0.25 + i * 0.12}s` } as React.CSSProperties}
+              >
+                <span className="mono-label relative z-10 inline-flex h-10 items-center rounded-full border border-hair bg-paper px-4 text-[12px] text-ink">
+                  0{i + 1}
+                </span>
+                <h3 className="mb-1.5 mt-4 font-[family-name:var(--font-display)] text-[20px] leading-snug">
+                  {s.title}
+                </h3>
+                <p className="text-[12.5px] leading-relaxed text-stone">{s.text}</p>
               </div>
-              <span className="absolute left-[calc(50%+16px)] top-11 hidden h-[21px] w-[21px] items-center justify-center rounded-full bg-ink text-[11px] font-semibold text-paper md:flex">
-                {i + 1}
-              </span>
-              <b className="mb-1 block text-sm font-semibold">{s.title}</b>
-              <p className="text-[12.5px] leading-normal text-stone">{s.text}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-        <div className="mt-9 text-center">
-          <Link href="/demo/" className="w-btn press inline-flex items-center gap-2.5 border border-ink/50 px-6 py-3 text-ink hover:bg-paper text-sm font-medium transition-transform hover:-translate-x-px hover:-translate-y-px">
+        <div className="mt-12 text-center" data-reveal>
+          <Link
+            href="/demo/"
+            className="arrow-shift mono-label inline-flex items-center gap-2.5 text-[13px] text-ink"
+          >
             Den Ablauf im Demo durchspielen <span aria-hidden="true">→</span>
           </Link>
         </div>
@@ -93,48 +109,65 @@ export function Process() {
 }
 
 const bandItems = [
-  { icon: <IconMenschen className="h-[26px] w-[26px]" />, title: "Alle Beteiligten. Ein Ablauf.", text: "Eine gemeinsame Quelle der Wahrheit für jeden Fall — für alle Organisationen." },
-  { icon: <IconBrief className="h-[26px] w-[26px]" />, title: "Weniger Anrufe, Mails und Fax.", text: "Rückfragen entfallen, weil der Stand für alle sichtbar ist." },
-  { icon: <IconKurve className="h-[26px] w-[26px]" />, title: "Schnellere Koordination.", text: "Vom ersten Anruf bis zum Abschluss — ohne Wartezeiten zwischen den Stellen." },
-  { icon: <IconSchild className="h-[26px] w-[26px]" />, title: "Prüfbar dokumentiert.", text: "Jeder Schritt protokolliert — Vertraulichkeit nach Rolle, DSGVO im Blick." },
+  { icon: <IconMenschen className="h-6 w-6" />, title: "Alle Beteiligten. Ein Ablauf.", text: "Eine gemeinsame Quelle der Wahrheit für jeden Fall — für alle Organisationen." },
+  { icon: <IconBrief className="h-6 w-6" />, title: "Weniger Anrufe, Mails und Fax.", text: "Rückfragen entfallen, weil der Stand für alle sichtbar ist." },
+  { icon: <IconKurve className="h-6 w-6" />, title: "Schnellere Koordination.", text: "Vom ersten Anruf bis zum Abschluss — ohne Wartezeiten zwischen den Stellen." },
+  { icon: <IconSchild className="h-6 w-6" />, title: "Prüfbar dokumentiert.", text: "Jeder Schritt protokolliert — Vertraulichkeit nach Rolle, DSGVO im Blick." },
 ];
 
 export function ValueBand() {
   return (
-    <section className="mx-auto max-w-[1180px] px-7 py-16">
-      <div data-reveal className="w1 grid gap-7 rounded-[20px] bg-forest-deep p-7 text-paper sm:grid-cols-2 lg:grid-cols-4 md:p-10">
-        {bandItems.map((b) => (
-          <div key={b.title}>
-            <span className="mb-2.5 block text-ash">{b.icon}</span>
-            <b className="block text-base font-semibold leading-snug">{b.title}</b>
-            <p className="mt-1.5 text-[12.5px] leading-normal text-ash">{b.text}</p>
-          </div>
-        ))}
+    <section className="mx-auto max-w-[1200px] px-6 py-20">
+      {/* единственная цветная карта системы — Periwinkle с пастельной иллюстрацией */}
+      <div data-reveal className="relative overflow-hidden rounded-[40px] bg-periwinkle p-8 md:p-12">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-24 h-[26rem] w-[26rem] rounded-full opacity-70 blur-[70px]"
+          style={{ background: "radial-gradient(circle at 40% 60%, #ff9473 0%, #a0b5eb 55%, #a7fccd 100%)" }}
+        />
+        <div className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {bandItems.map((b, i) => (
+            <div key={b.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
+              <span className="mb-4 block text-ink">{b.icon}</span>
+              <h3 className="font-[family-name:var(--font-display)] text-[21px] leading-snug">
+                {b.title}
+              </h3>
+              <p className="mt-2 text-[13px] leading-relaxed text-charcoal/80">{b.text}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
 const audiences = [
-  { icon: <IconBestatter className="h-11 w-11" />, title: "Bestattungsunternehmen", text: "Ein Vorgang statt zehn Anrufe — alles dokumentiert." },
-  { icon: <IconFriedhof className="h-11 w-11" />, title: "Friedhofsverwaltungen", text: "Belegungen, Termine und Unterlagen im Überblick." },
-  { icon: <IconKrematorium className="h-10 w-10" />, title: "Krematorien", text: "Vollständige Unterlagen vor der Anlieferung, digitale Annahme." },
-  { icon: <IconSarg className="h-11 w-11" />, title: "Zulieferer", text: "Anfragen empfangen, Aufträge bestätigen, im Takt bleiben." },
-  { icon: <IconUrne className="h-10 w-10" />, title: "Verbünde & Gruppen", text: "Einheitliche Abläufe über mehrere Standorte hinweg." },
+  { icon: <IconBestatter className="h-8 w-8" />, title: "Bestattungsunternehmen", text: "Ein Vorgang statt zehn Anrufe — alles dokumentiert." },
+  { icon: <IconFriedhof className="h-8 w-8" />, title: "Friedhofsverwaltungen", text: "Belegungen, Termine und Unterlagen im Überblick." },
+  { icon: <IconKrematorium className="h-8 w-8" />, title: "Krematorien", text: "Vollständige Unterlagen vor der Anlieferung, digitale Annahme." },
+  { icon: <IconSarg className="h-8 w-8" />, title: "Zulieferer", text: "Anfragen empfangen, Aufträge bestätigen, im Takt bleiben." },
+  { icon: <IconUrne className="h-8 w-8" />, title: "Verbünde & Gruppen", text: "Einheitliche Abläufe über mehrere Standorte hinweg." },
 ];
 
 export function Audiences() {
   return (
-    <section id="zielgruppen" className="mx-auto max-w-[1180px] px-7 py-16">
+    <section id="zielgruppen" className="mx-auto max-w-[1200px] px-6 py-20">
       <SectionHead kicker="Für wen" title="Gebaut für jede Organisation der Branche." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {audiences.map((a, i) => (
-          <div key={a.title} data-reveal style={{ transitionDelay: `${i * 70}ms` }} className={`overflow-hidden rounded-[14px] bg-card pb-5 text-center elev-md`}>
-            <div className="flex h-28 items-center justify-center bg-keylime text-ink">
+          <div
+            key={a.title}
+            data-reveal
+            style={{ transitionDelay: `${i * 70}ms` }}
+            className="card-hover rounded-[28px] border border-hair p-6 text-center"
+          >
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-hair text-ink">
               {a.icon}
             </div>
-            <b className="mx-3 mb-1 mt-4 block text-sm font-semibold">{a.title}</b>
-            <p className="mx-3.5 text-xs leading-normal text-stone">{a.text}</p>
+            <h3 className="mb-1.5 font-[family-name:var(--font-display)] text-[19px] leading-snug">
+              {a.title}
+            </h3>
+            <p className="text-[12px] leading-relaxed text-stone">{a.text}</p>
           </div>
         ))}
       </div>
@@ -144,18 +177,30 @@ export function Audiences() {
 
 export function ContactCta() {
   return (
-    <section id="kontakt" data-reveal className="mx-auto max-w-[1180px] px-7 pb-20 pt-16 text-center">
-      <div className="mono-label text-[11px] text-ink">Kontakt</div>
-      <h2 className="mb-3 mt-3 text-balance font-[family-name:var(--font-display)] text-[28px] font-medium md:text-[32px]">
-        Sehen, wie ein gemeinsamer Vorgang aussieht?
-      </h2>
-      <p className="mb-7 text-stone">Wir zeigen MementoOS in 20 Minuten — ruhig, konkret, ohne Verkaufsdruck.</p>
-      <a
-        href="mailto:timurkry.dev@gmail.com?subject=MementoOS%20Demo"
-        className="w-btn kirsche-hover inline-flex items-center gap-2.5 border border-transparent bg-ink px-5 py-3 text-sm font-medium text-paper hover:-translate-x-px hover:-translate-y-px"
-      >
-        Demo anfragen <span aria-hidden="true">↗</span>
-      </a>
+    <section id="kontakt" className="hero-glow overflow-hidden border-t border-line">
+      <div data-reveal className="mx-auto max-w-[760px] px-6 pb-24 pt-20 text-center">
+        <div className="mono-label text-[12px] text-stone">Kontakt</div>
+        <h2 className="mb-4 mt-4 text-balance font-[family-name:var(--font-display)] text-[34px] leading-[1.15] md:text-[46px]">
+          Sehen, wie ein gemeinsamer Vorgang aussieht?
+        </h2>
+        <p className="mb-9 text-[15px] text-graphite">
+          Wir zeigen MementoOS in 20 Minuten — ruhig, konkret, ohne Verkaufsdruck.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="mailto:timurkry.dev@gmail.com?subject=MementoOS%20Demo"
+            className="btn-blue press arrow-shift mono-label inline-flex items-center gap-2.5 px-8 py-4 text-[13px]"
+          >
+            Demo anfragen <span aria-hidden="true">▸</span>
+          </a>
+          <Link
+            href="/demo/"
+            className="btn-ghost press mono-label inline-flex items-center gap-2 px-8 py-4 text-[13px]"
+          >
+            Demo selbst ansehen
+          </Link>
+        </div>
+      </div>
     </section>
   );
 }

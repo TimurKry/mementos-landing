@@ -176,7 +176,7 @@ export function IconCheck({ className }: IconProps) {
   );
 }
 
-export function Logo({ className, fill = "#0f3e17" }: IconProps & { fill?: string }) {
+export function Logo({ className, fill = "#242424" }: IconProps & { fill?: string }) {
   return (
     <svg viewBox="0 0 32 29" className={className} aria-hidden="true">
       <circle cx="8.5" cy="8" r="7" fill={fill} />
