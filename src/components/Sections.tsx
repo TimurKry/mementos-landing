@@ -300,7 +300,7 @@ export function ValueBand() {
 }
 
 const audiences = [
-  { icon: <IconBestatter className="h-8 w-8" />, title: "Bestattungsunternehmen", text: "Ein Vorgang statt zehn Anrufe — alles dokumentiert." },
+  { icon: <IconBestatter className="h-8 w-8" />, title: "Bestattungsunternehmen", text: "Ein Vorgang statt zehn Anrufe — alles dokumentiert.", href: "/fuer-bestatter/" },
   { icon: <IconFriedhof className="h-8 w-8" />, title: "Friedhofsverwaltungen", text: "Belegungen, Termine und Unterlagen im Überblick." },
   { icon: <IconKrematorium className="h-8 w-8" />, title: "Krematorien", text: "Vollständige Unterlagen vor der Anlieferung, digitale Annahme." },
   { icon: <IconSarg className="h-8 w-8" />, title: "Zulieferer", text: "Anfragen empfangen, Aufträge bestätigen, im Takt bleiben." },
@@ -312,22 +312,35 @@ export function Audiences() {
     <section id="zielgruppen" className="mx-auto max-w-[1200px] px-6 py-20">
       <SectionHead kicker="Für wen" title="Gebaut für jede Organisation der Branche." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {audiences.map((a, i) => (
-          <div
-            key={a.title}
-            data-reveal
-            style={{ transitionDelay: `${i * 70}ms` }}
-            className="card-hover rounded-[28px] border border-hair p-6 text-center"
-          >
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-hair text-ink">
-              {a.icon}
+        {audiences.map((a, i) => {
+          const inner = (
+            <>
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-hair text-ink">
+                {a.icon}
+              </div>
+              <h3 className="mb-1.5 font-[family-name:var(--font-display)] text-[19px] leading-snug">
+                {a.title}
+              </h3>
+              <p className="text-[12px] leading-relaxed text-stone">{a.text}</p>
+              {a.href && (
+                <span className="arrow-shift mono-label mt-4 inline-flex items-center gap-1.5 text-[10px] text-ink">
+                  Eigene Seite <span aria-hidden="true">→</span>
+                </span>
+              )}
+            </>
+          );
+          const cls = "card-hover block rounded-[28px] border border-hair p-6 text-center";
+          const delay = { transitionDelay: `${i * 70}ms` };
+          return a.href ? (
+            <Link key={a.title} href={a.href} data-reveal style={delay} className={cls}>
+              {inner}
+            </Link>
+          ) : (
+            <div key={a.title} data-reveal style={delay} className={cls}>
+              {inner}
             </div>
-            <h3 className="mb-1.5 font-[family-name:var(--font-display)] text-[19px] leading-snug">
-              {a.title}
-            </h3>
-            <p className="text-[12px] leading-relaxed text-stone">{a.text}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

@@ -40,9 +40,21 @@
   --color-ocker: #8f6a24;
   --color-terra: #8f4527;
 
+  /* Steep-палитра для страниц аудиторий (/fuer-*): serif analytics
+     on warm paper — белый холст, туманные карты, персиковый акцент */
+  --color-nero: #17191c;
+  --color-mist: #f2f2f3;
+  --color-fog: #fafafb;
+  --color-slate: #777b86;
+  --color-ashen: #979799;
+  --color-dove: #a3a6af;
+  --color-peach: #fbe1d1;
+  --color-sienna: #5d2a1a;
+
   --font-display: var(--font-serif), "Georgia", "Times New Roman", serif;
   --font-body: var(--font-mono), ui-monospace, "JetBrains Mono", monospace;
   --font-label: var(--font-mono), ui-monospace, "JetBrains Mono", monospace;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
@@ -340,6 +352,44 @@ body::after {
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
+/* ── Steep-артефакты (/fuer-*): плавающие фрагменты продукта ── */
+
+.artifact {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow:
+    rgba(4, 23, 43, 0.05) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
+    rgba(0, 0, 0, 0.1) 0px 8px 10px -6px;
+}
+
+.artifact-quiet {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: rgba(4, 23, 43, 0.06) 0px 0px 0px 1px, rgba(0, 0, 0, 0.06) 0px 4px 12px -4px;
+}
+
+/* pill-кнопки страниц аудиторий */
+.btn-nero {
+  background: #17191c;
+  color: #ffffff;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-nero:hover { background: #000000; transform: translateY(-1px); }
+
+.btn-nero-ghost {
+  border: 1px solid #17191c;
+  color: #17191c;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-nero-ghost:hover { background: rgba(23, 25, 28, 0.05); transform: translateY(-1px); }
+
+/* текстовая ссылка: подчёркивание только на hover, стрелка в лейбле */
+.quiet-link { text-decoration: none; }
+.quiet-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── FAQ-аккордеон ──────────────────────────────────────────── */
 

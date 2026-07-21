@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Logo } from "./icons";
 
 export function Footer() {
@@ -27,7 +28,7 @@ export function Footer() {
           <div>
             <h4 className="mono-label mb-4 text-[11px] text-paper">Für wen</h4>
             <ul className="grid gap-2.5">
-              <li><a className="wavy-link hover:text-paper" href="#zielgruppen">Bestatter</a></li>
+              <li><Link className="wavy-link hover:text-paper" href="/fuer-bestatter/">Bestatter</Link></li>
               <li><a className="wavy-link hover:text-paper" href="#zielgruppen">Krematorien</a></li>
               <li><a className="wavy-link hover:text-paper" href="#zielgruppen">Friedhöfe & Partner</a></li>
             </ul>
