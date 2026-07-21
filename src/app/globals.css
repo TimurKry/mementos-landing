@@ -249,6 +249,98 @@ h1, h2, h3 { color: var(--color-ink); }
 }
 .revealed .process-line { transform: scaleX(1); }
 
+/* ── киноплёночное зерно поверх страницы ────────────────────── */
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── бегущая строка ролей отрасли ───────────────────────────── */
+
+.marquee { overflow: hidden; }
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 36s linear infinite;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ── плавающие карточки у продукт-сцены ─────────────────────── */
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.float-a { animation: floaty 5s ease-in-out infinite; }
+.float-b { animation: floaty 6s ease-in-out infinite 0.8s; }
+
+/* ── продукт-сцена: кейс проживает цикл сам (14s, бесконечно) ─
+   Хореография: статус ANFRAGE→BESTÄTIGT → документы отмечаются
+   один за другим → полоса прогресса растёт → тост «bestätigt». */
+
+.scene-pill-a { animation: scene-pill-a 14s ease-in-out infinite; }
+@keyframes scene-pill-a {
+  0%, 8% { opacity: 1; }
+  12%, 92% { opacity: 0; }
+  96%, 100% { opacity: 1; }
+}
+.scene-pill-b { animation: scene-pill-b 14s ease-in-out infinite; }
+@keyframes scene-pill-b {
+  0%, 8% { opacity: 0; }
+  12%, 92% { opacity: 1; }
+  96%, 100% { opacity: 0; }
+}
+
+.scene-check { opacity: 0; animation: scene-check 14s ease-in-out infinite; }
+.scene-check-1 { animation-name: scene-check-1; }
+.scene-check-2 { animation-name: scene-check-2; }
+.scene-check-3 { animation-name: scene-check-3; }
+.scene-check-4 { animation-name: scene-check-4; }
+@keyframes scene-check-1 { 0%, 18% { opacity: 0; } 22%, 92% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes scene-check-2 { 0%, 32% { opacity: 0; } 36%, 92% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes scene-check-3 { 0%, 46% { opacity: 0; } 50%, 92% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes scene-check-4 { 0%, 60% { opacity: 0; } 64%, 92% { opacity: 1; } 96%, 100% { opacity: 0; } }
+
+.scene-bar {
+  transform-origin: left center;
+  animation: scene-bar 14s ease-in-out infinite;
+}
+@keyframes scene-bar {
+  0%, 16% { transform: scaleX(0.05); }
+  22% { transform: scaleX(0.3); }
+  36% { transform: scaleX(0.55); }
+  50% { transform: scaleX(0.8); }
+  64%, 92% { transform: scaleX(1); }
+  97%, 100% { transform: scaleX(0.05); }
+}
+
+.scene-toast {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: scene-toast 14s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes scene-toast {
+  0%, 68% { opacity: 0; transform: translateY(10px); }
+  73%, 88% { opacity: 1; transform: translateY(0); }
+  93%, 100% { opacity: 0; transform: translateY(10px); }
+}
+
+.scene-cursor { animation: scene-cursor 1.1s steps(2) infinite; }
+@keyframes scene-cursor {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 /* ── FAQ-аккордеон ──────────────────────────────────────────── */
 
 .faq-answer {
@@ -274,7 +366,17 @@ h1, h2, h3 { color: var(--color-ink); }
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
-  .live-dot, .hub-glow, .hero-glow::before, .hero-glow::after { animation: none !important; }
+  .live-dot, .hub-glow, .hero-glow::before, .hero-glow::after,
+  .marquee-track, .float-a, .float-b, .scene-cursor,
+  .scene-pill-a, .scene-pill-b, .scene-bar, .scene-toast,
+  .scene-check, .scene-check-1, .scene-check-2, .scene-check-3, .scene-check-4 {
+    animation: none !important;
+  }
+  /* сцена замирает в завершённом состоянии */
+  .scene-pill-a { opacity: 0 !important; }
+  .scene-pill-b, .scene-check { opacity: 1 !important; }
+  .scene-bar { transform: scaleX(1) !important; }
+  .scene-toast { opacity: 1 !important; transform: none !important; }
   .diagram-path { stroke-dashoffset: 0; }
   .flow-dot, .flow-dot * { display: none; }
 }

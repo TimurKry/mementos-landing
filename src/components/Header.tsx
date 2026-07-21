@@ -3,9 +3,9 @@ import { Logo } from "./icons";
 
 const links = [
   { href: "#plattform", label: "Plattform" },
+  { href: "#produkt", label: "Produkt" },
   { href: "#ablauf", label: "Ablauf" },
   { href: "/demo/", label: "Demo" },
-  { href: "#zielgruppen", label: "Für wen" },
   { href: "#faq", label: "FAQ" },
 ];
 

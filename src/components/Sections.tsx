@@ -43,13 +43,20 @@ export function Why() {
             key={it.title}
             data-reveal
             style={{ transitionDelay: `${i * 80}ms` }}
-            className={`card-hover rounded-[28px] p-7 ${
+            className={`card-hover relative overflow-hidden rounded-[28px] p-7 ${
               it.accent
                 ? "bg-periwinkle"
                 : "border border-hair bg-transparent"
             }`}
           >
-            <div className="mb-5 text-ink">{it.icon}</div>
+            {it.accent && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-60 blur-[36px]"
+                style={{ background: "radial-gradient(circle, #ff9473 0%, #a0b5eb 60%, rgba(160,181,235,0) 100%)" }}
+              />
+            )}
+            <div className="relative mb-5 text-ink">{it.icon}</div>
             <h3 className="mb-2.5 font-[family-name:var(--font-display)] text-[22px] leading-snug">
               {it.title}
             </h3>
@@ -115,26 +122,70 @@ const bandItems = [
   { icon: <IconSchild className="h-6 w-6" />, title: "Prüfbar dokumentiert.", text: "Jeder Schritt protokolliert — Vertraulichkeit nach Rolle, DSGVO im Blick." },
 ];
 
+/* Генерированная иллюстрация: перекрывающиеся полупрозрачные формы
+   в пастельных градиентах (Monad «In-flight Transforms») */
+function GradientArt() {
+  return (
+    <svg
+      viewBox="0 0 420 360"
+      className="h-full w-full"
+      aria-hidden="true"
+      role="presentation"
+    >
+      <defs>
+        <linearGradient id="ga1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ff9473" />
+          <stop offset="100%" stopColor="#a0b5eb" />
+        </linearGradient>
+        <linearGradient id="ga2" x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#a0b5eb" />
+          <stop offset="100%" stopColor="#a7fccd" />
+        </linearGradient>
+        <linearGradient id="ga3" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%" stopColor="#ecda98" />
+          <stop offset="100%" stopColor="#ff9473" />
+        </linearGradient>
+        <filter id="gab" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="30" />
+        </filter>
+      </defs>
+      {/* размытое дыхание фона */}
+      <ellipse cx="220" cy="190" rx="170" ry="140" fill="url(#ga2)" opacity="0.5" filter="url(#gab)" />
+      {/* чёткие перекрывающиеся формы */}
+      <circle cx="150" cy="140" r="95" fill="url(#ga1)" opacity="0.82" />
+      <circle cx="265" cy="185" r="110" fill="url(#ga2)" opacity="0.72" />
+      <path d="M60 330 A 150 150 0 0 1 360 330 Z" fill="url(#ga3)" opacity="0.78" />
+      <circle cx="305" cy="95" r="42" fill="#f6f3f1" opacity="0.85" />
+      <circle cx="118" cy="255" r="24" fill="#f6f3f1" opacity="0.7" />
+      {/* тонкие орбиты — язык схемографии */}
+      <circle cx="210" cy="180" r="132" fill="none" stroke="#f6f3f1" strokeWidth="1" opacity="0.7" strokeDasharray="3 6" />
+      <circle cx="210" cy="180" r="165" fill="none" stroke="#f6f3f1" strokeWidth="1" opacity="0.45" />
+    </svg>
+  );
+}
+
 export function ValueBand() {
   return (
     <section className="mx-auto max-w-[1200px] px-6 py-20">
-      {/* единственная цветная карта системы — Periwinkle с пастельной иллюстрацией */}
-      <div data-reveal className="relative overflow-hidden rounded-[40px] bg-periwinkle p-8 md:p-12">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-24 -top-24 h-[26rem] w-[26rem] rounded-full opacity-70 blur-[70px]"
-          style={{ background: "radial-gradient(circle at 40% 60%, #ff9473 0%, #a0b5eb 55%, #a7fccd 100%)" }}
-        />
-        <div className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {bandItems.map((b, i) => (
-            <div key={b.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
-              <span className="mb-4 block text-ink">{b.icon}</span>
-              <h3 className="font-[family-name:var(--font-display)] text-[21px] leading-snug">
-                {b.title}
-              </h3>
-              <p className="mt-2 text-[13px] leading-relaxed text-charcoal/80">{b.text}</p>
+      {/* единственная цветная карта системы — Periwinkle с генерированным артом */}
+      <div data-reveal className="relative overflow-hidden rounded-[40px] bg-periwinkle">
+        <div className="grid items-stretch md:grid-cols-[1.25fr_1fr]">
+          <div className="grid gap-8 p-8 sm:grid-cols-2 md:p-12">
+            {bandItems.map((b, i) => (
+              <div key={b.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
+                <span className="mb-4 block text-ink">{b.icon}</span>
+                <h3 className="font-[family-name:var(--font-display)] text-[21px] leading-snug">
+                  {b.title}
+                </h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-charcoal/80">{b.text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="relative hidden min-h-[360px] md:block">
+            <div className="absolute inset-0">
+              <GradientArt />
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>

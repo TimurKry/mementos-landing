@@ -1,6 +1,7 @@
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { Ecosystem } from "@/components/Ecosystem";
+import { Marquee } from "@/components/Marquee";
+import { ProductScene } from "@/components/ProductScene";
 import { Why, Process, ValueBand, Audiences, ContactCta } from "@/components/Sections";
 import { Faq } from "@/components/Faq";
 import { Footer } from "@/components/Footer";
@@ -11,8 +12,9 @@ export default function Home() {
       <Header />
       <main id="top">
         <Hero />
-        <Ecosystem />
+        <Marquee />
         <Why />
+        <ProductScene />
         <Process />
         <ValueBand />
         <Audiences />

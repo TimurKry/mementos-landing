@@ -16,7 +16,7 @@ pnpm build      # статический экспорт в out/
 
 ```
 src/app/            layout (шрифты, метаданные), page, globals.css (токены + анимационный слой)
-src/components/     Header, Hero, HubDiagram, Sections (Why/Process/ValueBand/Audiences/Cta), Faq, Footer, icons
+src/components/     Header, Hero (+HubDiagram), Marquee, ProductScene, Sections (Why/Process/ValueBand/Audiences/Cta), Faq, Footer, icons
 assets/icons/       исходные SVG-иконки (выбор основателя) — в компонентах инлайнены нормализованными
 ```
 

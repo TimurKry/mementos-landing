@@ -1,11 +1,19 @@
 import { IconCheck } from "./icons";
+import { HubDiagram } from "./HubDiagram";
 
-/* Типографический hero (Monad): никакого скриншота — заголовок-серif,
-   mono-подтекст, две пилюли. Атмосфера — дрейфующие градиентные заливки. */
+/* Hero по образцу monad.com: типографика + пайплайн-схема в одном
+   экране. Атмосфера — три дрейфующие градиентные заливки и зерно. */
 export function Hero() {
   return (
     <section id="plattform" className="hero-glow overflow-hidden">
-      <div className="mx-auto flex max-w-[880px] flex-col items-center px-6 pb-14 pt-16 text-center md:pb-20 md:pt-24">
+      {/* третья заливка — тёплое золото по центру за схемой */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-[52%] -z-10 h-[30rem] w-[44rem] -translate-x-1/2 rounded-full opacity-50 blur-[80px]"
+        style={{ background: "radial-gradient(ellipse, #ecda98 0%, rgba(236,218,152,0) 65%)" }}
+      />
+
+      <div className="mx-auto flex max-w-[880px] flex-col items-center px-6 pt-16 text-center md:pt-20">
         <span
           className="rise mono-label inline-flex items-center gap-2.5 rounded-full border border-hair bg-paper px-4 py-2 text-[11px] text-ink"
           style={{ "--rise-delay": "0s" } as React.CSSProperties}
@@ -43,7 +51,7 @@ export function Hero() {
             Demo anfragen <span aria-hidden="true">▸</span>
           </a>
           <a
-            href="#oekosystem"
+            href="#produkt"
             className="btn-ghost press mono-label inline-flex items-center gap-2 px-8 py-4 text-[13px]"
           >
             So funktioniert es
@@ -57,6 +65,11 @@ export function Hero() {
           <IconCheck className="h-4 w-4 text-ink" />
           Entwickelt in Leipzig — im direkten Austausch mit der Branche.
         </p>
+      </div>
+
+      {/* пайплайн-схема — фирменный образ, прямо в hero */}
+      <div data-reveal className="mx-auto max-w-[1200px] px-6 pb-16 pt-12 md:pb-20 md:pt-14">
+        <HubDiagram />
       </div>
     </section>
   );
