@@ -4,6 +4,7 @@ import {
   IconPhone,
   IconKerze,
   IconDokument,
+  IconKalender,
   IconBrief,
   IconKurve,
   IconSchild,
@@ -68,48 +69,154 @@ export function Why() {
   );
 }
 
-const steps = [
-  { title: "Buchung beim Krematorium", text: "Der Termin wird bestätigt — und der Fall entsteht mit einem Link." },
-  { title: "Bestatter füllt den Vorgang", text: "Strukturierte Angaben statt Fax: alles, was für eine sichere Einäscherung nötig ist." },
-  { title: "Partner über einen Link", text: "Transport, Floristik, Zulieferer treten ohne Registrierung bei und bestätigen ihren Teil." },
-  { title: "Unterlagen & Status", text: "Fehlende Dokumente fallen sofort auf — nicht erst vor Ort. Jeder sieht, was aussteht." },
-  { title: "Würdevoller Abschluss", text: "Der Fall wird abgeschlossen, dokumentiert und archiviert — vollständig und nachvollziehbar." },
-];
+/* Вертикальный пайплайн (monad.com Managed Data Pipelines):
+   белые карточки-узлы с тёмными портами, коннекторы-пилюли,
+   ветвление в конце — на коралло-периwinkle заливке. */
+
+function LinkGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+      <path d="M6.5 9.5 9.5 6.5M7.8 4.2l.9-.9a2.55 2.55 0 0 1 3.6 3.6l-.9.9M8.2 11.8l-.9.9a2.55 2.55 0 0 1-3.6-3.6l.9-.9" />
+    </svg>
+  );
+}
+
+function Port() {
+  return <span aria-hidden="true" className="block h-[5px] w-8 rounded-full bg-ink/75" />;
+}
+
+function FlowLine() {
+  return <span aria-hidden="true" className="block h-4 w-px bg-hair" />;
+}
+
+function Connector({ label }: { label: string }) {
+  return (
+    <span className="mono-label inline-flex items-center gap-2 rounded-[10px] border border-blue bg-card px-4 py-2 text-[10px] text-blue">
+      <LinkGlyph /> {label}
+    </span>
+  );
+}
+
+function FlowCard({
+  icon,
+  title,
+  tag,
+  text,
+  delay,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  tag: string;
+  text?: string;
+  delay: number;
+}) {
+  return (
+    <div
+      className="diagram-node soft-ambient w-full rounded-[16px] border border-line bg-card p-4 text-left"
+      style={{ "--node-delay": `${delay}s` } as React.CSSProperties}
+    >
+      <div className="flex items-center gap-3">
+        <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full border border-hair text-ink">
+          {icon}
+        </span>
+        <span className="min-w-0">
+          <b className="block truncate text-[13.5px] font-medium text-charcoal">{title}</b>
+          <span className="mono-label mt-1 inline-block rounded-[6px] border border-line bg-paper px-2 py-0.5 text-[9px] text-stone">
+            {tag}
+          </span>
+        </span>
+      </div>
+      {text && <p className="mt-3 text-[11.5px] leading-relaxed text-stone">{text}</p>}
+    </div>
+  );
+}
 
 export function Process() {
   return (
-    <section id="ablauf" className="border-y border-line">
-      <div className="mx-auto max-w-[1200px] px-6 py-20">
-        <SectionHead kicker="Der Ablauf" title="Eine Plattform. Jeder Schritt. Alle verbunden." />
-        <div data-reveal className="relative">
-          {/* линия процесса рисуется слева направо при появлении */}
-          <div className="process-line absolute left-0 right-0 top-[19px] hidden h-px bg-hair md:block" aria-hidden="true" />
-          <div className="grid gap-9 md:grid-cols-5 md:gap-5">
-            {steps.map((s, i) => (
-              <div
-                key={s.title}
-                className="diagram-node relative md:text-left"
-                style={{ "--node-delay": `${0.25 + i * 0.12}s` } as React.CSSProperties}
-              >
-                <span className="mono-label relative z-10 inline-flex h-10 items-center rounded-full border border-hair bg-paper px-4 text-[12px] text-ink">
-                  0{i + 1}
-                </span>
-                <h3 className="mb-1.5 mt-4 font-[family-name:var(--font-display)] text-[20px] leading-snug">
-                  {s.title}
-                </h3>
-                <p className="text-[12.5px] leading-relaxed text-stone">{s.text}</p>
-              </div>
-            ))}
+    <section id="ablauf" className="mx-auto max-w-[1200px] px-6 py-20">
+      <SectionHead kicker="Der Ablauf" title="Eine Plattform. Jeder Schritt. Alle verbunden." />
+      <div
+        data-reveal
+        className="relative mx-auto max-w-[820px] overflow-hidden rounded-[40px] border border-line px-6 py-12 md:px-10"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 12%, rgba(255,148,115,0.4), rgba(255,148,115,0) 55%), radial-gradient(circle at 50% 95%, rgba(160,181,235,0.5), rgba(160,181,235,0) 60%), #f6f3f1",
+        }}
+      >
+        <div className="mx-auto flex max-w-[400px] flex-col items-center">
+          <FlowCard
+            delay={0.1}
+            icon={<IconKalender className="h-5 w-5" />}
+            title="Buchung bestätigt"
+            tag="Krematorium"
+            text="Der Termin steht — der Fall entsteht mit einem Link."
+          />
+          <Port />
+          <FlowLine />
+          <Connector label="Per Link" />
+          <FlowLine />
+          <Port />
+          <FlowCard
+            delay={0.25}
+            icon={<IconBestatter className="h-5 w-5" />}
+            title="Vorgang ausgefüllt"
+            tag="Bestatter"
+            text="Strukturierte Angaben statt Fax — alles für eine sichere Einäscherung."
+          />
+          <Port />
+          <FlowLine />
+          <Connector label="Ohne Registrierung" />
+          <FlowLine />
+          <Port />
+          <FlowCard
+            delay={0.4}
+            icon={<IconHandshake className="h-5 w-5" />}
+            title="Partner treten bei"
+            tag="Transport · Floristik"
+            text="Zulieferer bestätigen ihren Teil direkt im Browser."
+          />
+          <Port />
+          <FlowLine />
+          <Connector label="Automatisch" />
+          <FlowLine />
+          <Port />
+          <FlowCard
+            delay={0.55}
+            icon={<IconDokument className="h-5 w-5" />}
+            title="Unterlagen vollständig"
+            tag="MementoOS"
+            text="Fehlendes fällt sofort auf — nicht erst vor Ort."
+          />
+          <Port />
+          <FlowLine />
+          <Connector label="Wenn vollständig" />
+          {/* ветвление к двум финальным узлам */}
+          <svg viewBox="0 0 100 26" className="h-[26px] w-full max-w-[300px]" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M50 0 V10 M25 10 H75 M25 10 V26 M75 10 V26" stroke="#cecac8" strokeWidth="1" fill="none" vectorEffect="non-scaling-stroke" />
+          </svg>
+          <div className="grid w-full grid-cols-2 gap-3">
+            <FlowCard
+              delay={0.7}
+              icon={<IconKrematorium className="h-5 w-5" />}
+              title="Einäscherung"
+              tag="dokumentiert"
+            />
+            <FlowCard
+              delay={0.8}
+              icon={<IconUrne className="h-5 w-5" />}
+              title="Abschluss"
+              tag="archiviert"
+            />
           </div>
         </div>
-        <div className="mt-12 text-center" data-reveal>
-          <Link
-            href="/demo/"
-            className="arrow-shift mono-label inline-flex items-center gap-2.5 text-[13px] text-ink"
-          >
-            Den Ablauf im Demo durchspielen <span aria-hidden="true">→</span>
-          </Link>
-        </div>
+      </div>
+      <div className="mt-12 text-center" data-reveal>
+        <Link
+          href="/demo/"
+          className="arrow-shift mono-label inline-flex items-center gap-2.5 text-[13px] text-ink"
+        >
+          Den Ablauf im Demo durchspielen <span aria-hidden="true">→</span>
+        </Link>
       </div>
     </section>
   );
