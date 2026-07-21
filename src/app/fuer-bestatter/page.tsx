@@ -9,7 +9,7 @@ import {
 } from "@/components/icons";
 
 export const metadata: Metadata = {
-  title: "MementoOS für Bestatter — Das Cockpit für Ihr Bestattungshaus",
+  title: "MementoOS für Bestatter — Der Arbeitsbereich für Ihr Bestattungshaus",
   description:
     "Fälle, Aufgaben und Partner in einem ruhigen Arbeitsbereich. Offene Punkte schließen sich, bevor sie zu Anrufen werden.",
 };
@@ -36,8 +36,11 @@ function AudienceNav() {
           <Link href="/" className="quiet-link hidden text-slate sm:block">
             Startseite
           </Link>
-          <Link href="/demo/" className="btn-nero-ghost press hidden px-5 py-2.5 text-[14px] text-nero md:block">
-            Demo ansehen
+          <a href="#preise" className="quiet-link hidden text-slate lg:block">
+            Preise
+          </a>
+          <Link href="/workspace/" className="btn-nero-ghost press hidden px-5 py-2.5 text-[14px] text-nero md:block">
+            Selbst ausprobieren
           </Link>
           <a href="#kontakt" className="btn-nero press px-5 py-2.5 text-[14px]">
             Demo anfragen
@@ -241,7 +244,7 @@ export default function FuerBestatter() {
                   className={`rise ${serif} text-balance text-[48px] leading-[1.15] text-nero md:text-[76px] md:tracking-[-2px]`}
                   style={{ "--rise-delay": "0s" } as React.CSSProperties}
                 >
-                  Das Cockpit für Ihr <em className="italic">Bestattungshaus</em>.
+                  Der Arbeitsbereich für Ihr <em className="italic">Bestattungshaus</em>.
                 </h1>
                 <p
                   className={`rise ${sans} mx-auto mt-6 max-w-[46ch] text-[16px] leading-[1.5] text-slate md:text-[18px]`}
@@ -254,12 +257,12 @@ export default function FuerBestatter() {
                   className="rise mt-9 flex flex-wrap items-center justify-center gap-3.5"
                   style={{ "--rise-delay": "0.24s" } as React.CSSProperties}
                 >
-                  <a href="#kontakt" className={`btn-nero press ${sans} px-7 py-3.5 text-[15px]`}>
+                  <Link href="/workspace/" className={`btn-nero press ${sans} px-7 py-3.5 text-[15px]`}>
+                    Selbst ausprobieren
+                  </Link>
+                  <a href="#kontakt" className={`btn-nero-ghost press ${sans} px-7 py-3.5 text-[15px]`}>
                     Demo anfragen
                   </a>
-                  <Link href="/demo/" className={`btn-nero-ghost press ${sans} px-7 py-3.5 text-[15px]`}>
-                    Demo ansehen
-                  </Link>
                 </div>
               </div>
 
@@ -328,6 +331,139 @@ export default function FuerBestatter() {
           </div>
         </section>
 
+        {/* сравнительная схема: где теряется информация */}
+        <section className="mx-auto max-w-[1200px] px-6 py-20">
+          <div className="mx-auto max-w-[680px] text-center" data-reveal>
+            <h2 className={`${serif} text-balance text-[34px] leading-[1.2] text-nero md:text-[52px] md:tracking-[-1px]`}>
+              Wir wissen, wo heute <em className="italic">Information verloren geht</em>.
+            </h2>
+            <p className={`${sans} mx-auto mt-4 max-w-[52ch] text-[16px] leading-[1.5] text-slate`}>
+              Den Ablauf haben wir mit der Branche kartiert — Anruf für Anruf.
+              Links der heutige Weg, rechts derselbe Fall in MementoOS.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-12 grid max-w-[960px] gap-5 md:grid-cols-2">
+            {/* Heute: цепочка с точками потерь */}
+            <div data-reveal className="rounded-[24px] bg-mist p-7">
+              <div className={`${sans} mb-6 flex items-center justify-between`}>
+                <span className="text-[14px] font-medium text-nero">Heute</span>
+                <span className="rounded-full bg-white px-2.5 py-1 text-[11px] text-slate">Telefon · Fax · Zettel</span>
+              </div>
+              <div className="flex flex-col items-center">
+                {[
+                  { from: "Familie", via: "Anruf", to: "Bestatter", loss: "Notizen auf Zetteln — nichts ist geteilt" },
+                  { from: "Bestatter", via: "Fax", to: "Krematorium", loss: "Warten auf Rückruf, Stand unklar" },
+                  { from: "Krematorium", via: "Rückfrage", to: "Bestatter", loss: "Angaben werden doppelt erfasst" },
+                  { from: "Bestatter", via: "Anrufe", to: "Partner", loss: "Jeder Partner einzeln — niemand sieht das Ganze" },
+                ].map((s, i) => (
+                  <div
+                    key={s.via + i}
+                    className="diagram-node flex w-full flex-col items-center"
+                    style={{ "--node-delay": `${0.1 + i * 0.14}s` } as React.CSSProperties}
+                  >
+                    <div className={`${sans} flex w-full items-center justify-center gap-2`}>
+                      <span className="artifact-quiet whitespace-nowrap px-3.5 py-1.5 text-[12.5px] text-nero">{s.from}</span>
+                      <span className="flex flex-col items-center px-1">
+                        <span className="text-[10px] uppercase tracking-wide text-ashen">{s.via}</span>
+                        <span aria-hidden="true" className="text-[13px] text-ashen">⇢</span>
+                      </span>
+                      <span className="artifact-quiet whitespace-nowrap px-3.5 py-1.5 text-[12.5px] text-nero">{s.to}</span>
+                    </div>
+                    <div className={`loss-pulse ${sans} my-3 flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[11.5px] text-sienna`}>
+                      <span aria-hidden="true">✕</span> {s.loss}
+                    </div>
+                    {i < 3 && <span aria-hidden="true" className="mb-3 block h-4 w-px border-l border-dashed border-ashen" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mit MementoOS: тот же Fall без потерь */}
+            <div data-reveal style={{ transitionDelay: "120ms" }} className="artifact p-7">
+              <div className={`${sans} mb-6 flex items-center justify-between`}>
+                <span className="text-[14px] font-medium text-nero">Mit MementoOS</span>
+                <span className="rounded-full bg-mist px-2.5 py-1 text-[11px] text-slate">Ein Fall · ein Ort</span>
+              </div>
+              <div className="flex flex-col">
+                {[
+                  { title: "Der Fall entsteht", text: "Mit der Buchung — alle Angaben landen sofort im Fall." },
+                  { title: "Alle arbeiten am selben Fall", text: "Familie, Krematorium und Partner treten per Link bei." },
+                  { title: "Aufgaben: offen oder erledigt", text: "Jeder sieht, was aussteht — Rückfragen entfallen." },
+                  { title: "Abschluss & Archiv", text: "Vollständig dokumentiert, nichts geht verloren." },
+                ].map((s, i) => (
+                  <div
+                    key={s.title}
+                    className="diagram-node flex gap-3.5"
+                    style={{ "--node-delay": `${0.2 + i * 0.14}s` } as React.CSSProperties}
+                  >
+                    <div className="flex flex-col items-center">
+                      <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-nero text-white">
+                        <IconCheck className="h-3 w-3" />
+                      </span>
+                      {i < 3 && <span aria-hidden="true" className="w-px flex-1 bg-mist" />}
+                    </div>
+                    <div className={`${sans} pb-6`}>
+                      <b className="block text-[14.5px] font-medium text-nero">{s.title}</b>
+                      <p className="mt-1 text-[13px] leading-[1.5] text-slate">{s.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className={`${sans} mt-1 rounded-[12px] bg-mist px-4 py-3 text-[12.5px] text-nero`}>
+                Schneller und leichter — weil Information nie den Kanal wechselt.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* каждый Fall — самостоятельная акта */}
+        <section className="bg-fog">
+          <div className="mx-auto grid max-w-[1200px] items-center gap-10 px-6 py-20 md:grid-cols-[1fr_1.1fr]">
+            <div data-reveal>
+              <h2 className={`${serif} text-[34px] leading-[1.2] text-nero md:text-[52px] md:tracking-[-1px]`}>
+                Jeder Fall ist eine <em className="italic">eigene Akte</em>.
+              </h2>
+              <p className={`${sans} mt-4 max-w-[46ch] text-[16px] leading-[1.5] text-slate`}>
+                Ein Fall trägt alles in sich: Beteiligte, Aufgaben, Unterlagen
+                und die vollständige Historie. Er ist eine selbstständige
+                Einheit — abgeschlossen heißt vollständig, nachvollziehbar,
+                archiviert.
+              </p>
+              <Link href="/workspace/" className={`quiet-link ${sans} mt-6 inline-block text-[15px] text-nero`}>
+                Im Arbeitsbereich ansehen →
+              </Link>
+            </div>
+            <div data-reveal style={{ transitionDelay: "120ms" }} className="artifact p-6 md:p-7">
+              <div className={`${sans} flex items-center justify-between border-b border-mist pb-4`}>
+                <span>
+                  <b className="block text-[15px] font-medium text-nero">Fall M-2026-0147</b>
+                  <span className="text-[12px] text-dove">Einäscherung · Beispieldaten</span>
+                </span>
+                <span className="rounded-full bg-nero px-3 py-1 text-[11px] text-white">Abgeschlossen</span>
+              </div>
+              <div className={`${sans} mt-4 grid grid-cols-2 gap-3`}>
+                {[
+                  { k: "Beteiligte", v: "4 Organisationen", d: "alle per Link" },
+                  { k: "Aufgaben", v: "7 von 7 erledigt", d: "keine offen" },
+                  { k: "Unterlagen", v: "4 von 4 vollständig", d: "geprüft" },
+                  { k: "Historie", v: "Lückenlos", d: "jede Änderung protokolliert" },
+                ].map((t, i) => (
+                  <div
+                    key={t.k}
+                    className="diagram-node rounded-[12px] bg-fog p-4"
+                    style={{ "--node-delay": `${0.15 + i * 0.1}s` } as React.CSSProperties}
+                  >
+                    <span className="text-[11px] text-ashen">{t.k}</span>
+                    <b className="mt-1 block text-[13.5px] font-medium text-nero">{t.v}</b>
+                    <span className="text-[11px] text-slate">{t.d}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* канбан: как в книжках по менеджменту */}
         <section className="mx-auto max-w-[1200px] px-6 py-20">
           <div className="mx-auto max-w-[640px] text-center" data-reveal>
@@ -390,11 +526,108 @@ export default function FuerBestatter() {
           </div>
         </section>
 
+        {/* прайсинг: ядро — оплата pro abgeschlossenem Fall */}
+        <section id="preise" className="mx-auto max-w-[1200px] px-6 pb-20">
+          <div className="mx-auto max-w-[680px] text-center" data-reveal>
+            <h2 className={`${serif} text-balance text-[34px] leading-[1.2] text-nero md:text-[52px] md:tracking-[-1px]`}>
+              Bezahlt wird ein <em className="italic">abgeschlossener Fall</em>.
+            </h2>
+            <p className={`${sans} mx-auto mt-4 max-w-[52ch] text-[16px] leading-[1.5] text-slate`}>
+              Keine Grundgebühr, keine Schulungskosten. Das Kernmodell rechnet
+              pro erfolgreich abgeschlossenem Fall ab — für Häuser mit
+              konstantem Volumen gibt es Abos.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-12 grid max-w-[1000px] gap-5 md:grid-cols-3">
+            {/* Kernmodell — единственная приподнятая карта */}
+            <div data-reveal className="artifact flex flex-col p-7">
+              <span className={`${sans} text-[12px] font-medium uppercase tracking-wide text-sienna`}>Kernmodell</span>
+              <h3 className={`${serif} mt-2 text-[30px] text-nero`}>Pro Fall</h3>
+              <p className={`${sans} mt-1 text-[14px] text-slate`}>Abrechnung je abgeschlossenem Fall</p>
+              <ul className={`${sans} mt-5 flex flex-1 flex-col gap-2.5 text-[13.5px] text-nero`}>
+                {[
+                  "Alle Beteiligten am Fall inklusive",
+                  "Partner treten ohne eigene Lizenz bei",
+                  "Zugang für Angehörige inklusive",
+                  "Archiv & lückenloses Protokoll",
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2.5">
+                    <span className="mt-0.5 flex h-4 w-4 flex-none items-center justify-center rounded-full bg-nero text-white">
+                      <IconCheck className="h-2.5 w-2.5" />
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <p className={`${sans} mt-5 text-[12.5px] text-slate`}>
+                Konditionen: in der Pilotphase gemeinsam festgelegt
+              </p>
+              <a href="#kontakt" className={`btn-nero press ${sans} mt-4 self-start px-6 py-3 text-[14px]`}>
+                Demo anfragen
+              </a>
+            </div>
+
+            {/* Abo: Haus */}
+            <div data-reveal style={{ transitionDelay: "90ms" }} className="flex flex-col rounded-[24px] bg-mist p-7">
+              <span className={`${sans} text-[12px] font-medium uppercase tracking-wide text-ashen`}>Abo</span>
+              <h3 className={`${serif} mt-2 text-[30px] text-nero`}>Haus</h3>
+              <p className={`${sans} mt-1 text-[14px] text-slate`}>Monatlich, je Standort</p>
+              <ul className={`${sans} mt-5 flex flex-1 flex-col gap-2.5 text-[13.5px] text-nero`}>
+                {[
+                  "Unbegrenzte Fälle im Monat",
+                  "Alles aus dem Kernmodell",
+                  "Auswertungen für das Haus",
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2.5">
+                    <span className="mt-0.5 flex h-4 w-4 flex-none items-center justify-center rounded-full border border-slate text-slate">
+                      <IconCheck className="h-2.5 w-2.5" />
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <p className={`${sans} mt-5 text-[12.5px] text-slate`}>Auf Anfrage</p>
+              <a href="#kontakt" className={`quiet-link ${sans} mt-4 self-start py-2 text-[14px] text-nero`}>
+                Gespräch vereinbaren →
+              </a>
+            </div>
+
+            {/* Abo: Verbund */}
+            <div data-reveal style={{ transitionDelay: "180ms" }} className="flex flex-col rounded-[24px] bg-mist p-7">
+              <span className={`${sans} text-[12px] font-medium uppercase tracking-wide text-ashen`}>Abo</span>
+              <h3 className={`${serif} mt-2 text-[30px] text-nero`}>Verbund</h3>
+              <p className={`${sans} mt-1 text-[14px] text-slate`}>Für Gruppen & mehrere Standorte</p>
+              <ul className={`${sans} mt-5 flex flex-1 flex-col gap-2.5 text-[13.5px] text-nero`}>
+                {[
+                  "Zentrale Übersicht über alle Häuser",
+                  "Einheitliche Abläufe im Verbund",
+                  "Onboarding je Standort",
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2.5">
+                    <span className="mt-0.5 flex h-4 w-4 flex-none items-center justify-center rounded-full border border-slate text-slate">
+                      <IconCheck className="h-2.5 w-2.5" />
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <p className={`${sans} mt-5 text-[12.5px] text-slate`}>Individuell</p>
+              <a href="#kontakt" className={`quiet-link ${sans} mt-4 self-start py-2 text-[14px] text-nero`}>
+                Gespräch vereinbaren →
+              </a>
+            </div>
+          </div>
+          <p className={`${sans} mt-6 text-center text-[12px] text-dove`} data-reveal>
+            Vorschau — endgültige Konditionen werden mit den Pilotpartnern festgelegt.
+          </p>
+        </section>
+
         {/* CTA */}
         <section id="kontakt" className="border-t border-mist bg-fog">
           <div className="mx-auto max-w-[720px] px-6 py-20 text-center" data-reveal>
             <h2 className={`${serif} text-balance text-[34px] leading-[1.2] text-nero md:text-[52px] md:tracking-[-1px]`}>
-              Sehen Sie Ihr Haus im Cockpit.
+              Sehen Sie Ihr Haus im Arbeitsbereich.
             </h2>
             <p className={`${sans} mx-auto mt-4 max-w-[44ch] text-[16px] text-slate`}>
               Wir zeigen MementoOS in 20 Minuten — ruhig, konkret, ohne
@@ -407,6 +640,9 @@ export default function FuerBestatter() {
               >
                 Demo anfragen
               </a>
+              <Link href="/workspace/" className={`btn-nero-ghost press ${sans} px-7 py-3.5 text-[15px]`}>
+                Selbst ausprobieren
+              </Link>
               <Link href="/" className={`quiet-link ${sans} px-2 py-3.5 text-[15px] text-nero`}>
                 Zur Startseite →
               </Link>

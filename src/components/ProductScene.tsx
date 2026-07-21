@@ -8,7 +8,7 @@ import {
   IconCheck,
 } from "./icons";
 
-/* «Живой» продукт-кадр: окно Cockpit проживает один Fall по кругу —
+/* «Живой» продукт-кадр: окно Arbeitsbereich проживает один Fall по кругу —
    статус подтверждается, Unterlagen отмечаются, приходит Meldung.
    Чистый CSS-таймлайн (14s), при reduced-motion замирает завершённым.
    Все данные — Beispieldaten, как в /demo. */
@@ -37,7 +37,7 @@ export function ProductScene() {
             Ein Fall, der sich selbst erklärt.
           </h2>
           <p className="mx-auto mt-4 max-w-[52ch] text-[14px] leading-relaxed text-graphite">
-            So sieht ein laufender Vorgang im Cockpit aus: Status, Beteiligte
+            So sieht ein laufender Vorgang im Arbeitsbereich aus: Status, Beteiligte
             und Unterlagen — für alle sichtbar, ohne einen einzigen Anruf.
           </p>
         </div>
@@ -53,7 +53,7 @@ export function ProductScene() {
                 <span className="h-2.5 w-2.5 rounded-full bg-hair" />
               </span>
               <span className="mono-label ml-2 flex-1 truncate rounded-full border border-line bg-paper px-4 py-1.5 text-[10px] text-stone">
-                cockpit.mementos.app/fall/M-2026-0147
+                app.mementos.app/fall/M-2026-0147
               </span>
               <span className="mono-label hidden rounded-full border border-hair px-3 py-1 text-[9px] text-stone sm:block">
                 Beispieldaten

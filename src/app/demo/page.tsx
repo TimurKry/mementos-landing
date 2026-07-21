@@ -19,7 +19,7 @@ export default function DemoPage() {
             MementoOS
           </Link>
           <div className="flex items-center gap-5 text-sm">
-            <Link href="/workspace/" className="wavy-link text-stone">Bestatter-Cockpit</Link>
+            <Link href="/workspace/" className="wavy-link text-stone">Arbeitsbereich</Link>
             <Link href="/" className="wavy-link text-stone">← Startseite</Link>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { Logo } from "@/components/icons";
 import { BestatterWorkspace } from "@/components/workspace/BestatterWorkspace";
 
 export const metadata: Metadata = {
-  title: "MementoOS — Bestatter-Cockpit (Konzept)",
+  title: "MementoOS — Der Arbeitsbereich (Konzept)",
   description:
     "Interaktives Konzept-Mockup: Dashboard, Vorgangs-Pipeline, Beteiligten-Matrix und KI-Schnellerfassung für Bestattungsunternehmen.",
 };
@@ -29,7 +29,7 @@ export default function WorkspacePage() {
       </header>
       <main className="mx-auto max-w-[1240px] px-7 pb-24 pt-10">
         <div className="mb-8">
-          <div className="mono-label text-[11px] text-ink">Bestatter-Cockpit</div>
+          <div className="mono-label text-[11px] text-ink">Arbeitsbereich</div>
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-[30px] font-medium leading-tight">
             Guten Morgen. Hier steht alles.
           </h1>

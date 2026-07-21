@@ -387,6 +387,13 @@ body::after {
 }
 .btn-nero-ghost:hover { background: rgba(23, 25, 28, 0.05); transform: translateY(-1px); }
 
+/* маркеры потери информации в сравнительной схеме */
+.loss-pulse { animation: loss-pulse 2.6s ease-in-out infinite; }
+@keyframes loss-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
 /* текстовая ссылка: подчёркивание только на hover, стрелка в лейбле */
 .quiet-link { text-decoration: none; }
 .quiet-link:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -417,7 +424,7 @@ body::after {
     animation-duration: 0.01ms !important;
   }
   .live-dot, .hub-glow, .hero-glow::before, .hero-glow::after,
-  .marquee-track, .float-a, .float-b, .scene-cursor,
+  .marquee-track, .float-a, .float-b, .scene-cursor, .loss-pulse,
   .scene-pill-a, .scene-pill-b, .scene-bar, .scene-toast,
   .scene-check, .scene-check-1, .scene-check-2, .scene-check-3, .scene-check-4 {
     animation: none !important;
