@@ -109,6 +109,8 @@ export type AudienceData = {
   slug: string;
   meta: { title: string; description: string };
   navLabel: string;
+  /* soft → тихий тон без напористых CTA (для Familien) */
+  tone?: "default" | "soft";
   hero: HeroSpec;
   warum: { heading: string; headingEm: string; sub?: string; cards: WarumCard[] };
   szenario: ScenarioBlock;

@@ -44,7 +44,7 @@ export function AudienceHero({ hero }: { hero: HeroSpec }) {
           ))}
 
           {/* заголовок */}
-          <div className="mx-auto max-w-[720px] py-4 text-center lg:py-28">
+          <div className="mx-auto max-w-[720px] py-4 text-center lg:max-w-[560px] lg:py-28">
             {hero.kicker && (
               <div className={`rise ${sans} mb-4 text-[13px] uppercase tracking-wide text-ashen`}>{hero.kicker}</div>
             )}

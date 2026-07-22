@@ -7,7 +7,15 @@ import { Logo } from "../icons";
 const sans = "font-[family-name:var(--font-sans)]";
 const serif = "font-[family-name:var(--font-display)]";
 
-export function AudienceNav({ navLabel, hasPricing = true }: { navLabel: string; hasPricing?: boolean }) {
+export function AudienceNav({
+  navLabel,
+  hasPricing = true,
+  soft = false,
+}: {
+  navLabel: string;
+  hasPricing?: boolean;
+  soft?: boolean;
+}) {
   return (
     <header className="bg-white">
       <div className="mx-auto flex h-[76px] max-w-[1200px] items-center gap-8 px-6">
@@ -25,12 +33,21 @@ export function AudienceNav({ navLabel, hasPricing = true }: { navLabel: string;
               Preise
             </a>
           )}
-          <Link href="/workspace/" className="btn-nero-ghost press hidden px-5 py-2.5 text-[14px] text-nero md:block">
-            Selbst ausprobieren
-          </Link>
-          <a href="#kontakt" className="btn-nero press px-5 py-2.5 text-[14px]">
-            Demo anfragen
-          </a>
+          {soft ? (
+            /* тихий вариант: одна спокойная ссылка, без напористых пилюль */
+            <a href="#kontakt" className="btn-nero-ghost press px-5 py-2.5 text-[14px] text-nero">
+              Kontakt
+            </a>
+          ) : (
+            <>
+              <Link href="/workspace/" className="btn-nero-ghost press hidden px-5 py-2.5 text-[14px] text-nero md:block">
+                Selbst ausprobieren
+              </Link>
+              <a href="#kontakt" className="btn-nero press px-5 py-2.5 text-[14px]">
+                Demo anfragen
+              </a>
+            </>
+          )}
         </nav>
       </div>
     </header>

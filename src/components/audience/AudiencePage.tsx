@@ -18,7 +18,7 @@ import { Pricing } from "../pricing/Pricing";
 export function AudiencePage({ data }: { data: AudienceData }) {
   return (
     <div className="bg-white text-nero">
-      <AudienceNav navLabel={data.navLabel} hasPricing={data.pricing !== null} />
+      <AudienceNav navLabel={data.navLabel} hasPricing={data.pricing !== null} soft={data.tone === "soft"} />
       <main>
         <AudienceHero hero={data.hero} />
         <WarumSection warum={data.warum} />
@@ -27,7 +27,7 @@ export function AudiencePage({ data }: { data: AudienceData }) {
         {data.quote && <QuoteSection quote={data.quote} />}
         {data.pricing && <Pricing spec={data.pricing} />}
         <FaqSection faq={data.faq} />
-        <AudienceCta cta={data.cta} />
+        <AudienceCta cta={data.cta} soft={data.tone === "soft"} />
       </main>
       <AudienceFooter />
     </div>
