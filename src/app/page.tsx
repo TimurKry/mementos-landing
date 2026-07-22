@@ -4,6 +4,7 @@ import { Marquee } from "@/components/Marquee";
 import { ProductScene } from "@/components/ProductScene";
 import { FeatureCards } from "@/components/FeatureCards";
 import { Why, Process, ValueBand, Audiences, ContactCta } from "@/components/Sections";
+import { AccessTeaser } from "@/components/AccessTeaser";
 import { Faq } from "@/components/Faq";
 import { Footer } from "@/components/Footer";
 
@@ -19,6 +20,7 @@ export default function Home() {
         <FeatureCards />
         <Process />
         <ValueBand />
+        <AccessTeaser />
         <Audiences />
         <Faq />
         <ContactCta />

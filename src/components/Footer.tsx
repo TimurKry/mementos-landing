@@ -22,6 +22,7 @@ export function Footer() {
             <ul className="grid gap-2.5">
               <li><a className="wavy-link hover:text-paper" href="#plattform">Überblick</a></li>
               <li><a className="wavy-link hover:text-paper" href="#ablauf">So funktioniert es</a></li>
+              <li><Link className="wavy-link hover:text-paper" href="/datenmodell/">Datenmodell & Zugriff</Link></li>
               <li><a className="wavy-link hover:text-paper" href="#warum">Warum MementoOS</a></li>
             </ul>
           </div>

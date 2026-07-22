@@ -4,7 +4,7 @@ import { Logo } from "./icons";
 const links = [
   { href: "#plattform", label: "Plattform" },
   { href: "#produkt", label: "Produkt" },
-  { href: "#ablauf", label: "Ablauf" },
+  { href: "/datenmodell/", label: "Zugriff" },
   { href: "/demo/", label: "Demo" },
   { href: "#faq", label: "FAQ" },
 ];

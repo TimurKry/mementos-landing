@@ -15,8 +15,9 @@ pnpm build      # статический экспорт в out/
 ## Структура
 
 ```
-src/app/            layout (шрифты, метаданные), page, globals.css (токены + анимационный слой)
-src/components/     Header, Hero (+HubDiagram), Marquee, ProductScene, Sections (Why/Process/ValueBand/Audiences/Cta), Faq, Footer, icons
+src/app/            layout, page, /fuer-bestatter, /datenmodell, /demo, /workspace, globals.css (токены + слои)
+src/components/     Header, Hero (+HubDiagram), Marquee, ProductScene, Sections, AccessTeaser, Faq, Footer, icons
+src/components/datamodel/  ER-схема доступа: data.ts, ui, EntityDiagram, EntityCard, DocTable
 assets/icons/       исходные SVG-иконки (выбор основателя) — в компонентах инлайнены нормализованными
 ```
 

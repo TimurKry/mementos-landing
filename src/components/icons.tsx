@@ -176,6 +176,57 @@ export function IconCheck({ className }: IconProps) {
   );
 }
 
+export function IconKlinik({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M4 20h16M6 20V9l6-4 6 4v11" />
+      <path d="M12 10v5M9.5 12.5h5" />
+    </Line>
+  );
+}
+
+export function IconBehoerde({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M4 20h16M5 20V10h14v10M4 10l8-5 8 5M9 20v-6h6v6" />
+    </Line>
+  );
+}
+
+export function IconSteinmetz({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M8 21V9a4 4 0 0 1 8 0v12M6 21h12M9.5 13h5" />
+    </Line>
+  );
+}
+
+export function IconRedner({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <circle cx="12" cy="5.5" r="2.2" />
+      <path d="M9 21v-6l-2-1.5M15 21v-6l2-1.5M9.5 12h5l1 3h-7z" />
+    </Line>
+  );
+}
+
+export function IconVerbund({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M3 21V9l5-3v15M13 21V4l8 4v13M3 21h18M6 9v0M6 12v0M16 9v0M16 13v0" />
+    </Line>
+  );
+}
+
+export function IconEuro({ className }: IconProps) {
+  return (
+    <Line className={className} viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="6.5" />
+      <path d="M10.5 5.8a3 3 0 1 0 0 4.4M5 7.3h4M5 8.9h3.4" />
+    </Line>
+  );
+}
+
 export function Logo({ className, fill = "#242424" }: IconProps & { fill?: string }) {
   return (
     <svg viewBox="0 0 32 29" className={className} aria-hidden="true">
