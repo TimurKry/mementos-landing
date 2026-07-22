@@ -102,15 +102,12 @@ export const verbuende: AudienceData = {
       {
         title: "Standort geplant",
         state: "open",
-        tasks: [
-          { label: "Haus West", meta: "Onboarding vorbereitet · Beispieldaten" },
-          { label: "Haus Ost", meta: "Termin offen" },
-        ],
+        tasks: [{ label: "Haus Ost", meta: "Termin offen · Beispieldaten" }],
       },
       {
         title: "In Einführung",
         state: "doing",
-        tasks: [{ label: "Haus Süd", meta: "Abläufe werden übernommen" }],
+        tasks: [{ label: "Haus West", meta: "Abläufe werden übernommen" }],
       },
       {
         title: "Im Verbund aktiv",
@@ -118,6 +115,7 @@ export const verbuende: AudienceData = {
         tasks: [
           { label: "Haus Nord", meta: "0 offene Fälle" },
           { label: "Haus Mitte", meta: "1 offener Fall" },
+          { label: "Haus Süd", meta: "3 offene Fälle" },
         ],
       },
     ],
