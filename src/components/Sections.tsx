@@ -14,6 +14,7 @@ import {
   IconKrematorium,
   IconSarg,
   IconUrne,
+  IconFamilie,
 } from "./icons";
 
 function SectionHead({ kicker, title }: { kicker: string; title: string }) {
@@ -301,17 +302,18 @@ export function ValueBand() {
 
 const audiences = [
   { icon: <IconBestatter className="h-8 w-8" />, title: "Bestattungsunternehmen", text: "Ein Vorgang statt zehn Anrufe — alles dokumentiert.", href: "/fuer-bestatter/" },
-  { icon: <IconFriedhof className="h-8 w-8" />, title: "Friedhofsverwaltungen", text: "Belegungen, Termine und Unterlagen im Überblick." },
-  { icon: <IconKrematorium className="h-8 w-8" />, title: "Krematorien", text: "Vollständige Unterlagen vor der Anlieferung, digitale Annahme." },
-  { icon: <IconSarg className="h-8 w-8" />, title: "Zulieferer", text: "Anfragen empfangen, Aufträge bestätigen, im Takt bleiben." },
-  { icon: <IconUrne className="h-8 w-8" />, title: "Verbünde & Gruppen", text: "Einheitliche Abläufe über mehrere Standorte hinweg." },
+  { icon: <IconKrematorium className="h-8 w-8" />, title: "Krematorien", text: "Vollständige Unterlagen vor der Anlieferung, digitale Annahme.", href: "/fuer-krematorien/" },
+  { icon: <IconFriedhof className="h-8 w-8" />, title: "Friedhofsverwaltungen", text: "Belegungen, Termine und Unterlagen im Überblick.", href: "/fuer-friedhoefe/" },
+  { icon: <IconSarg className="h-8 w-8" />, title: "Zulieferer", text: "Anfragen empfangen, Aufträge bestätigen, im Takt bleiben.", href: "/fuer-zulieferer/" },
+  { icon: <IconFamilie className="h-8 w-8" />, title: "Familien & Angehörige", text: "Den Stand sehen und Angaben ergänzen — über einen Link.", href: "/fuer-familien/" },
+  { icon: <IconUrne className="h-8 w-8" />, title: "Verbünde & Gruppen", text: "Einheitliche Abläufe über mehrere Standorte hinweg.", href: "/fuer-verbuende/" },
 ];
 
 export function Audiences() {
   return (
-    <section id="zielgruppen" className="mx-auto max-w-[1200px] px-6 py-20">
-      <SectionHead kicker="Für wen" title="Gebaut für jede Organisation der Branche." />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <section id="ich-bin" className="mx-auto max-w-[1200px] px-6 py-20">
+      <SectionHead kicker="Ich bin…" title="Wählen Sie Ihre Rolle." />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {audiences.map((a, i) => {
           const inner = (
             <>

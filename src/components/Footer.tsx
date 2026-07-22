@@ -23,6 +23,7 @@ export function Footer() {
               <li><a className="wavy-link hover:text-paper" href="#plattform">Überblick</a></li>
               <li><a className="wavy-link hover:text-paper" href="#ablauf">So funktioniert es</a></li>
               <li><Link className="wavy-link hover:text-paper" href="/datenmodell/">Datenmodell & Zugriff</Link></li>
+              <li><Link className="wavy-link hover:text-paper" href="/preise/">Preise</Link></li>
               <li><a className="wavy-link hover:text-paper" href="#warum">Warum MementoOS</a></li>
             </ul>
           </div>
@@ -30,8 +31,11 @@ export function Footer() {
             <h4 className="mono-label mb-4 text-[11px] text-paper">Für wen</h4>
             <ul className="grid gap-2.5">
               <li><Link className="wavy-link hover:text-paper" href="/fuer-bestatter/">Bestatter</Link></li>
-              <li><a className="wavy-link hover:text-paper" href="#zielgruppen">Krematorien</a></li>
-              <li><a className="wavy-link hover:text-paper" href="#zielgruppen">Friedhöfe & Partner</a></li>
+              <li><Link className="wavy-link hover:text-paper" href="/fuer-krematorien/">Krematorien</Link></li>
+              <li><Link className="wavy-link hover:text-paper" href="/fuer-friedhoefe/">Friedhöfe</Link></li>
+              <li><Link className="wavy-link hover:text-paper" href="/fuer-zulieferer/">Zulieferer</Link></li>
+              <li><Link className="wavy-link hover:text-paper" href="/fuer-familien/">Familien</Link></li>
+              <li><Link className="wavy-link hover:text-paper" href="/fuer-verbuende/">Verbünde</Link></li>
             </ul>
           </div>
           <div>

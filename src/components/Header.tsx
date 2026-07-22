@@ -2,10 +2,11 @@ import Link from "next/link";
 import { Logo } from "./icons";
 
 const links = [
-  { href: "#plattform", label: "Plattform" },
   { href: "#produkt", label: "Produkt" },
+  { href: "#ich-bin", label: "Für wen" },
   { href: "/datenmodell/", label: "Zugriff" },
   { href: "/demo/", label: "Demo" },
+  { href: "/preise/", label: "Preise" },
   { href: "#faq", label: "FAQ" },
 ];
 
