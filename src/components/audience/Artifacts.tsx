@@ -9,7 +9,7 @@ const sans = "font-[family-name:var(--font-sans)]";
 /* list → «Aktuelle Fälle»: строки со статус-пилюлей */
 function ListArtifact({ a }: { a: Extract<ArtifactSpec, { kind: "list" }> }) {
   return (
-    <div className={`artifact ${sans} p-4`} style={{ width: a.width ?? 300 }}>
+    <div className={`artifact ${sans} p-4`} style={{ width: a.width ?? 300, maxWidth: "100%" }}>
       <div className="mb-3 flex items-center justify-between">
         <b className="text-[14px] font-medium text-nero">{a.title}</b>
         {a.badge && <span className="rounded-full bg-mist px-2.5 py-1 text-[10px] text-ashen">{a.badge}</span>}
@@ -41,7 +41,7 @@ function ListArtifact({ a }: { a: Extract<ArtifactSpec, { kind: "list" }> }) {
 /* checklist → «Aufgaben heute»: круглые чек-маркеры, foot-итог */
 function ChecklistArtifact({ a }: { a: Extract<ArtifactSpec, { kind: "checklist" }> }) {
   return (
-    <div className={`artifact ${sans} p-4`} style={{ width: a.width ?? 290 }}>
+    <div className={`artifact ${sans} p-4`} style={{ width: a.width ?? 290, maxWidth: "100%" }}>
       <b className="text-[14px] font-medium text-nero">{a.title}</b>
       <ul className="mt-3 flex flex-col gap-2.5">
         {a.items.map((t) => (
@@ -67,7 +67,7 @@ function ChecklistArtifact({ a }: { a: Extract<ArtifactSpec, { kind: "checklist"
 function RingArtifact({ a }: { a: Extract<ArtifactSpec, { kind: "ring" }> }) {
   const filled = Math.max(0, Math.min(1, a.ratio)) * 100;
   return (
-    <div className={`artifact ${sans} p-4`} style={{ width: a.width ?? 240 }}>
+    <div className={`artifact ${sans} p-4`} style={{ width: a.width ?? 240, maxWidth: "100%" }}>
       <b className="text-[14px] font-medium text-nero">{a.title}</b>
       <div className="mt-3 flex items-center gap-4">
         <svg viewBox="0 0 48 48" className="h-14 w-14 -rotate-90" aria-hidden="true">
@@ -97,7 +97,7 @@ function RingArtifact({ a }: { a: Extract<ArtifactSpec, { kind: "ring" }> }) {
 /* composer → строка ввода заметки к делу */
 function ComposerArtifact({ a }: { a: Extract<ArtifactSpec, { kind: "composer" }> }) {
   return (
-    <div className={`artifact ${sans} flex items-center gap-3 p-3`} style={{ width: a.width ?? 340 }}>
+    <div className={`artifact ${sans} flex items-center gap-3 p-3`} style={{ width: a.width ?? 340, maxWidth: "100%" }}>
       <span
         className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-mist text-slate"
         aria-hidden="true"

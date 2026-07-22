@@ -21,7 +21,7 @@ export function AudienceNav({ navLabel, hasPricing = true }: { navLabel: string;
             Startseite
           </Link>
           {hasPricing && (
-            <a href="#preise" className="quiet-link hidden text-slate lg:block">
+            <a href="#preise" className="quiet-link hidden text-slate md:block">
               Preise
             </a>
           )}
