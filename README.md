@@ -24,6 +24,14 @@ assets/icons/       исходные SVG-иконки (выбор основат
 
 GitHub Actions (`.github/workflows/deploy.yml`) собирает и публикует `out/` на GitHub Pages при пуше в `main`. `basePath: /mementos-landing` задан в `next.config.ts`.
 
+## Команда агентов
+
+Для Claude Code настроен конвейер `/team` (`.claude/skills/team/`) и роли
+в `.claude/agents/`: `architect` (план) → `implementer` (реализация) →
+`reviewer` (ревью) → `doc-writer` (документация). Контекст для агентов:
+`CLAUDE.md` + `docs/design-systems.md` (канон трёх дизайн-систем).
+Отчёты по фичам копятся в `docs/features/`.
+
 ## Правила контента
 
 - Копия на немецком, тон: ruhig, präzise, respektvoll
