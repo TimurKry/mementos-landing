@@ -44,6 +44,15 @@
 - **Сигнатуры:** hero-коллаж из 4 артефактов вокруг заголовка (лёгкие
   повороты, float), канбан offen/in Arbeit/erledigt, сравнительная схема
   потерь информации (`.loss-pulse`), прайсинг Pro Fall / Haus / Verbund.
+- **Data-driven:** зона строится из одного шаблона — `AudiencePage`
+  (`src/components/audience/`): одна `AudienceData` описывает страницу
+  `/fuer-*` целиком (hero → warum → szenario → ablauf → quote? → pricing?
+  → faq → cta), `page.tsx` — тонкий рендер. Сценарий выбирает один из трёх
+  видов: `loss` / `board` / `access`. Общий прайсинг — `src/components/
+  pricing/` (`full` / `partner-note` / `custom`); отдельная страница
+  `/preise` тоже в Steep. Тон `tone:"soft"` (Familien) глушит CTA.
+- На `lg` заголовок hero сужен до `max-w-[560px]` (против `720px` на mobile),
+  чтобы не пересекаться с плавающими артефактами по краям коллажа.
 
 ## 3. Default — CRM `/workspace`
 
