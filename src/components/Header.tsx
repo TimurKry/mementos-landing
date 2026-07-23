@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Logo } from "./icons";
 
+/* Якоря главной ведём через "/#…", чтобы работали и с подстраниц.
+   Лейблы короткие — ряд из 6 не должен переполнять планшет (768–1024). */
 const links = [
-  { href: "#produkt", label: "Produkt" },
-  { href: "/so-funktioniert-es/", label: "So funktioniert es" },
-  { href: "#ich-bin", label: "Für wen" },
+  { href: "/#produkt", label: "Produkt" },
+  { href: "/so-funktioniert-es/", label: "Ablauf" },
+  { href: "/#ich-bin", label: "Für wen" },
   { href: "/sicherheit/", label: "Sicherheit" },
   { href: "/preise/", label: "Preise" },
   { href: "/demo/", label: "Demo" },
