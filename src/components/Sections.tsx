@@ -211,12 +211,15 @@ export function Process() {
           </div>
         </div>
       </div>
-      <div className="mt-12 text-center" data-reveal>
-        <Link
-          href="/demo/"
-          className="arrow-shift mono-label inline-flex items-center gap-2.5 text-[13px] text-ink"
-        >
-          Den Ablauf im Demo durchspielen <span aria-hidden="true">→</span>
+      <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4" data-reveal>
+        <Link href="/demo/" className="arrow-shift mono-label inline-flex items-center gap-2 text-[13px] text-ink">
+          Im Demo durchspielen <span aria-hidden="true">→</span>
+        </Link>
+        <Link href="/datenmodell/" className="arrow-shift mono-label inline-flex items-center gap-2 text-[13px] text-ink">
+          Wer sieht was <span aria-hidden="true">→</span>
+        </Link>
+        <Link href="/so-funktioniert-es/" className="arrow-shift mono-label inline-flex items-center gap-2 text-[13px] text-ink">
+          So funktioniert es im Detail <span aria-hidden="true">→</span>
         </Link>
       </div>
     </section>

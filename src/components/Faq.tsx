@@ -26,6 +26,18 @@ const items = [
     q: "In welcher Phase ist MementoOS?",
     a: "MementoOS ist in Entwicklung und wird in Leipzig im direkten Austausch mit der Branche aufgebaut. Wir suchen Pilotpartner, die den Ablauf mit uns gestalten möchten.",
   },
+  {
+    q: "Was, wenn ein Partner nicht mitmacht?",
+    a: "Niemand muss ein Konto anlegen. Partner treten über einen Link bei und bestätigen ihren Teil im Browser. Wer nicht digital arbeitet, wird weiterhin per Telefon, Ausdruck oder E-Mail eingebunden — der Vorgang bleibt trotzdem an einem Ort vollständig.",
+  },
+  {
+    q: "Läuft das neben unserer bestehenden Software?",
+    a: "Ja. MementoOS ersetzt nicht, was bei Ihnen funktioniert — es verbindet die Beteiligten eines Falls. Wie sich MementoOS konkret in Ihre Abläufe einfügt, klären wir in der Pilotphase gemeinsam.",
+  },
+  {
+    q: "Was passiert mit den Daten nach Abschluss?",
+    a: "Ein abgeschlossener Fall wird dokumentiert archiviert und bleibt nachvollziehbar. Aufbewahrung und Löschung richten sich nach den gesetzlichen Vorgaben; die Details legen wir in der Pilotphase transparent fest.",
+  },
 ];
 
 export function Faq() {

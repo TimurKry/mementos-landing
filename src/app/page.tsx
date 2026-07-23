@@ -4,6 +4,7 @@ import { Marquee } from "@/components/Marquee";
 import { ProductScene } from "@/components/ProductScene";
 import { FeatureCards } from "@/components/FeatureCards";
 import { Why, Process, ValueBand, Audiences, ContactCta } from "@/components/Sections";
+import { HeuteMorgen } from "@/components/HeuteMorgen";
 import { AccessTeaser } from "@/components/AccessTeaser";
 import { Faq } from "@/components/Faq";
 import { Footer } from "@/components/Footer";
@@ -16,6 +17,7 @@ export default function Home() {
         <Hero />
         <Marquee />
         <Why />
+        <HeuteMorgen />
         <ProductScene />
         <FeatureCards />
         <Process />

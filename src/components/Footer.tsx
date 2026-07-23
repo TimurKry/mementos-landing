@@ -21,8 +21,9 @@ export function Footer() {
             <h4 className="mono-label mb-4 text-[11px] text-paper">Plattform</h4>
             <ul className="grid gap-2.5">
               <li><a className="wavy-link hover:text-paper" href="#plattform">Überblick</a></li>
-              <li><a className="wavy-link hover:text-paper" href="#ablauf">So funktioniert es</a></li>
+              <li><Link className="wavy-link hover:text-paper" href="/so-funktioniert-es/">So funktioniert es</Link></li>
               <li><Link className="wavy-link hover:text-paper" href="/datenmodell/">Datenmodell & Zugriff</Link></li>
+              <li><Link className="wavy-link hover:text-paper" href="/sicherheit/">Sicherheit & Datenschutz</Link></li>
               <li><Link className="wavy-link hover:text-paper" href="/preise/">Preise</Link></li>
               <li><a className="wavy-link hover:text-paper" href="#warum">Warum MementoOS</a></li>
             </ul>
@@ -42,6 +43,7 @@ export function Footer() {
             <h4 className="mono-label mb-4 text-[11px] text-paper">Kontakt</h4>
             <ul className="grid gap-2.5">
               <li><a className="wavy-link hover:text-paper" href="mailto:timurkry.dev@gmail.com">timurkry.dev@gmail.com</a></li>
+              <li><Link className="wavy-link hover:text-paper" href="/ueber-uns/">Über uns</Link></li>
               <li>Leipzig, Deutschland</li>
             </ul>
           </div>

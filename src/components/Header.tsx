@@ -3,11 +3,11 @@ import { Logo } from "./icons";
 
 const links = [
   { href: "#produkt", label: "Produkt" },
+  { href: "/so-funktioniert-es/", label: "So funktioniert es" },
   { href: "#ich-bin", label: "Für wen" },
-  { href: "/datenmodell/", label: "Zugriff" },
-  { href: "/demo/", label: "Demo" },
+  { href: "/sicherheit/", label: "Sicherheit" },
   { href: "/preise/", label: "Preise" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/demo/", label: "Demo" },
 ];
 
 export function Header() {
@@ -35,7 +35,7 @@ export function Header() {
               MementoOS
             </span>
           </a>
-          <nav className="mono-label ml-auto hidden gap-7 text-[12px] text-graphite md:flex" aria-label="Hauptnavigation">
+          <nav className="mono-label ml-auto hidden gap-5 whitespace-nowrap text-[12px] text-graphite md:flex" aria-label="Hauptnavigation">
             {links.map((l) =>
               l.href.startsWith("#") ? (
                 <a key={l.href} href={l.href} className="wavy-link">
