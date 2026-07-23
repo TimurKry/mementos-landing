@@ -16,8 +16,9 @@ pnpm build      # статический экспорт в out/
 
 ```
 src/app/            layout, page, /datenmodell, /demo, /workspace, /preise, globals.css (токены + слои)
+                    /so-funktioniert-es, /sicherheit, /ueber-uns — Monad-подстраницы (Ablauf/Vertrauen/Über uns)
                     /fuer-bestatter|krematorien|friedhoefe|zulieferer|familien|verbuende — страницы аудиторий
-src/components/     Header, Hero (+HubDiagram), Marquee, ProductScene, Sections, AccessTeaser, Faq, Footer, icons
+src/components/     Header, Hero (+HubDiagram), Marquee, ProductScene, Sections, HeuteMorgen, AccessTeaser, Faq, Footer, icons
 src/components/audience/   data-driven шаблон /fuer-*: types, AudiencePage, секции (Nav/Hero/Warum/Scenario/Steps/Quote/Faq/Cta/Footer), data/*.ts
 src/components/pricing/    общий прайсинг: types, data (defaultPlans), Pricing (full/partner-note/custom)
 src/components/datamodel/  ER-схема доступа: data.ts, ui, EntityDiagram, EntityCard, DocTable

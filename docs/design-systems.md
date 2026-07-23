@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Monad — лендинг `/` и `/demo`
+## 1. Monad — лендинг `/`, `/demo` и Monad-подстраницы
 
 > editorial tech journal on warm parchment
 
@@ -24,6 +24,13 @@
   (кривые pathLength=1 + .diagram-path draw, flow-точки animateMotion),
   вертикальный пайплайн в Process, ProductScene (14s CSS-цикл), marquee,
   зерно плёнки (body::after), периwinkle-карта `#cfdaf5` — одна на страницу.
+- **Monad-подстраницы вне лендинга:** `/so-funktioniert-es` (шаги 01–05 +
+  HubDiagram + Umstieg), `/sicherheit` (4 Vertrauens-Bausteine + дисклеймер),
+  `/ueber-uns` (минимально-честно). Строятся тем же словарём Monad; каждая
+  держит правило «одна periwinkle-карта на страницу».
+- **Потери информации в Monad** гасятся `stone` + `line-through` (маркер `✕`):
+  sienna в UI Monad **запрещена** (в отличие от Steep, где потери — sienna).
+  См. `HeuteMorgen` (карта «Heute»).
 
 ## 2. Steep — страницы аудиторий `/fuer-*`
 
