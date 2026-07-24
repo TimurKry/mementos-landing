@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+/* MementoOS MVP — тёмный «Default» (mission control). Тот же словарь,
+   что у концепт-страницы /workspace лендинга. */
+
+@theme {
+  --color-void: #0b0c0e;
+  --color-graphite: #131416;
+  --color-charcoal: #1f1f21;
+  --color-smoke: #3c3d3e;
+  --color-steel: #71717a;
+  --color-fog: #858687;
+  --color-ash: #9d9e9f;
+  --color-chalk: #cececf;
+  --color-snow: #ffffff;
+  --color-bone: #f2f2f2;
+  --color-signal: #3b82f6;
+  --color-arc: #60a5fa;
+  --color-mint: #4ade80;
+  --color-coral: #f87171;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body { background: var(--color-void); }
+body {
+  color: #fff;
+  font-family: var(--font-sans);
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { color: #fff; font-weight: 400; letter-spacing: -0.02em; }
+
+/* поверхность-карта: hairline 0.5px + inset вместо теней */
+.card {
+  background: #131416;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 0.5px rgba(255,255,255,0.07);
+}
+.card-hover { transition: box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.22,1,0.36,1); }
+.card-hover:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(147,197,253,0.35); }
+
+/* костяная CTA — единственный яркий элемент */
+.btn-bone { background: #f2f2f2; color: #333; border-radius: 10px; transition: background-color .15s ease; }
+.btn-bone:hover { background: #fff; }
+.btn-ghost { background: rgba(255,255,255,0.05); color: #fff; border-radius: 10px; transition: background-color .15s ease; }
+.btn-ghost:hover { background: rgba(255,255,255,0.09); }
+
+/* контурные бейджи-семантика */
+.badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 5.26px; padding: 2px 7px; font-size: 10px; font-weight: 500; white-space: nowrap; }
+.badge-green { color: #4ade80; border: 1px solid rgba(74,222,128,.55); }
+.badge-blue { color: #60a5fa; border: 1px solid rgba(59,130,246,.55); }
+.badge-red { color: #f87171; border: 1px solid rgba(248,113,113,.5); }
+.badge-dim { color: #9d9e9f; border: 1px solid rgba(255,255,255,.14); }
+
+.hair { box-shadow: 0 0.5px 0 rgba(255,255,255,0.07); }
