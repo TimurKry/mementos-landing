@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
-import { getCaseByInvite } from "@/lib/data";
+import { getCaseBySession, redeemInvite } from "@/lib/data";
 import { roleLabel } from "@/lib/access";
 import type { Deceased } from "@/lib/types";
 
 /* Вход по ссылке-приглашению без аккаунта. Показывает Fall, отфильтрованный
-   под роль приглашённого (полевой доступ). Семья не увидит медицину/водителя. */
+   под роль приглашённого (полевой доступ). Семья не увидит медицину/водителя.
+
+   ÜBERGANGSLÖSUNG: Der Token wird hier bei jedem Aufruf direkt eingelöst.
+   Der endgültige Weg (Token einlösen → Sitzung im Cookie → /zugang) kommt
+   mit den Zugangs-Bildschirmen; diese Seite bleibt bis dahin der Demo-Pfad. */
 
 const fieldLabel: Record<keyof Deceased, string> = {
   vorname: "Vorname", nachname: "Nachname",
@@ -17,7 +21,9 @@ const fieldLabel: Record<keyof Deceased, string> = {
 
 export default async function EinladungPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const view = await getCaseByInvite(token);
+  const session = await redeemInvite(token);
+  if (!session) notFound();
+  const view = await getCaseBySession(session);
   if (!view) notFound();
 
   const d = view.verstorbene;

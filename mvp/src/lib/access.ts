@@ -1,6 +1,7 @@
-/* Полевой доступ по ролям — ЗЕРКАЛО функции allowed_tiers() из БД
-   (mvp/supabase/migrations/0003_access.sql). Источник истины — БД;
-   это нужно для mock-режима и для подписей в UI. Держать синхронно! */
+/* Полевой доступ по ролям — ЗЕРКАЛО функции app.allowed_tiers() из БД
+   (mvp/supabase/migrations/0004_hardening.sql). Источник истины — БД:
+   в live-режиме фильтрует сервер, здесь — mock-режим, подписи в UI и аудит.
+   Матрица tier'ов менялась только вместе с миграцией. Держать синхронно! */
 
 import type { Role, Tier, Deceased, Case, RoleView } from "./types";
 
@@ -22,6 +23,14 @@ const tierFields: Record<Tier, (keyof Deceased)[]> = {
   op: ["groesse_cm", "gewicht_kg", "sargmass"],
   sens: ["herzschrittmacher", "infektionshinweis", "freigabe_einaescherung"],
 };
+
+/* Zu welcher Gruppe gehört ein Feld — für Beschriftungen und Audit. */
+export function tierOfField(field: keyof Deceased): Tier | null {
+  for (const tier of Object.keys(tierFields) as Tier[]) {
+    if (tierFields[tier].includes(field)) return tier;
+  }
+  return null;
+}
 
 export function allowedTiers(role: Role): Tier[] {
   switch (role) {
