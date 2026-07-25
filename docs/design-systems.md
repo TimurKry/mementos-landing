@@ -77,6 +77,14 @@
   ТОЛЬКО семантика (успех/срочность) как контурные бейджи `.badge-dk-*`.
 - **Плотность:** compact — текст 10–13px, паддинги 12–16px, радиусы
   9–12px.
+- **Тот же словарь у MVP (`mvp/`)** — отдельное приложение, поэтому у него
+  **свой** `mvp/src/app/globals.css` (@theme void/graphite/charcoal/steel/fog/
+  chalk/bone/signal/mint/coral, Inter): `.card` + `.card-hover`, `.btn-bone` /
+  `.btn-ghost`, `.badge-green|blue|red|dim`, `.hair`, и единственное поле ввода
+  `.input-dk` (фон rgba(255,255,255,.04), inset-hairline, фокус — inset 1px
+  `#3b82f6`; используется только на экране входа `/login`). Правка токенов
+  лендинга не влияет на MVP и наоборот — при изменении Default синхронизировать
+  оба файла вручную.
 
 ---
 

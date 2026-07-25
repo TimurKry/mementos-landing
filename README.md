@@ -23,7 +23,25 @@ src/components/audience/   data-driven шаблон /fuer-*: types, AudiencePage
 src/components/pricing/    общий прайсинг: types, data (defaultPlans), Pricing (full/partner-note/custom)
 src/components/datamodel/  ER-схема доступа: data.ts, ui, EntityDiagram, EntityCard, DocTable
 assets/icons/       исходные SVG-иконки (выбор основателя) — в компонентах инлайнены нормализованными
+mvp/                отдельное динамическое Next-приложение (auth + Supabase), НЕ GitHub Pages
 ```
+
+## MVP (`mvp/`)
+
+Прототип продукта (общий Fall с полевым доступом по ролям) — своё приложение
+со своим lockfile и своей документацией на немецком: `mvp/README.md`
+(запуск, mock-режим, Sicherheitsmodell, провижн Supabase, offene Punkte).
+
+```bash
+cd mvp
+pnpm install --ignore-workspace   # свой lockfile, вне workspace лендинга
+pnpm dev                          # http://localhost:3000 (mock-режим, без БД)
+pnpm build                        # зелёный без переменных окружения
+```
+
+Модель угроз, закрытые дыры и чеклист перед провижном Supabase —
+`docs/features/mvp-sicherheit.md`. Читать перед правкой SQL-миграций,
+`mvp/src/middleware.ts` или потока приглашений.
 
 ## Деплой
 
