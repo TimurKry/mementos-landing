@@ -1,14 +1,17 @@
-import { notFound } from "next/navigation";
-import { getCaseBySession, redeemInvite } from "@/lib/data";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getCaseBySession } from "@/lib/data";
 import { roleLabel } from "@/lib/access";
-import type { Deceased } from "@/lib/types";
+import { ZUGANG_COOKIE } from "@/lib/zugang";
+import type { Deceased, RoleView } from "@/lib/types";
+import { ZugangBeenden } from "./ZugangBeenden";
 
-/* Вход по ссылке-приглашению без аккаунта. Показывает Fall, отфильтрованный
-   под роль приглашённого (полевой доступ). Семья не увидит медицину/водителя.
+/* Ansicht der Eingeladenen. Der Token steht nicht mehr in der Adresszeile —
+   die Sitzung kommt aus dem Cookie, gefiltert wird serverseitig nach Rolle
+   (get_case_by_session). Was eine Rolle nicht sehen darf, wird nicht
+   ausgeblendet, sondern gar nicht erst geliefert. */
 
-   ÜBERGANGSLÖSUNG: Der Token wird hier bei jedem Aufruf direkt eingelöst.
-   Der endgültige Weg (Token einlösen → Sitzung im Cookie → /zugang) kommt
-   mit den Zugangs-Bildschirmen; diese Seite bleibt bis dahin der Demo-Pfad. */
+export const dynamic = "force-dynamic";
 
 const fieldLabel: Record<keyof Deceased, string> = {
   vorname: "Vorname", nachname: "Nachname",
@@ -19,12 +22,17 @@ const fieldLabel: Record<keyof Deceased, string> = {
   freigabe_einaescherung: "Freigabe Einäscherung",
 };
 
-export default async function EinladungPage({ params }: { params: Promise<{ token: string }> }) {
-  const { token } = await params;
-  const session = await redeemInvite(token);
-  if (!session) notFound();
-  const view = await getCaseBySession(session);
-  if (!view) notFound();
+export default async function ZugangPage() {
+  const session = (await cookies()).get(ZUGANG_COOKIE)?.value;
+  if (!session) redirect("/einladung/ungueltig");
+
+  let view: RoleView | null;
+  try {
+    view = await getCaseBySession(session);
+  } catch {
+    redirect("/einladung/ungueltig?grund=technik");
+  }
+  if (!view) redirect("/einladung/ungueltig");
 
   const d = view.verstorbene;
   const fields = (Object.keys(d) as (keyof Deceased)[]).filter((k) => d[k] !== undefined && d[k] !== "");
@@ -103,9 +111,25 @@ export default async function EinladungPage({ params }: { params: Promise<{ toke
         </section>
       )}
 
-      <p className="mt-8 text-[11px] text-steel">
-        MementoOS · Zugang ohne Konto · Beispieldaten
-      </p>
+      {/* подвал: правила этого доступа + выход */}
+      <div className="hair mt-10" />
+      <section className="pt-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-[440px]">
+            <p className="text-[11.5px] leading-relaxed text-steel">
+              Dieser Zugang ist zeitlich begrenzt und kann jederzeit zurückgezogen
+              werden. Bitte geben Sie den Link nicht weiter — er gilt für Ihre Rolle.
+            </p>
+            <p className="mt-2 text-[11.5px] leading-relaxed text-steel">
+              Zugriffe auf diesen Fall werden protokolliert.
+            </p>
+          </div>
+          <ZugangBeenden />
+        </div>
+        <p className="mt-6 text-[11px] text-steel">
+          MementoOS · Zugang ohne Konto · Beispieldaten
+        </p>
+      </section>
     </div>
   );
 }

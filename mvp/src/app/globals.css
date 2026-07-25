@@ -54,3 +54,21 @@ h1, h2, h3 { color: #fff; font-weight: 400; letter-spacing: -0.02em; }
 .badge-dim { color: #9d9e9f; border: 1px solid rgba(255,255,255,.14); }
 
 .hair { box-shadow: 0 0.5px 0 rgba(255,255,255,0.07); }
+
+/* поле ввода — единственное в MVP (страница входа) */
+.input-dk { background: rgba(255,255,255,0.04); border-radius: 10px;
+  box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.10); color:#fff;
+  font-size:13px; padding:9px 12px; }
+.input-dk::placeholder { color:#71717a; }
+.input-dk:focus { outline:none; box-shadow: inset 0 0 0 1px #3b82f6; }
+
+/* prefers-reduced-motion глушит всё — .card-hover двигает transform */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .card-hover:hover { transform: none; }
+}

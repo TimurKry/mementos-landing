@@ -19,7 +19,8 @@ const TAG = 24 * 60 * 60 * 1000;
 const INVITE_TTL_MS = 30 * TAG; // wie invites.expires_at in 0001_init.sql
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 
-const cases: Case[] = [
+function seedCases(): Case[] {
+  return [
   {
     id: "0147",
     ref: "M-2026-0147",
@@ -79,7 +80,8 @@ const cases: Case[] = [
     dokumente: [],
     verlauf: [{ actor: "Sie", action: "Fall angelegt", at: "Mi 16:20" }],
   },
-];
+  ];
+}
 
 /* ── Einladungen & Sitzungen ─────────────────────────────────── */
 
@@ -98,10 +100,33 @@ type MockInvite = {
 
 type MockSession = { inviteId: string; expiresAt: number };
 
-const invites = new Map<string, MockInvite>();      // id → Einladung
-const sessions = new Map<string, MockSession>();    // Sitzungs-ID → Sitzung
+type MockState = {
+  cases: Case[];
+  invites: Map<string, MockInvite>;   // id → Einladung
+  sessions: Map<string, MockSession>; // Sitzungs-ID → Sitzung
+};
 
-function addInvite(caseId: string, role: Role, token: string, label: string | null = null): MockInvite {
+/* Am globalThis, nicht am Modul: der Bundler legt dieses Modul mehrfach ab
+   (Seiten-Bündel, Server-Action-Bündel, Route-Handler). Als Modulzustand
+   schriebe die Server Action in eine andere Kopie als die Seite liest — eine
+   abgehakte Aufgabe käme nie an. */
+const g = globalThis as unknown as { __mementoMock?: MockState };
+
+function initState(): MockState {
+  const state: MockState = { cases: seedCases(), invites: new Map(), sessions: new Map() };
+  /* Demo-Einladungen: die beiden Ansichten aus dem README */
+  addInvite(state, "0147", "familie", DEMO_FAMILY_TOKEN);
+  addInvite(state, "0147", "krematorium", DEMO_KREMATORIUM_TOKEN);
+  return state;
+}
+
+function addInvite(
+  state: MockState,
+  caseId: string,
+  role: Role,
+  token: string,
+  label: string | null = null,
+): MockInvite {
   const now = Date.now();
   const inv: MockInvite = {
     id: crypto.randomUUID(),
@@ -115,13 +140,12 @@ function addInvite(caseId: string, role: Role, token: string, label: string | nu
     lastUsedAt: null,
     sessionCount: 0,
   };
-  invites.set(inv.id, inv);
+  state.invites.set(inv.id, inv);
   return inv;
 }
 
-/* Demo-Einladungen: die beiden Ansichten aus dem README */
-addInvite("0147", "familie", DEMO_FAMILY_TOKEN);
-addInvite("0147", "krematorium", DEMO_KREMATORIUM_TOKEN);
+const state: MockState = (g.__mementoMock ??= initState());
+const { cases, invites, sessions } = state;
 
 function inviteByToken(token: string): MockInvite | undefined {
   for (const inv of invites.values()) if (inv.token === token) return inv;
@@ -171,9 +195,13 @@ export const mockStore = {
     sessions.delete(sessionId);
   },
 
-  /* Der Token wird genau einmal zurückgegeben — danach nur noch die Zusammenfassung. */
+  /* Der Token wird genau einmal zurückgegeben — danach nur noch die Zusammenfassung.
+     Form wie app.new_token() in 0004: zwei UUIDs hex-verkettet, 64 Zeichen —
+     damit greift die Formatprüfung des Einlöse-Handlers auch im Mock. */
   createInvite: (caseId: string, role: Role): { inviteId: string; token: string } => {
-    const inv = addInvite(caseId, role, crypto.randomUUID());
+    const token =
+      crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+    const inv = addInvite(state, caseId, role, token);
     return { inviteId: inv.id, token: inv.token };
   },
 
