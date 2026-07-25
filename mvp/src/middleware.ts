@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { assertRuntimeConfig, getRuntimeMode, supabasePublicConfig } from "@/lib/env";
 import { applySecurityHeaders, contentSecurityPolicy } from "@/lib/security-headers";
 import { ZUGANG_COOKIE, isSessionId } from "@/lib/zugang";
+import { safeNext } from "@/lib/safe-next";
 import type { CookieOptions } from "@supabase/ssr";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
@@ -22,13 +23,6 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
 function nonce(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
   return btoa(String.fromCharCode(...bytes));
-}
-
-/* Nur ein Pfad auf derselben Seite ist als Rücksprungziel zulässig. */
-function safeNext(value: string): string {
-  return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\")
-    ? value
-    : "/";
 }
 
 export async function middleware(req: NextRequest) {
@@ -111,7 +105,7 @@ export async function middleware(req: NextRequest) {
     angemeldet = false;
   }
   if (!angemeldet) {
-    return umleiten(`/login?next=${encodeURIComponent(safeNext(pathname))}`);
+    return umleiten(`/login?next=${encodeURIComponent(safeNext(pathname, req.url))}`);
   }
   return res;
 }

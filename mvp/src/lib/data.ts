@@ -91,9 +91,19 @@ export async function toggleTask(caseId: string, taskId: string): Promise<void> 
   if (getRuntimeMode() === "mock") return mockStore.toggleTask(caseId, taskId);
   const { supabaseServer } = await import("./supabase/server");
   const sb = await supabaseServer();
-  const { data: cur } = await sb.from("tasks").select("status").eq("id", taskId).maybeSingle();
-  const next = cur?.status === "offen" ? "erledigt" : "offen";
-  await sb.from("tasks").update({ status: next }).eq("id", taskId);
+  /* Immer an das Paar (Fall, Aufgabe) gebunden: die Aufgaben-Kennung allein
+     würde genügen, um eine fremde Aufgabe zu treffen, falls die
+     RLS-Regel je fehlt oder gelockert wird. Der Fall-Bezug kommt vom
+     Aufrufer, deshalb darf er nicht unbenutzt bleiben. Die eigentliche
+     Berechtigung prüft weiterhin die Regel tasks_owner (0002_rls.sql). */
+  const { data: cur } = await sb
+    .from("tasks").select("status")
+    .eq("id", taskId).eq("case_id", caseId).maybeSingle();
+  if (!cur) return;
+  const next = cur.status === "offen" ? "erledigt" : "offen";
+  await sb
+    .from("tasks").update({ status: next })
+    .eq("id", taskId).eq("case_id", caseId);
 }
 
 /* ── Einladungen verwalten (nur Eigentümer) ──────────────────── */

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isMockMode } from "@/lib/env";
+import { safeNext } from "@/lib/safe-next";
 
 /* Rückweg des Magic Links: Code gegen eine Sitzung tauschen.
 
@@ -10,16 +11,9 @@ import { isMockMode } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
-function safeNext(value: string | null): string {
-  if (!value) return "/";
-  return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\")
-    ? value
-    : "/";
-}
-
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
-  const ziel = safeNext(req.nextUrl.searchParams.get("next"));
+  const ziel = safeNext(req.nextUrl.searchParams.get("next"), req.url);
 
   const antwort = (pfad: string) => {
     const res = NextResponse.redirect(new URL(pfad, req.url), 303);
