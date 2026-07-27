@@ -100,24 +100,35 @@ export type AdminFall = {
   letzte_aktivitaet: string | null;
 };
 
-/* Eine offene Sitzung eines Zugangs. Siehe Hinweis bei AdminZugang.sitzungen. */
-export type AdminSitzung = { sitzung_id: string; zuletzt_gesehen: string | null };
+/* Eine offene Sitzung eines Zugangs (0009). Nur Zeitpunkte und die Kennung —
+   ohne die Kennung liesse sich eine einzelne Sitzung nicht beenden. */
+export type AdminSitzung = {
+  sitzung_id: string;
+  created_at: string | null;
+  zuletzt_gesehen: string | null;
+  expires_at: string | null;
+};
 
+/* Die Merkhilfe des Hauses (invites.label) kommt hier bewusst NICHT vor: seit
+   0009 gibt admin_zugaenge sie gar nicht mehr heraus. Sie ist Freitext und
+   trägt in der Praxis Personennamen — für die Betreuung der Plattform genügt
+   die Rolle. Im Arbeitsbereich des Hauses bleibt sie (InviteSummary.label). */
 export type AdminZugang = {
   zugang_id: string;
   role: Role;
-  label: string | null;
   created_at: string;
   expires_at: string;
   revoked: boolean;
   sitzungen_aktiv: number;
   zuletzt_gesehen: string | null;
-  /* Kennungen der offenen Sitzungen. admin_zugaenge liefert bisher nur deren
-     ANZAHL — ohne Kennung lässt sich keine einzelne Sitzung beenden. Die Liste
-     ist deshalb im Live-Betrieb leer und im Mock gefüllt; der Knopf «Sitzung
-     beenden» erscheint nur, wo eine Kennung vorliegt. Sobald der SQL-Vertrag
-     die Kennungen mitliefert, füllt sie sich auch live. */
   sitzungen: AdminSitzung[];
+};
+
+/* Ein Vorgang samt seinem Haus — was admin_fall(p_fall) in einer Zeile
+   liefert (0009). Das Haus steht nur für die Brotkrumen dabei. */
+export type AdminFallKontext = {
+  fall: AdminFall;
+  haus: { haus_id: string; org_name: string };
 };
 
 export type AdminEreignis = {

@@ -5,8 +5,10 @@
    entschiede die Zeitzone des Browsers über das Datum und seine Uhr über den
    Status, und beide Renderdurchläufe gingen auseinander.
 
-   Kein Token, kein Hash, kein Inhalt des Vorgangs — Rolle, Merkhilfe des
-   Hauses, Zeitpunkte, Zähler. */
+   Kein Token, kein Hash, kein Inhalt des Vorgangs — Rolle, Zeitpunkte,
+   Zähler. Auch keine Merkhilfe: admin_zugaenge gibt sie seit 0009 nicht mehr
+   heraus (Freitext des Hauses, in der Praxis mit Personennamen). Wem der
+   Zugang gehört, sagt die Rolle. */
 
 import { roleLabel } from "@/lib/access";
 import type { AdminZugang } from "@/lib/types";
@@ -14,18 +16,17 @@ import { zeitpunkt } from "../../format";
 
 export type ZugangStatus = "aktiv" | "zurückgezogen" | "abgelaufen";
 
-export type SitzungAnsicht = { id: string; zuletzt: string };
+export type SitzungAnsicht = { id: string; seit: string; zuletzt: string };
 
 export type ZugangAnsicht = {
   id: string;
   rolle: string;
-  label: string | null;
   status: ZugangStatus;
   erstellt: string;
   gueltigBis: string;
   zuletzt: string;
   sitzungenAnzahl: number;
-  /* Nur gefüllt, wenn die Kennungen vorliegen — siehe AdminZugang.sitzungen. */
+  /* Offene Sitzungen mit Kennung — Grundlage für «Sitzung beenden». */
   sitzungen: SitzungAnsicht[];
 };
 
@@ -38,7 +39,6 @@ export function zuAnsicht(zugaenge: AdminZugang[], jetzt = Date.now()): ZugangAn
   return zugaenge.map((z) => ({
     id: z.zugang_id,
     rolle: roleLabel[z.role] ?? z.role,
-    label: z.label,
     status: status(z, jetzt),
     erstellt: zeitpunkt(z.created_at),
     gueltigBis: zeitpunkt(z.expires_at),
@@ -46,6 +46,7 @@ export function zuAnsicht(zugaenge: AdminZugang[], jetzt = Date.now()): ZugangAn
     sitzungenAnzahl: z.sitzungen_aktiv,
     sitzungen: z.sitzungen.map((s) => ({
       id: s.sitzung_id,
+      seit: zeitpunkt(s.created_at),
       zuletzt: zeitpunkt(s.zuletzt_gesehen),
     })),
   }));

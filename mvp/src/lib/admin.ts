@@ -22,8 +22,8 @@
    eine zweite Wahrheit, die irgendwann von der ersten abweicht. */
 
 import type {
-  AdminEreignis, AdminFall, AdminHaus, AdminSitzung, AdminUebersicht,
-  AdminZugang, Phase, Role,
+  AdminEreignis, AdminFall, AdminFallKontext, AdminHaus, AdminSitzung,
+  AdminUebersicht, AdminZugang, Phase, Role,
 } from "./types";
 import { getRuntimeMode } from "./env";
 import { mockAdmin } from "./mock";
@@ -118,22 +118,24 @@ function zuFall(r: Roh): AdminFall {
 }
 
 function zuZugang(r: Roh): AdminZugang {
-  /* admin_zugaenge liefert bisher nur die Anzahl offener Sitzungen. Liefert
-     der Vertrag eines Tages auch deren Kennungen mit, werden sie hier
-     übernommen — bis dahin bleibt die Liste leer und der Knopf «Sitzung
-     beenden» erscheint nur im Mock-Betrieb. */
+  /* «sitzungen» ist jsonb: nur die offenen Sitzungen, jüngste zuerst (0009).
+     Die Datenbank nennt die Felder wie ihre Spalten (id, last_seen_at); die
+     Namen der Anwendung stehen daneben, damit ein späterer Umbau des Vertrags
+     hier nicht sofort zu einer leeren Liste führt. */
   const roh = Array.isArray(r.sitzungen) ? (r.sitzungen as Roh[]) : [];
   const sitzungen: AdminSitzung[] = roh
     .map((s) => ({
-      sitzung_id: wort(s.sitzung_id ?? s.id),
-      zuletzt_gesehen: zeit(s.zuletzt_gesehen),
+      sitzung_id: wort(s.id ?? s.sitzung_id),
+      created_at: zeit(s.created_at),
+      zuletzt_gesehen: zeit(s.last_seen_at ?? s.zuletzt_gesehen),
+      expires_at: zeit(s.expires_at),
     }))
     .filter((s) => s.sitzung_id !== "");
 
+  /* Ohne Merkhilfe des Hauses: admin_zugaenge gibt sie seit 0009 nicht aus. */
   return {
     zugang_id: wort(r.zugang_id),
     role: wort(r.role) as Role,
-    label: typeof r.label === "string" && r.label ? r.label : null,
     created_at: zeit(r.created_at) ?? "",
     expires_at: zeit(r.expires_at) ?? "",
     revoked: r.revoked === true,
@@ -203,28 +205,18 @@ export async function adminEreignisse(
   return rows.map(zuEreignis);
 }
 
-/* Ein einzelner Vorgang mit seinem Haus.
-
-   Der Vertrag kennt admin_faelle(p_haus), aber keine Funktion für einen
-   einzelnen Vorgang. Deshalb: der Weg über die Liste des Hauses. Die
-   Kennung des Hauses kommt als Hinweis von der aufrufenden Seite; fehlt sie
-   (direkt eingegebene Adresse), werden die Häuser der Reihe nach durchsucht.
-   Das kostet im Live-Betrieb je Haus einen Aufruf — vertretbar, solange die
-   Zahl der Häuser klein ist. Sauberer wäre ein admin_fall(p_fall) im
-   SQL-Vertrag; bis dahin bleibt es bei diesem Weg. */
-export async function adminFallKontext(
-  fallId: string,
-  hausHinweis?: string | null,
-): Promise<{ fall: AdminFall; haus: AdminHaus } | null> {
-  const haeuser = await adminHaeuser();
-  const zuerst = haeuser.filter((h) => h.haus_id === hausHinweis);
-  const rest = haeuser.filter((h) => h.haus_id !== hausHinweis);
-
-  for (const haus of [...zuerst, ...rest]) {
-    const fall = (await adminFaelle(haus.haus_id)).find((f) => f.fall_id === fallId);
-    if (fall) return { fall, haus };
-  }
-  return null;
+/* Ein einzelner Vorgang mit seinem Haus — ein Aufruf (admin_fall, 0009).
+   Vorher musste die Anwendung ohne Vorwissen jede Hausliste durchgehen, nur
+   um die Brotkrumen zu bauen. null = unbekannter Vorgang. */
+export async function adminFallKontext(fallId: string): Promise<AdminFallKontext | null> {
+  if (mock()) return mockAdmin.fall(fallId);
+  const rows = (await rpc<Roh[]>("admin_fall", { p_fall: fallId })) ?? [];
+  const r = rows[0];
+  if (!r) return null;
+  return {
+    fall: zuFall(r),
+    haus: { haus_id: wort(r.haus_id), org_name: wort(r.org_name) || "Ohne Namen" },
+  };
 }
 
 /* ── Regeln ──────────────────────────────────────────────────── */

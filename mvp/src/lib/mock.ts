@@ -9,8 +9,8 @@
    Sitzungs-ID, nie die case_id. */
 
 import type {
-  AdminEreignis, AdminFall, AdminHaus, AdminUebersicht, AdminZugang,
-  Case, InviteSummary, Phase, Role, RoleView,
+  AdminEreignis, AdminFall, AdminFallKontext, AdminHaus, AdminUebersicht,
+  AdminZugang, Case, InviteSummary, Phase, Role, RoleView,
 } from "./types";
 import { caseForRole } from "./access";
 
@@ -126,10 +126,13 @@ type MockAdminFall = {
   createdAt: number; targetDate: string | null; beteiligte: number;
 };
 
-type MockAdminSitzung = { id: string; zuletztGesehen: number };
+type MockAdminSitzung = { id: string; seit: number; zuletztGesehen: number; laeuftAb: number };
 
+/* Ohne Merkhilfe: admin_zugaenge gibt sie seit 0009 nicht mehr heraus, und
+   was die Datenbank nicht herausgibt, soll auch der Mock nicht kennen —
+   sonst weicht die Vorführung von der Wirklichkeit ab. */
 type MockAdminZugang = {
-  id: string; fallId: string; role: Role; label: string | null;
+  id: string; fallId: string; role: Role;
   createdAt: number; expiresAt: number; revokedAt: number | null;
   sitzungen: MockAdminSitzung[]; zuletztGesehen: number | null;
 };
@@ -215,12 +218,6 @@ const ZUGANG_ROLLEN: Role[] = [
   "familie", "krematorium", "transport", "friedhof",
   "standesamt", "klinik", "floristik", "redner",
 ];
-/* Merkhilfen der Häuser — bewusst sachlich. Die Übersicht erfindet keine
-   Personennamen; sie hätte dort auch nichts zu suchen. */
-const MERKHILFEN: (string | null)[] = [
-  null, null, "Angehörige", "Abholung", "Trauerfeier", null, "Rücksprache", null,
-];
-
 function seedPlattform(): MockPlattform {
   const r = saat(20260727);
   const jetzt = Date.now();
@@ -286,15 +283,19 @@ function seedPlattform(): MockPlattform {
           id: uuid(),
           fallId: fall.id,
           role: rolle,
-          label: MERKHILFEN[ganz(MERKHILFEN.length)],
           createdAt: zc,
           expiresAt: zc + 30 * TAG,
           revokedAt,
           sitzungen: geradeAktiv
-            ? Array.from({ length: r() < 0.25 ? 2 : 1 }, () => ({
-                id: uuid(),
-                zuletztGesehen: zuletztGesehen ?? jetzt - STD,
-              }))
+            ? Array.from({ length: r() < 0.25 ? 2 : 1 }, () => {
+                const gesehen = zuletztGesehen ?? jetzt - STD;
+                return {
+                  id: uuid(),
+                  seit: gesehen - ganz(3) * STD - minuten(),
+                  zuletztGesehen: gesehen,
+                  laeuftAb: gesehen + 12 * STD,
+                };
+              })
             : [],
           zuletztGesehen,
         };
@@ -492,17 +493,21 @@ function demoZugaenge(): MockAdminZugang[] {
   for (const [sid, s] of sessions) {
     if (s.expiresAt <= jetzt) continue;
     const liste = offen.get(s.inviteId) ?? [];
+    const seit = s.expiresAt - SESSION_TTL_MS;
     liste.push({
       id: sid,
-      zuletztGesehen: invites.get(s.inviteId)?.lastUsedAt ?? s.expiresAt - SESSION_TTL_MS,
+      seit,
+      zuletztGesehen: invites.get(s.inviteId)?.lastUsedAt ?? seit,
+      laeuftAb: s.expiresAt,
     });
     offen.set(s.inviteId, liste);
   }
+  /* i.label bleibt hier bewusst liegen: die Merkhilfe gehört dem Haus und
+     verlässt seinen Arbeitsbereich nicht. */
   return [...invites.values()].map((i) => ({
     id: i.id,
     fallId: i.caseId,
     role: i.role,
-    label: i.label,
     createdAt: i.createdAt,
     expiresAt: i.expiresAt,
     revokedAt: i.revokedAt,
@@ -613,6 +618,18 @@ export const mockAdmin = {
       });
   },
 
+  /* Spiegel von admin_fall (0009): ein Vorgang samt Haus in einem Zug.
+     Bewusst über dieselbe Aufbereitung wie die Liste, damit beide Wege nie
+     verschiedene Zahlen zeigen. */
+  fall: (fallId: string): AdminFallKontext | null => {
+    const roh = alleFaelle().find((f) => f.id === fallId);
+    if (!roh) return null;
+    const haus = plattform.haeuser.find((h) => h.id === roh.hausId);
+    const fall = mockAdmin.faelle(roh.hausId).find((f) => f.fall_id === fallId);
+    if (!fall || !haus) return null;
+    return { fall, haus: { haus_id: haus.id, org_name: haus.orgName } };
+  },
+
   zugaenge: (fallId: string): AdminZugang[] => {
     const jetzt = Date.now();
     return alleZugaenge()
@@ -621,16 +638,18 @@ export const mockAdmin = {
       .map((z) => ({
         zugang_id: z.id,
         role: z.role,
-        label: z.label,
         created_at: iso(z.createdAt),
         expires_at: iso(z.expiresAt),
         revoked: z.revokedAt !== null,
         sitzungen_aktiv: sitzungenOffen(z, jetzt),
         zuletzt_gesehen: isoOderNull(z.zuletztGesehen),
+        /* Wie admin_zugaenge in 0009: nur die offenen Sitzungen, mit Kennung. */
         sitzungen: zugangAktiv(z, jetzt)
           ? z.sitzungen.map((s) => ({
               sitzung_id: s.id,
+              created_at: isoOderNull(s.seit),
               zuletzt_gesehen: isoOderNull(s.zuletztGesehen),
+              expires_at: isoOderNull(s.laeuftAb),
             }))
           : [],
       }));

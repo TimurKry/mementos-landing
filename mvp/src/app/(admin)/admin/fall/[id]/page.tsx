@@ -12,24 +12,17 @@ import { zuAnsicht } from "./zugang-view";
    sie benutzt — nicht, was hinter ihnen liegt. Der Vorgang trägt hier keinen
    Namen, nur seine Nummer und seine Phase.
 
-   Der Hinweis ?haus= kommt von der Liste des Hauses und erspart die Suche
-   über alle Häuser; fehlt er, sucht die Datenschicht selbst. */
+   Vorgang und Haus kommen aus einem Aufruf (admin_fall, 0009); die Adresse
+   braucht deshalb keinen Hinweis auf das Haus mehr. */
 export const dynamic = "force-dynamic";
 
 const EREIGNISSE_JE_FALL = 25;
 
-export default async function FallSeite({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ haus?: string }>;
-}) {
+export default async function FallSeite({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { haus: hausHinweis } = await searchParams;
 
   const ladung = await laden(async () => {
-    const kontext = await adminFallKontext(id, hausHinweis ?? null);
+    const kontext = await adminFallKontext(id);
     if (!kontext) return null;
     const [zugaenge, ereignisse] = await Promise.all([
       adminZugaenge(id),
@@ -66,12 +59,12 @@ export default async function FallSeite({
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Kennzahl label="Angelegt" wert={datum(fall.created_at)} />
-        <Kennzahl label="Termin" wert={datum(fall.target_date)} />
-        <Kennzahl label="Beteiligte" wert={fall.beteiligte} />
-        <Kennzahl label="Aktive Zugänge" wert={fall.zugaenge_aktiv} />
-        <Kennzahl label="Aktive Sitzungen" wert={fall.sitzungen_aktiv} />
-        <Kennzahl label="Letzte Aktivität" wert={zeitpunkt(fall.letzte_aktivitaet)} />
+        <Kennzahl titel="Angelegt" wert={datum(fall.created_at)} />
+        <Kennzahl titel="Termin" wert={datum(fall.target_date)} />
+        <Kennzahl titel="Beteiligte" wert={fall.beteiligte} />
+        <Kennzahl titel="Aktive Zugänge" wert={fall.zugaenge_aktiv} />
+        <Kennzahl titel="Aktive Sitzungen" wert={fall.sitzungen_aktiv} />
+        <Kennzahl titel="Letzte Aktivität" wert={zeitpunkt(fall.letzte_aktivitaet)} />
       </div>
 
       <section className="mt-8">

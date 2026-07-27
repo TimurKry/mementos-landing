@@ -32,14 +32,14 @@ export default async function PlattformSeite() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        <Kennzahl label="Häuser" wert={u.haeuser} />
-        <Kennzahl label="Vorgänge gesamt" wert={u.faelle_gesamt} />
-        <Kennzahl label="davon offen" wert={u.faelle_offen} />
-        <Kennzahl label="davon abgeschlossen" wert={u.faelle_abgeschlossen} />
-        <Kennzahl label="Aktive Zugänge" wert={u.zugaenge_aktiv} />
-        <Kennzahl label="Zurückgezogene Zugänge" wert={u.zugaenge_zurueckgezogen} />
-        <Kennzahl label="Aktive Sitzungen" wert={u.sitzungen_aktiv} hinweis="gerade offen" />
-        <Kennzahl label="Ereignisse" wert={u.ereignisse_24h} hinweis="letzte 24 Stunden" />
+        <Kennzahl titel="Häuser" wert={u.haeuser} />
+        <Kennzahl titel="Vorgänge gesamt" wert={u.faelle_gesamt} />
+        <Kennzahl titel="davon offen" wert={u.faelle_offen} />
+        <Kennzahl titel="davon abgeschlossen" wert={u.faelle_abgeschlossen} />
+        <Kennzahl titel="Aktive Zugänge" wert={u.zugaenge_aktiv} />
+        <Kennzahl titel="Zurückgezogene Zugänge" wert={u.zugaenge_zurueckgezogen} />
+        <Kennzahl titel="Aktive Sitzungen" wert={u.sitzungen_aktiv} hinweis="gerade offen" />
+        <Kennzahl titel="Ereignisse" wert={u.ereignisse_24h} hinweis="letzte 24 Stunden" />
       </div>
 
       <div className="mt-3">

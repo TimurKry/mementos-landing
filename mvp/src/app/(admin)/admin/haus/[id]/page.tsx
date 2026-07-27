@@ -36,12 +36,12 @@ export default async function HausSeite({ params }: { params: Promise<{ id: stri
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Kennzahl label="Vorgänge gesamt" wert={haus.faelle_gesamt} />
-        <Kennzahl label="davon offen" wert={haus.faelle_offen} />
-        <Kennzahl label="davon abgeschlossen" wert={haus.faelle_abgeschlossen} />
-        <Kennzahl label="Aktive Zugänge" wert={haus.zugaenge_aktiv} />
-        <Kennzahl label="Aktive Sitzungen" wert={haus.sitzungen_aktiv} />
-        <Kennzahl label="Letzte Aktivität" wert={zeitpunkt(haus.letzte_aktivitaet)} />
+        <Kennzahl titel="Vorgänge gesamt" wert={haus.faelle_gesamt} />
+        <Kennzahl titel="davon offen" wert={haus.faelle_offen} />
+        <Kennzahl titel="davon abgeschlossen" wert={haus.faelle_abgeschlossen} />
+        <Kennzahl titel="Aktive Zugänge" wert={haus.zugaenge_aktiv} />
+        <Kennzahl titel="Aktive Sitzungen" wert={haus.sitzungen_aktiv} />
+        <Kennzahl titel="Letzte Aktivität" wert={zeitpunkt(haus.letzte_aktivitaet)} />
       </div>
 
       <section className="mt-8">
@@ -69,7 +69,7 @@ export default async function HausSeite({ params }: { params: Promise<{ id: stri
               <tr key={f.fall_id}>
                 <td>
                   <Link
-                    href={`/admin/fall/${f.fall_id}?haus=${haus.haus_id}`}
+                    href={`/admin/fall/${f.fall_id}`}
                     className="tnum text-chalk transition-colors hover:text-white"
                   >
                     {f.ref}

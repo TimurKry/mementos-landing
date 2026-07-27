@@ -7,8 +7,9 @@ import type { ZugangAnsicht, ZugangStatus } from "./zugang-view";
 /* Zugänge eines Vorgangs — Zustand ansehen und eingreifen.
 
    Zu sehen ist, DASS ein Zugang besteht und von wem er benutzt wird: Rolle,
-   Merkhilfe des Hauses, Zeitpunkte, offene Sitzungen. Was hinter dem Zugang
-   liegt, steht hier nicht — die Übersicht kennt es nicht.
+   Zeitpunkte, offene Sitzungen. Was hinter dem Zugang liegt, steht hier
+   nicht — die Übersicht kennt es nicht. Die Merkhilfe des Hauses steht hier
+   ebenfalls nicht: sie kommt aus der Datenbank gar nicht erst her (0009).
 
    Beide Eingriffe fragen einmal nach: sie wirken sofort und lassen sich nicht
    zurücknehmen. */
@@ -66,9 +67,6 @@ export function Zugaenge({
             <div className="flex items-start justify-between gap-2">
               <span className="min-w-0">
                 <span className="block text-[13px] text-chalk">{z.rolle}</span>
-                {z.label && (
-                  <span className="mt-0.5 block truncate text-[10.5px] text-fog">{z.label}</span>
-                )}
               </span>
               <span className="flex flex-wrap items-center justify-end gap-1.5">
                 {z.sitzungenAnzahl > 0 && (
@@ -96,7 +94,7 @@ export function Zugaenge({
                     className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] bg-white/[0.03] px-2.5 py-2"
                   >
                     <span className="min-w-0 text-[10.5px] text-fog">
-                      Sitzung · zuletzt {s.zuletzt}
+                      Sitzung seit {s.seit} · zuletzt {s.zuletzt}
                     </span>
                     <button
                       type="button"

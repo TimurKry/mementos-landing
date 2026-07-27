@@ -11,11 +11,11 @@ import { aktion, akteur, zahl, zeitpunkt } from "./format";
 /* ── Kennzahl ────────────────────────────────────────────────── */
 
 export function Kennzahl({
-  label,
+  titel,
   wert,
   hinweis,
 }: {
-  label: string;
+  titel: string;
   wert: number | string;
   hinweis?: string;
 }) {
@@ -25,7 +25,7 @@ export function Kennzahl({
   const istZahl = typeof wert === "number";
   return (
     <div className="card p-3.5">
-      <div className="text-[10px] text-steel">{label}</div>
+      <div className="text-[10px] text-steel">{titel}</div>
       <div className={`tnum mt-2 leading-tight ${istZahl ? "text-[24px]" : "text-[15px]"}`}>
         {istZahl ? zahl(wert) : wert}
       </div>
