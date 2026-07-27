@@ -56,6 +56,79 @@ export type InviteSession = {
   expires_at: string;
 };
 
+/* ── Plattform-Übersicht (Betreuung der Plattform) ──────────────────
+   Spiegel der Funktionen aus 0008_plattform_uebersicht.sql.
+
+   Ausschliesslich Metadaten und Verbindungen: Zähler, Phasen, Zeitpunkte,
+   Rollen. Kein Feld einer verstorbenen Person, kein Aufgabentext, kein
+   Dokumentname. Ein Vorgang wird über seine Nummer (ref) und seine Phase
+   erkannt — und sonst gar nicht. Wer hier Inhalte sähe, hätte wieder die
+   Lücke, die 0004 geschlossen hat. */
+
+export type AdminUebersicht = {
+  haeuser: number;
+  faelle_gesamt: number;
+  faelle_offen: number;
+  faelle_abgeschlossen: number;
+  phasen: Record<Phase, number>;
+  zugaenge_aktiv: number;
+  zugaenge_zurueckgezogen: number;
+  sitzungen_aktiv: number;
+  ereignisse_24h: number;
+};
+
+export type AdminHaus = {
+  haus_id: string;
+  org_name: string;
+  faelle_gesamt: number;
+  faelle_offen: number;
+  faelle_abgeschlossen: number;
+  zugaenge_aktiv: number;
+  sitzungen_aktiv: number;
+  letzte_aktivitaet: string | null;
+};
+
+export type AdminFall = {
+  fall_id: string;
+  ref: string;
+  phase: Phase;
+  created_at: string;
+  target_date: string | null;
+  beteiligte: number;
+  zugaenge_aktiv: number;
+  sitzungen_aktiv: number;
+  letzte_aktivitaet: string | null;
+};
+
+/* Eine offene Sitzung eines Zugangs. Siehe Hinweis bei AdminZugang.sitzungen. */
+export type AdminSitzung = { sitzung_id: string; zuletzt_gesehen: string | null };
+
+export type AdminZugang = {
+  zugang_id: string;
+  role: Role;
+  label: string | null;
+  created_at: string;
+  expires_at: string;
+  revoked: boolean;
+  sitzungen_aktiv: number;
+  zuletzt_gesehen: string | null;
+  /* Kennungen der offenen Sitzungen. admin_zugaenge liefert bisher nur deren
+     ANZAHL — ohne Kennung lässt sich keine einzelne Sitzung beenden. Die Liste
+     ist deshalb im Live-Betrieb leer und im Mock gefüllt; der Knopf «Sitzung
+     beenden» erscheint nur, wo eine Kennung vorliegt. Sobald der SQL-Vertrag
+     die Kennungen mitliefert, füllt sie sich auch live. */
+  sitzungen: AdminSitzung[];
+};
+
+export type AdminEreignis = {
+  at: string;
+  action: string;
+  actor_kind: string;
+  actor_ref: string | null;
+  detail: string | null;
+  fall_ref: string | null;
+};
+
 /* Роль-фильтрованный вид (то, что отдаёт get_case_by_session в БД) */
 export type RoleView = {
   ref: string;

@@ -3,7 +3,14 @@
    в live-режиме фильтрует сервер, здесь — mock-режим, подписи в UI и аудит.
    Матрица tier'ов менялась только вместе с миграцией. Держать синхронно! */
 
-import type { Role, Tier, Deceased, Case, RoleView } from "./types";
+import type { Role, Tier, Deceased, Case, Phase, RoleView } from "./types";
+
+/* Phasen eines Vorgangs — eine Beschriftung für alle Bildschirme
+   (Arbeitsbereich und Plattform-Übersicht). */
+export const phaseLabel: Record<Phase, string> = {
+  neu: "Neu", unterlagen: "Unterlagen", bestaetigt: "Bestätigt",
+  durchfuehrung: "Durchführung", abschluss: "Abschluss",
+};
 
 export const roleLabel: Record<Role, string> = {
   bestatter: "Bestatter", familie: "Familie", krematorium: "Krematorium",

@@ -75,7 +75,16 @@ export async function middleware(req: NextRequest) {
   /* ── innerer Umkreis: Arbeitsbereich ────────────────────────── */
   if (!isLive) return weiter(); // Mock-Demo läuft ohne Konto
 
-  const geschuetzt = pathname === "/" || pathname.startsWith("/fall/");
+  /* /admin/** gehört der Plattform-Betreuung. Die Anmeldung ist hier nur die
+     äussere Tür: WER von den Angemeldeten die Übersicht sehen darf, entscheidet
+     allein die Datenbank (Mitgliedschaft in platform_admins, geprüft in jeder
+     admin_*-Funktion). Eine zweite Prüfung an dieser Stelle wäre eine zweite
+     Wahrheit — und die Server Actions sind ohnehin direkt aufrufbar. */
+  const geschuetzt =
+    pathname === "/" ||
+    pathname.startsWith("/fall/") ||
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/");
   if (!geschuetzt) return weiter();
 
   const res = applySecurityHeaders(NextResponse.next({ request: { headers } }), opts);

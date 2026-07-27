@@ -1,16 +1,11 @@
 import Link from "next/link";
 import { listCases } from "@/lib/data";
-import type { Phase } from "@/lib/types";
+import { phaseLabel } from "@/lib/access";
 
 /* Dashboard: обзор фаллов владельца (Bestatter).
    Kein Vorab-Rendern: die Vorgänge hängen am angemeldeten Haus, und die
    Konfigurationsprüfung muss bei jeder Anfrage laufen. */
 export const dynamic = "force-dynamic";
-
-const phaseLabel: Record<Phase, string> = {
-  neu: "Neu", unterlagen: "Unterlagen", bestaetigt: "Bestätigt",
-  durchfuehrung: "Durchführung", abschluss: "Abschluss",
-};
 
 export default async function Dashboard() {
   const cases = await listCases();
