@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCase, isMock } from "@/lib/data";
+import { getCase, isMock, listInvites } from "@/lib/data";
 import { roleLabel } from "@/lib/access";
-import { DEMO_FAMILY_TOKEN, DEMO_KREMATORIUM_TOKEN } from "@/lib/mock";
+import type { InviteSummary } from "@/lib/types";
+import { DEMO_CASE_ID, DEMO_FAMILY_TOKEN, DEMO_KREMATORIUM_TOKEN } from "@/lib/mock";
 import { TaskItem } from "./TaskItem";
+import { Einladungen } from "./Einladungen";
+import { zuAnsicht } from "./invite-view";
 
 /* Карточка фалла — полный вид владельца (Bestatter): все поля, участники,
    задачи, документы + ссылки-приглашения (роль-фильтрованный вид).
@@ -20,6 +23,17 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
   const d = c.verstorbene;
   const name = [d.vorname, d.nachname].filter(Boolean).join(" ");
   const offen = c.aufgaben.filter((t) => t.status === "offen").length;
+
+  /* Die Übersicht der Einladungen darf den Fall nicht mitreissen: eine Störung
+     hier heisst nicht, dass keine Zugänge vergeben sind — das sagt die
+     Oberfläche dann auch so, statt eine leere Liste zu zeigen. */
+  let invites: InviteSummary[] = [];
+  let ladefehler = false;
+  try {
+    invites = await listInvites(id);
+  } catch {
+    ladefehler = true;
+  }
 
   return (
     <div>
@@ -101,13 +115,22 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
             <p className="mb-2.5 text-[11.5px] leading-relaxed text-steel">
               Beteiligte treten ohne Konto bei und sehen nur ihren Teil.
             </p>
-            {isMock ? (
-              <div className="grid gap-2">
-                <InviteLink token={DEMO_FAMILY_TOKEN} label="Als Familie ansehen" />
-                <InviteLink token={DEMO_KREMATORIUM_TOKEN} label="Als Krematorium ansehen" />
+
+            <Einladungen caseId={c.id} einladungen={zuAnsicht(invites)} ladefehler={ladefehler} />
+
+            {/* Die beiden festen Ansichten der Vorführung — nur im Mock-Modus
+                und nur an dem Fall, zu dem ihre Einladungen gehören. */}
+            {isMock && c.id === DEMO_CASE_ID && (
+              <div className="mt-4">
+                <div className="hair mb-3" />
+                <p className="mb-2 text-[10.5px] leading-relaxed text-steel">
+                  Beispieldaten: zwei feste Ansichten zum Vorführen.
+                </p>
+                <div className="grid gap-2">
+                  <InviteLink token={DEMO_FAMILY_TOKEN} label="Als Familie ansehen" />
+                  <InviteLink token={DEMO_KREMATORIUM_TOKEN} label="Als Krematorium ansehen" />
+                </div>
               </div>
-            ) : (
-              <p className="text-[11.5px] text-steel">Links werden je Rolle generiert.</p>
             )}
           </section>
         </aside>

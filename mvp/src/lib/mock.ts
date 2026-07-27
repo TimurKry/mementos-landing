@@ -11,7 +11,10 @@
 import type { Case, InviteSummary, Role, RoleView } from "./types";
 import { caseForRole } from "./access";
 
-/* фиксированные demo-токены (Demo-Ablauf im README) — müssen gültig bleiben */
+/* фиксированные demo-токены (Demo-Ablauf im README) — müssen gültig bleiben.
+   Sie gehören zu genau einem Fall: nur dort dürfen die beiden festen
+   Beispiel-Ansichten angeboten werden. */
+export const DEMO_CASE_ID = "0147";
 export const DEMO_FAMILY_TOKEN = "demo-familie-0147";
 export const DEMO_KREMATORIUM_TOKEN = "demo-krematorium-0147";
 
@@ -114,9 +117,9 @@ const g = globalThis as unknown as { __mementoMock?: MockState };
 
 function initState(): MockState {
   const state: MockState = { cases: seedCases(), invites: new Map(), sessions: new Map() };
-  /* Demo-Einladungen: die beiden Ansichten aus dem README */
-  addInvite(state, "0147", "familie", DEMO_FAMILY_TOKEN);
-  addInvite(state, "0147", "krematorium", DEMO_KREMATORIUM_TOKEN);
+  /* Demo-Einladungen: die beiden Ansichten aus dem README (Beispieldaten) */
+  addInvite(state, DEMO_CASE_ID, "familie", DEMO_FAMILY_TOKEN, "Familie Weber");
+  addInvite(state, DEMO_CASE_ID, "krematorium", DEMO_KREMATORIUM_TOKEN, "Krematorium Südstadt");
   return state;
 }
 
@@ -197,11 +200,22 @@ export const mockStore = {
 
   /* Der Token wird genau einmal zurückgegeben — danach nur noch die Zusammenfassung.
      Form wie app.new_token() in 0004: zwei UUIDs hex-verkettet, 64 Zeichen —
-     damit greift die Formatprüfung des Einlöse-Handlers auch im Mock. */
-  createInvite: (caseId: string, role: Role): { inviteId: string; token: string } => {
+     damit greift die Formatprüfung des Einlöse-Handlers auch im Mock.
+
+     null = unbekannter Fall. Im Mock gibt es keine Anmeldung und damit auch
+     kein is_case_owner; die Server Action ist aber direkt aufrufbar, deshalb
+     wird wenigstens der Fallbezug geprüft. Die Rolle «bestatter» lehnt der
+     Mock ebenso ab wie invites_role_not_bestatter in der Datenbank. */
+  createInvite: (
+    caseId: string,
+    role: Role,
+    label: string | null = null,
+  ): { inviteId: string; token: string } | null => {
+    if (role === "bestatter") return null;
+    if (!cases.some((c) => c.id === caseId)) return null;
     const token =
       crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
-    const inv = addInvite(state, caseId, role, token);
+    const inv = addInvite(state, caseId, role, token, label);
     return { inviteId: inv.id, token: inv.token };
   },
 

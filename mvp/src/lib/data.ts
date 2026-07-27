@@ -19,6 +19,21 @@ export const isMock = isMockMode();
 
 const ERR_DB = "MementoOS: Die Datenbank hat die Anfrage abgelehnt.";
 
+/* Die Eigentümer-Funktionen (create_invite, list_invites, revoke_invite) sind
+   SECURITY DEFINER und prüfen is_case_owner selbst — Ablehnung kommt mit
+   errcode 42501. Sie wird hier von einer technischen Störung getrennt, damit
+   die Oberfläche zwei verschiedene Auskünfte geben kann. Der Text der
+   Datenbank wird bewusst nicht durchgereicht. */
+export const ERR_KEIN_ZUGRIFF = "MementoOS: Kein Zugriff auf diesen Fall.";
+
+export function istKeinZugriff(e: unknown): boolean {
+  return e instanceof Error && e.message === ERR_KEIN_ZUGRIFF;
+}
+
+function dbFehler(code: string | undefined): Error {
+  return new Error(code === "42501" ? ERR_KEIN_ZUGRIFF : ERR_DB);
+}
+
 /* ── чтение ─────────────────────────────────────────────────── */
 
 export async function listCases(): Promise<Case[]> {
@@ -109,15 +124,38 @@ export async function toggleTask(caseId: string, taskId: string): Promise<void> 
 /* ── Einladungen verwalten (nur Eigentümer) ──────────────────── */
 
 /* Der Token existiert genau einen Moment lang: create_invite gibt ihn einmal
-   zurück, danach liefert die Datenbank ihn nie wieder aus. */
-export async function createInvite(caseId: string, role: Role): Promise<{ inviteId: string; token: string }> {
-  if (getRuntimeMode() === "mock") return mockStore.createInvite(caseId, role);
+   zurück, danach liefert die Datenbank ihn nie wieder aus. Er wird deshalb
+   hier weder protokolliert noch irgendwo zwischengelegt — er geht als
+   Rückgabewert zurück und nirgendwo sonst hin.
+
+   Die Merkhilfe (label) kennt create_invite nicht; sie wird anschliessend an
+   die Zeile geschrieben (Policy invites_owner aus 0002_rls.sql). */
+export async function createInvite(
+  caseId: string,
+  role: Role,
+  label: string | null = null,
+): Promise<{ inviteId: string; token: string }> {
+  const merk = (label ?? "").trim() || null;
+
+  if (getRuntimeMode() === "mock") {
+    const angelegt = mockStore.createInvite(caseId, role, merk);
+    if (!angelegt) throw new Error(ERR_KEIN_ZUGRIFF);
+    return angelegt;
+  }
+
   const { supabaseServer } = await import("./supabase/server");
   const sb = await supabaseServer();
   const { data, error } = await sb.rpc("create_invite", { p_case: caseId, p_role: role });
-  if (error) throw new Error(ERR_DB);
+  if (error) throw dbFehler(error.code);
   const row = (Array.isArray(data) ? data[0] : data) as { invite_id?: string; token?: string } | null;
   if (!row?.invite_id || !row?.token) throw new Error(ERR_DB);
+
+  /* Bewusst ohne Fehlerbehandlung nach aussen: der Klartext-Token steht
+     ausschliesslich in dieser einen Antwort. Ein Abbruch wegen einer
+     misslungenen Merkhilfe würde ihn unwiederbringlich verlieren — die
+     Einladung selbst ist bereits angelegt und gültig. */
+  if (merk) await sb.from("invites").update({ label: merk }).eq("id", row.invite_id);
+
   return { inviteId: row.invite_id, token: row.token };
 }
 
@@ -126,14 +164,16 @@ export async function listInvites(caseId: string): Promise<InviteSummary[]> {
   const { supabaseServer } = await import("./supabase/server");
   const sb = await supabaseServer();
   const { data, error } = await sb.rpc("list_invites", { p_case: caseId });
-  if (error) throw new Error(ERR_DB);
+  if (error) throw dbFehler(error.code);
   return (data as InviteSummary[]) ?? [];
 }
 
+/* Zieht die Einladung zurück UND beendet alle offenen Sitzungen dieser
+   Einladung (revoke_invite in 0004) — der Entzug wirkt sofort. */
 export async function revokeInvite(inviteId: string): Promise<void> {
   if (getRuntimeMode() === "mock") return mockStore.revokeInvite(inviteId);
   const { supabaseServer } = await import("./supabase/server");
   const sb = await supabaseServer();
   const { error } = await sb.rpc("revoke_invite", { p_invite: inviteId });
-  if (error) throw new Error(ERR_DB);
+  if (error) throw dbFehler(error.code);
 }

@@ -16,6 +16,20 @@ export const tierLabel: Record<Tier, string> = {
   kern: "Identität", org: "Persönlich", op: "Körperlich", sens: "Medizinisch",
 };
 
+/* Rollen, für die ein Einladungslink ausgegeben werden darf — Spiegel der
+   Prüfregel invites_role_not_bestatter (0004_hardening.sql). «bestatter» fehlt
+   hier absichtlich: ein solcher Link wäre ein Zugang ohne Konto mit dem vollen
+   Blick des Hauses. Die Datenbank lehnt ihn ohnehin ab; die Oberfläche bietet
+   ihn gar nicht erst an. */
+export const einladbareRollen: Role[] = (Object.keys(roleLabel) as Role[])
+  .filter((r) => r !== "bestatter");
+
+/* Prüfung für die Server Action: sie ist direkt aufrufbar, nicht nur über das
+   Formular. Die harte Grenze bleibt die Datenbank. */
+export function istEinladbareRolle(value: unknown): value is Role {
+  return typeof value === "string" && (einladbareRollen as string[]).includes(value);
+}
+
 /* какие поля Verstorbene относятся к какой группе */
 const tierFields: Record<Tier, (keyof Deceased)[]> = {
   kern: ["vorname", "nachname"],
