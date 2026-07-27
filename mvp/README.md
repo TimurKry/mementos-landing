@@ -183,7 +183,9 @@ als zweite Reihe. `robots.txt` verbietet alles.
 ### 1. Projekt anlegen
 
 - Auf [supabase.com](https://supabase.com) ein Projekt in der Region
-  **EU (Frankfurt, `eu-central-1`)** erstellen — Daten bleiben in der EU.
+  **EU** erstellen — das laufende Projekt liegt in `eu-west-3` (Paris),
+  `eu-central-1` (Frankfurt) geht ebenso. Entscheidend ist, dass die Daten
+  in der EU bleiben.
 - Aus *Project Settings → API* übernehmen:
   `Project URL`, `anon public key`, `service_role key`.
 
