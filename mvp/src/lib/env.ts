@@ -24,7 +24,8 @@ export type RuntimeMode = "mock" | "live";
 
 const ERR_HALF =
   "MementoOS: Unvollständige Supabase-Konfiguration — NEXT_PUBLIC_SUPABASE_URL und " +
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY müssen beide gesetzt sein oder beide leer bleiben.";
+  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (oder NEXT_PUBLIC_SUPABASE_ANON_KEY) " +
+  "müssen beide gesetzt sein oder beide leer bleiben.";
 
 const ERR_PROD_MOCK =
   "MementoOS: Produktionsstart ohne Datenbank-Konfiguration abgebrochen.";
