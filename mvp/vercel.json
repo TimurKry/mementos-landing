@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm install --ignore-workspace",
+  "regions": ["fra1"],
+  "framework": "nextjs"
+}
