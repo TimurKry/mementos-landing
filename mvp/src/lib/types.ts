@@ -9,14 +9,21 @@ export type TaskStatus = "offen" | "erledigt";
 export type ContactStatus = "none" | "contacted" | "confirmed" | "skipped";
 export type Tier = "kern" | "org" | "op" | "sens";
 
+/* null ist hier kein Versehen, sondern «Angabe gelöscht». Ein weggelassenes
+   Feld (undefined) bliebe beim Speichern unverändert stehen — wer eine
+   Konfession wieder herausnimmt, muss sie auch leeren können. */
 export type Deceased = {
-  vorname?: string; nachname?: string;                       // kern
-  geburtsdatum?: string; sterbedatum?: string; konfession?: string; anschrift?: string; // org
-  groesse_cm?: number; gewicht_kg?: number; sargmass?: string; // op
-  herzschrittmacher?: boolean; infektionshinweis?: string; freigabe_einaescherung?: boolean; // sens
+  vorname?: string | null; nachname?: string | null;                       // kern
+  geburtsdatum?: string | null; sterbedatum?: string | null; konfession?: string | null; anschrift?: string | null; // org
+  groesse_cm?: number | null; gewicht_kg?: number | null; sargmass?: string | null; // op
+  herzschrittmacher?: boolean | null; infektionshinweis?: string | null; freigabe_einaescherung?: boolean | null; // sens
 };
 
-export type Participant = { role: Role; org?: string | null; joined: boolean; contact?: ContactStatus; sort?: number };
+/* id ist nur im Arbeitsbereich des Hauses bekannt — die rollengefilterte
+   Ansicht (RoleView) gibt sie nicht heraus. Ohne sie liesse sich ein
+   Beteiligter nicht gezielt entfernen: zwei Zeilen dürfen dieselbe Rolle
+   tragen (zwei Fahrdienste, zwei Angehörige). */
+export type Participant = { id?: string; role: Role; org?: string | null; joined: boolean; contact?: ContactStatus; sort?: number };
 export type Task = { id?: string; title: string; assignee?: Role | null; due?: string | null; status: TaskStatus };
 export type Doc = { id?: string; doc_type: string; verified: boolean; uploaded_by?: Role; visible_to?: Role[] };
 export type Event = { actor: string; action: string; at: string };

@@ -9,7 +9,7 @@
    Alle lesenden Aufrufe laufen mit dem anon-Schlüssel; service_role wird hier
    nie benutzt. Und: keine Tokens/Sitzungs-IDs in Logs. */
 
-import type { Case, InviteSummary, Role, RoleView } from "./types";
+import type { Case, Deceased, InviteSummary, Phase, Role, RoleView, Task } from "./types";
 import { getRuntimeMode, isMockMode } from "./env";
 import { mockStore } from "./mock";
 
@@ -53,7 +53,7 @@ export async function getCase(id: string): Promise<Case | null> {
   const [{ data: c }, { data: d }, { data: p }, { data: t }, { data: docs }] = await Promise.all([
     sb.from("cases").select("*").eq("id", id).maybeSingle(),
     sb.from("deceased").select("*").eq("case_id", id).maybeSingle(),
-    sb.from("participants").select("role, org_name, joined, contact, sort").eq("case_id", id).order("sort"),
+    sb.from("participants").select("id, role, org_name, joined, contact, sort").eq("case_id", id).order("sort"),
     sb.from("tasks").select("id, title, assignee, due, status").eq("case_id", id),
     sb.from("documents").select("id, doc_type, verified, uploaded_by, visible_to").eq("case_id", id),
   ]);
@@ -61,7 +61,7 @@ export async function getCase(id: string): Promise<Case | null> {
   return {
     id: c.id, ref: c.ref, bestattungsart: c.bestattungsart, phase: c.phase, target_date: c.target_date,
     verstorbene: d ?? {},
-    beteiligte: (p ?? []).map((x) => ({ role: x.role, org: x.org_name, joined: x.joined, contact: x.contact, sort: x.sort })),
+    beteiligte: (p ?? []).map((x) => ({ id: x.id, role: x.role, org: x.org_name, joined: x.joined, contact: x.contact, sort: x.sort })),
     aufgaben: t ?? [],
     dokumente: docs ?? [],
   } as Case;
@@ -101,6 +101,137 @@ export async function endInviteSession(sessionId: string): Promise<void> {
 }
 
 /* ── запись ─────────────────────────────────────────────────── */
+
+/* Zu allen schreibenden Wegen unten gilt dasselbe:
+
+   1. cases.owner wird NIE mitgeschickt. Die Spalte hat seit 0010 den
+      Vorgabewert auth.uid(); die Regel cases_owner (0002) prüft anschliessend
+      with check (owner = auth.uid()). Ein Fall auf fremden Namen ist damit
+      nicht anlegbar — und zwar unabhängig davon, was das Formular sendet.
+   2. Die Berechtigung prüft ausschliesslich die Datenbank (RLS). Hier steht
+      keine zweite, selbstgebaute Eigentümerprüfung.
+   3. Jede Anweisung ist an das Paar (Fall, Datensatz) gebunden, nicht an die
+      Kennung des Datensatzes allein — wie bei toggleTask weiter unten.
+   4. Der Text einer Datenbank-Ausnahme wird nie durchgereicht; nach aussen
+      geht ERR_DB oder ERR_KEIN_ZUGRIFF. Die Angaben der Gruppe sens
+      (herzschrittmacher, infektionshinweis, freigabe_einaescherung) stehen
+      deshalb in keiner Meldung, in keinem Protokoll und in keiner Adresse. */
+
+export type NeuerFall = {
+  bestattungsart: string;
+  target_date: string | null;
+  vorname: string;
+  nachname: string;
+};
+
+/* Legt Fall und verstorbene Person an und gibt die Kennung des Falls zurück. */
+export async function createCase(f: NeuerFall): Promise<string> {
+  if (getRuntimeMode() === "mock") return mockStore.createCase(f);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+
+  const { data, error } = await sb
+    .from("cases")
+    .insert({ bestattungsart: f.bestattungsart, target_date: f.target_date })
+    .select("id")
+    .single();
+  if (error || !data) throw dbFehler(error?.code);
+
+  const { error: fehlerPerson } = await sb
+    .from("deceased")
+    .insert({ case_id: data.id, vorname: f.vorname, nachname: f.nachname });
+  if (fehlerPerson) throw dbFehler(fehlerPerson.code);
+
+  return data.id as string;
+}
+
+export type FallAenderung = {
+  bestattungsart?: string;
+  target_date?: string | null;
+  phase?: Phase;
+};
+
+export async function updateCase(caseId: string, patch: FallAenderung): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.updateCase(caseId, patch);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb.from("cases").update(patch).eq("id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
+/* Eine Feldgruppe der verstorbenen Person schreiben. upsert, weil die Zeile
+   bei einem vor 0010 angelegten Fall fehlen kann — dann entsteht sie hier.
+   Gespeichert wird immer nur die übergebene Gruppe: ein Fehler in einer
+   Gruppe darf die anderen nicht mitreissen. */
+export async function updateDeceased(caseId: string, patch: Partial<Deceased>): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.updateDeceased(caseId, patch);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("deceased")
+    .upsert({ case_id: caseId, ...patch }, { onConflict: "case_id" });
+  if (error) throw dbFehler(error.code);
+}
+
+export async function addParticipant(caseId: string, role: Role, org: string): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.addParticipant(caseId, role, org);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  /* Reihenfolge fortschreiben, damit neue Zeilen unten landen und die Liste
+     nicht bei jedem Laden springt. */
+  const { data: vorhanden } = await sb.from("participants").select("sort").eq("case_id", caseId);
+  const sort = (vorhanden ?? []).reduce((max, p) => Math.max(max, p.sort ?? 0), -1) + 1;
+  const { error } = await sb
+    .from("participants")
+    .insert({ case_id: caseId, role, org_name: org, sort });
+  if (error) throw dbFehler(error.code);
+}
+
+export async function removeParticipant(caseId: string, participantId: string): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.removeParticipant(caseId, participantId);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("participants").delete()
+    .eq("id", participantId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
+export async function setParticipantJoined(
+  caseId: string,
+  participantId: string,
+  joined: boolean,
+): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.setParticipantJoined(caseId, participantId, joined);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("participants").update({ joined })
+    .eq("id", participantId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
+export type NeueAufgabe = Pick<Task, "title" | "assignee" | "due">;
+
+export async function addTask(caseId: string, t: NeueAufgabe): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.addTask(caseId, t);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("tasks")
+    .insert({ case_id: caseId, title: t.title, assignee: t.assignee, due: t.due });
+  if (error) throw dbFehler(error.code);
+}
+
+export async function removeTask(caseId: string, taskId: string): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.removeTask(caseId, taskId);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("tasks").delete()
+    .eq("id", taskId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
 
 export async function toggleTask(caseId: string, taskId: string): Promise<void> {
   if (getRuntimeMode() === "mock") return mockStore.toggleTask(caseId, taskId);

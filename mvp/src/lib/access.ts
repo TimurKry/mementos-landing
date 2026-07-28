@@ -23,6 +23,37 @@ export const tierLabel: Record<Tier, string> = {
   kern: "Identität", org: "Persönlich", op: "Körperlich", sens: "Medizinisch",
 };
 
+/* Überschriften der Feldgruppen im Erfassungsbogen. Die Gruppierung ist keine
+   Zierde: sie ist genau die Grenze, an der die Datenbank filtert. Wer die
+   Gruppe kennt, weiss, wer die Angabe später zu sehen bekommt. */
+export const tierGruppenTitel: Record<Tier, string> = {
+  kern: "Identität",
+  org: "Persönliche Angaben",
+  op: "Körperliche Angaben",
+  sens: "Medizinische Hinweise",
+};
+
+/* Welche Rollen sehen eine Feldgruppe? Abgeleitet aus allowedTiers, damit
+   Beschriftung und Filterregel nicht auseinanderlaufen können. Das Haus
+   selbst (bestatter) steht nicht dabei — es sieht ohnehin alles. */
+export function rollenMitTier(tier: Tier): Role[] {
+  return (Object.keys(roleLabel) as Role[])
+    .filter((r) => r !== "bestatter" && allowedTiers(r).includes(tier));
+}
+
+function aufzaehlung(woerter: string[]): string {
+  if (woerter.length <= 1) return woerter[0] ?? "";
+  return `${woerter.slice(0, -1).join(", ")} und ${woerter[woerter.length - 1]}`;
+}
+
+/* Ein Satz für den Bogen: wer diese Gruppe zu sehen bekommt, sobald ein
+   Zugang dieser Rolle vergeben ist. */
+export function sichtbarFuerText(tier: Tier): string {
+  const namen = rollenMitTier(tier).map((r) => roleLabel[r]);
+  if (namen.length === 0) return "Bleibt im Haus.";
+  return `Sichtbar für ${aufzaehlung(namen)} — sobald ein Zugang dieser Rolle vergeben ist.`;
+}
+
 /* Rollen, für die ein Einladungslink ausgegeben werden darf — Spiegel der
    Prüfregel invites_role_not_bestatter (0004_hardening.sql). «bestatter» fehlt
    hier absichtlich: ein solcher Link wäre ein Zugang ohne Konto mit dem vollen

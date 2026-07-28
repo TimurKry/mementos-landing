@@ -1,0 +1,85 @@
+-- MementoOS MVP — einen Vorgang anlegen (0010)
+--
+-- Bis hierher konnte das Bestattungshaus einen Fall nur ansehen. Mit dieser
+-- Migration darf es einen anlegen — und das ist der erste Schreibweg, über
+-- den personenbezogene Angaben einer verstorbenen Person in die Datenbank
+-- gelangen. Entsprechend eng ist die Frage: wem gehört der neue Fall?
+--
+-- ── Die Antwort: der Server setzt den Eigentümer, nicht der Aufrufer ──
+-- cases.owner bekommt den Vorgabewert auth.uid(). Damit schickt die Anwendung
+-- die Spalte gar nicht erst mit — sie hat keinen Wert dafür anzubieten, und
+-- was nicht gesendet wird, kann auch nicht gefälscht werden.
+--
+-- Der Riegel bleibt die Regel cases_owner aus 0002_rls.sql:
+--
+--   create policy cases_owner on cases
+--     for all using (owner = auth.uid()) with check (owner = auth.uid());
+--
+-- Reihenfolge in PostgreSQL: erst werden Vorgabewerte eingesetzt, dann prüft
+-- WITH CHECK die fertige Zeile. Beide Fälle sind damit abgedeckt:
+--   - Anwendung sendet kein owner  -> Vorgabe auth.uid()  -> Prüfung besteht;
+--   - jemand sendet ein fremdes owner (Server Action ist direkt aufrufbar,
+--     PostgREST ebenso) -> Vorgabe greift nicht -> WITH CHECK weist ab.
+--
+-- Bewusst KEINE neue SECURITY-DEFINER-Funktion zum Anlegen. Jede solche
+-- Funktion umgeht RLS und muss ihre Rechteprüfung selbst mitbringen — genau
+-- die Bauform, aus der die Lücken in 0003 entstanden sind (siehe 0004).
+-- Vorgabewert plus bestehende Regel kommen ohne neue Angriffsfläche aus.
+--
+-- ── Was hier NICHT nötig war ──────────────────────────────────
+-- Geprüft und für ausreichend befunden, deshalb ohne Änderung geblieben:
+--   - Regeln für deceased/participants/tasks: deceased_owner,
+--     participants_owner und tasks_owner aus 0002 sind je «for all» und
+--     decken INSERT, UPDATE und DELETE bereits ab.
+--   - Tabellenrechte: authenticated behält seine Rechte in public
+--     (0004 entzieht sie nur anon).
+--   - Fall-Nummer: vergibt der Trigger cases_set_ref (app.set_case_ref,
+--     0004) — die Anwendung sendet ref nicht.
+--   - Profil des Hauses: legt der Trigger on_auth_user_created an (0004),
+--     ohne das schlüge der Fremdschlüssel cases.owner -> profiles fehl.
+--
+-- Es entsteht keine neue Funktion. Deshalb steht am Dateiende auch kein
+-- Rechte-Block: es gäbe nichts zu entziehen. Die Lehre aus 0005 (ein solcher
+-- Block gehört ans Ende, sonst bleiben später angelegte Funktionen mit dem
+-- voreingestellten PUBLIC EXECUTE zurück) bleibt für kommende Migrationen
+-- stehen.
+--
+-- Das Skript ist idempotent und setzt den Stand nach 0001–0009 voraus.
+
+-- ═══════════════════════════════════════════════════════════════
+-- 1  Der Eigentümer kommt vom Server
+-- ═══════════════════════════════════════════════════════════════
+alter table public.cases alter column owner set default auth.uid();
+
+comment on column public.cases.owner is
+  'Bestattungshaus, dem der Vorgang gehoert. Vorgabewert auth.uid(): die '
+  'Anwendung sendet die Spalte nie mit. Ein mitgesendeter fremder Wert wird '
+  'von der Regel cases_owner (0002) abgewiesen.';
+
+-- ═══════════════════════════════════════════════════════════════
+-- Verifikation — einzeln ausfuehren, als angemeldetes Haus.
+-- Erwartet wird die Sitzungsvariable request.jwt.claim.sub auf der eigenen
+-- Kennung; in Supabase setzt PostgREST sie aus dem Token.
+-- ═══════════════════════════════════════════════════════════════
+--
+-- 1) Vorgabewert steht — erwartet: auth.uid().
+-- select column_default from information_schema.columns
+-- where table_schema = 'public' and table_name = 'cases' and column_name = 'owner';
+--
+-- 2) Anlegen OHNE owner gelingt, und owner traegt die eigene Kennung.
+--    Erwartet: eine Zeile, owner = auth.uid().
+-- set local role authenticated;
+-- insert into public.cases (bestattungsart) values ('Einäscherung')
+--   returning id, owner, owner = auth.uid() as gehoert_mir;
+--
+-- 3) Anlegen MIT fremdem owner wird abgewiesen.
+--    Erwartet: «new row violates row-level security policy for table "cases"».
+-- insert into public.cases (bestattungsart, owner)
+-- values ('Einäscherung', '00000000-0000-0000-0000-000000000000');
+--
+-- 4) Die Angaben zur Person haengen am eigenen Fall — und nur dort.
+--    Erwartet: erste Anweisung gelingt, zweite wird abgewiesen.
+-- insert into public.deceased (case_id, vorname, nachname)
+-- values ('<eigener-fall>', 'Beispiel', 'Beispieldaten');
+-- insert into public.deceased (case_id, vorname, nachname)
+-- values ('<fremder-fall>', 'Beispiel', 'Beispieldaten');

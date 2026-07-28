@@ -13,13 +13,24 @@ export default async function Dashboard() {
 
   return (
     <div>
-      <div className="mb-7">
-        <div className="text-[11px] font-medium text-signal">Arbeitsbereich</div>
-        <h1 className="mt-1.5 text-[30px] leading-tight">Guten Morgen. Hier steht alles.</h1>
-        <p className="mt-2 text-[13px] text-fog">
-          {active} aktive Vorgänge · klicken Sie einen Fall an.
-        </p>
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="text-[11px] font-medium text-signal">Arbeitsbereich</div>
+          <h1 className="mt-1.5 text-[30px] leading-tight">Guten Morgen. Hier steht alles.</h1>
+          <p className="mt-2 text-[13px] text-fog">
+            {active} aktive Vorgänge · klicken Sie einen Fall an.
+          </p>
+        </div>
+        <Link href="/fall/neu" className="btn-bone px-4 py-2.5 text-[13px] font-medium">
+          Neuer Vorgang
+        </Link>
       </div>
+
+      {cases.length === 0 && (
+        <p className="text-[13px] text-steel">
+          Noch kein Vorgang angelegt.
+        </p>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {cases.map((c) => {

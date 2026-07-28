@@ -10,7 +10,7 @@
 
 import type {
   AdminEreignis, AdminFall, AdminFallKontext, AdminHaus, AdminUebersicht,
-  AdminZugang, Case, InviteSummary, Phase, Role, RoleView,
+  AdminZugang, Case, Deceased, InviteSummary, Phase, Role, RoleView, Task,
 } from "./types";
 import { caseForRole } from "./access";
 
@@ -41,10 +41,10 @@ function seedCases(): Case[] {
       herzschrittmacher: true, infektionshinweis: "", freigabe_einaescherung: false,
     },
     beteiligte: [
-      { role: "krematorium", org: "Krematorium Südstadt", joined: true, contact: "confirmed", sort: 0 },
-      { role: "transport", org: "Fahrdienst Böhme", joined: true, contact: "contacted", sort: 1 },
-      { role: "floristik", org: "Blumen Lange", joined: false, contact: "none", sort: 2 },
-      { role: "familie", org: "Familie Weber", joined: true, contact: "confirmed", sort: 3 },
+      { id: "p1", role: "krematorium", org: "Krematorium Südstadt", joined: true, contact: "confirmed", sort: 0 },
+      { id: "p2", role: "transport", org: "Fahrdienst Böhme", joined: true, contact: "contacted", sort: 1 },
+      { id: "p3", role: "floristik", org: "Blumen Lange", joined: false, contact: "none", sort: 2 },
+      { id: "p4", role: "familie", org: "Familie Weber", joined: true, contact: "confirmed", sort: 3 },
     ],
     aufgaben: [
       { id: "t1", title: "Vollmacht bei Familie anfragen", assignee: "bestatter", due: "heute", status: "offen" },
@@ -77,8 +77,8 @@ function seedCases(): Case[] {
       herzschrittmacher: false, infektionshinweis: "", freigabe_einaescherung: false,
     },
     beteiligte: [
-      { role: "friedhof", org: "Südfriedhof Leipzig", joined: false, contact: "none", sort: 0 },
-      { role: "familie", org: "Familie Krüger", joined: false, contact: "none", sort: 1 },
+      { id: "p5", role: "friedhof", org: "Südfriedhof Leipzig", joined: false, contact: "none", sort: 0 },
+      { id: "p6", role: "familie", org: "Familie Krüger", joined: false, contact: "none", sort: 1 },
     ],
     aufgaben: [
       { id: "t5", title: "Erstgespräch mit Familie", assignee: "bestatter", due: "morgen", status: "offen" },
@@ -155,6 +155,10 @@ type MockState = {
   invites: Map<string, MockInvite>;   // id → Einladung
   sessions: Map<string, MockSession>; // Sitzungs-ID → Sitzung
   plattform: MockPlattform;
+  /* Wann ein im Betrieb angelegter Vorgang entstanden ist. Gehört in den
+     Zustand und nicht in eine Modulkonstante: der Bundler legt dieses Modul
+     mehrfach ab, eine Konstante liefe sonst je Kopie auseinander. */
+  angelegt: Map<string, number>;
 };
 
 /* Am globalThis, nicht am Modul: der Bundler legt dieses Modul mehrfach ab
@@ -169,6 +173,7 @@ function initState(): MockState {
     invites: new Map(),
     sessions: new Map(),
     plattform: seedPlattform(),
+    angelegt: new Map(),
   };
   /* Demo-Einladungen: die beiden Ansichten aus dem README (Beispieldaten) */
   addInvite(state, DEMO_CASE_ID, "familie", DEMO_FAMILY_TOKEN, "Familie Weber");
@@ -358,7 +363,7 @@ function seedPlattform(): MockPlattform {
 }
 
 const state: MockState = (g.__mementoMock ??= initState());
-const { cases, invites, sessions, plattform } = state;
+const { cases, invites, sessions, plattform, angelegt } = state;
 
 function inviteByToken(token: string): MockInvite | undefined {
   for (const inv of invites.values()) if (inv.token === token) return inv;
@@ -371,6 +376,25 @@ function usable(inv: MockInvite | undefined, at: number): inv is MockInvite {
 
 const iso = (ms: number) => new Date(ms).toISOString();
 
+/* Kennung eines im Betrieb angelegten Vorgangs. Live vergibt die Datenbank
+   eine UUID; hier genügt eine kurze, in der Adresszeile lesbare Kennung.
+   Die Fall-Nummer folgt der Form aus app.set_case_ref() (0004): M-JJJJ-NNNNNN. */
+function neueFallKennung(): string {
+  return crypto.randomUUID().slice(0, 8);
+}
+
+function neueFallNummer(): string {
+  const jahr = new Date().getFullYear();
+  const genommen = new Set(cases.map((c) => c.ref));
+  for (let i = 0; i < 50; i++) {
+    const nummer = `M-${jahr}-${String(100000 + Math.floor(Math.random() * 900000))}`;
+    if (!genommen.has(nummer)) return nummer;
+  }
+  return `M-${jahr}-${Date.now().toString().slice(-6)}`;
+}
+
+const fallVon = (caseId: string): Case | undefined => cases.find((c) => c.id === caseId);
+
 export const mockStore = {
   listCases: (): Case[] => cases,
   getCase: (id: string): Case | undefined => cases.find((c) => c.id === id),
@@ -378,6 +402,92 @@ export const mockStore = {
     const c = cases.find((x) => x.id === caseId);
     const t = c?.aufgaben.find((x) => x.id === taskId);
     if (t) t.status = t.status === "offen" ? "erledigt" : "offen";
+  },
+
+  /* ── Schreiben ────────────────────────────────────────────────
+     Ohne diese Wege könnte das Haus im Mock nur zusehen — und die Vorführung
+     zeigte ein Produkt, das man nicht benutzen kann.
+
+     Es gibt hier keine Anmeldung und damit kein is_case_owner. Geprüft wird
+     wie schon bei createInvite nur der Fallbezug: eine Server Action ist
+     direkt aufrufbar, und ein unbekannter Fall soll wirkungslos bleiben. */
+
+  createCase: (f: {
+    bestattungsart: string;
+    target_date: string | null;
+    vorname: string;
+    nachname: string;
+  }): string => {
+    const id = neueFallKennung();
+    cases.unshift({
+      id,
+      ref: neueFallNummer(),
+      bestattungsart: f.bestattungsart,
+      phase: "neu",
+      target_date: f.target_date,
+      verstorbene: { vorname: f.vorname, nachname: f.nachname },
+      beteiligte: [],
+      aufgaben: [],
+      dokumente: [],
+      verlauf: [],
+    });
+    angelegt.set(id, Date.now());
+    return id;
+  },
+
+  updateCase: (
+    caseId: string,
+    patch: { bestattungsart?: string; target_date?: string | null; phase?: Phase },
+  ): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    if (patch.bestattungsart !== undefined) c.bestattungsart = patch.bestattungsart;
+    if (patch.target_date !== undefined) c.target_date = patch.target_date;
+    if (patch.phase !== undefined) c.phase = patch.phase;
+  },
+
+  /* Nur die übergebene Feldgruppe wird geschrieben — die übrigen bleiben
+     unberührt, auch wenn eine andere Gruppe gerade unvollständig ist. */
+  updateDeceased: (caseId: string, patch: Partial<Deceased>): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    c.verstorbene = { ...c.verstorbene, ...patch };
+  },
+
+  addParticipant: (caseId: string, role: Role, org: string): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    const sort = c.beteiligte.reduce((max, p) => Math.max(max, p.sort ?? 0), -1) + 1;
+    c.beteiligte.push({ id: crypto.randomUUID(), role, org, joined: false, contact: "none", sort });
+  },
+
+  removeParticipant: (caseId: string, participantId: string): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    c.beteiligte = c.beteiligte.filter((p) => p.id !== participantId);
+  },
+
+  setParticipantJoined: (caseId: string, participantId: string, joined: boolean): void => {
+    const p = fallVon(caseId)?.beteiligte.find((x) => x.id === participantId);
+    if (p) p.joined = joined;
+  },
+
+  addTask: (caseId: string, t: Pick<Task, "title" | "assignee" | "due">): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    c.aufgaben.push({
+      id: crypto.randomUUID(),
+      title: t.title,
+      assignee: t.assignee ?? null,
+      due: t.due ?? null,
+      status: "offen",
+    });
+  },
+
+  removeTask: (caseId: string, taskId: string): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    c.aufgaben = c.aufgaben.filter((t) => t.id !== taskId);
   },
 
   /* Token → Sitzung. Ungültig/abgelaufen/zurückgezogen ⇒ null (kein Fehler:
@@ -479,7 +589,7 @@ function demoFaelle(): MockAdminFall[] {
     hausId: DEMO_HAUS_ID,
     ref: c.ref,
     phase: c.phase,
-    createdAt: DEMO_ANGELEGT[c.id] ?? START - 4 * TAG,
+    createdAt: angelegt.get(c.id) ?? DEMO_ANGELEGT[c.id] ?? START - 4 * TAG,
     targetDate: c.target_date ?? null,
     beteiligte: c.beteiligte.length,
   }));

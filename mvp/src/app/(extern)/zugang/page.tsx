@@ -35,7 +35,9 @@ export default async function ZugangPage() {
   if (!view) redirect("/einladung/ungueltig");
 
   const d = view.verstorbene;
-  const fields = (Object.keys(d) as (keyof Deceased)[]).filter((k) => d[k] !== undefined && d[k] !== "");
+  /* null zählt wie «nicht vorhanden»: die Datenbankfunktion liefert für eine
+     leere Angabe null, und «null» ist keine Auskunft, die jemand lesen soll. */
+  const fields = (Object.keys(d) as (keyof Deceased)[]).filter((k) => d[k] != null && d[k] !== "");
   const name = [d.vorname, d.nachname].filter(Boolean).join(" ");
 
   return (

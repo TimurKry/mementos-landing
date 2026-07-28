@@ -1,15 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCase, isMock, listInvites } from "@/lib/data";
-import { roleLabel } from "@/lib/access";
+import { phaseLabel } from "@/lib/access";
 import type { InviteSummary } from "@/lib/types";
 import { DEMO_CASE_ID, DEMO_FAMILY_TOKEN, DEMO_KREMATORIUM_TOKEN } from "@/lib/mock";
-import { TaskItem } from "./TaskItem";
+import { Aufgaben } from "./Aufgaben";
+import { Beteiligte } from "./Beteiligte";
 import { Einladungen } from "./Einladungen";
+import { VerstorbenePerson } from "./VerstorbenePerson";
+import { Vorgang } from "./Vorgang";
 import { zuAnsicht } from "./invite-view";
 
 /* Карточка фалла — полный вид владельца (Bestatter): все поля, участники,
    задачи, документы + ссылки-приглашения (роль-фильтрованный вид).
+   Zugleich der Arbeitsplatz: alle Angaben sind hier auch änderbar.
 
    Kein Vorab-Rendern: Falldaten gehören in keinen Cache, und die CSP
    bekommt je Anfrage einen frischen nonce. */
@@ -44,44 +48,42 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
           <div className="text-[10px] font-medium text-fog">{c.ref} · {c.bestattungsart}</div>
           <h1 className="mt-1 text-[28px] leading-tight">{name || c.ref}</h1>
         </div>
-        <span className={`badge ${offen === 0 ? "badge-green" : "badge-dim"}`}>
-          {offen === 0 ? "keine offenen Aufgaben" : `${offen} offen`}
-        </span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="badge badge-dim">{phaseLabel[c.phase]}</span>
+          <span className={`badge ${offen === 0 ? "badge-green" : "badge-dim"}`}>
+            {offen === 0 ? "keine offenen Aufgaben" : `${offen} offen`}
+          </span>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="grid gap-6">
-          {/* Verstorbene — полный набор полей (владелец) */}
+          {/* Vorgang — Bestattungsart, Termin, Phase */}
+          <section>
+            <div className="mb-2.5 text-[10px] font-medium text-fog">Vorgang</div>
+            <Vorgang
+              caseId={c.id}
+              bestattungsart={c.bestattungsart}
+              targetDate={c.target_date ?? null}
+              phase={c.phase}
+            />
+          </section>
+
+          {/* Verstorbene Person — nach Feldgruppen, jede für sich zu speichern */}
           <section>
             <div className="mb-2.5 text-[10px] font-medium text-fog">Verstorbene Person</div>
-            <div className="card grid grid-cols-2 gap-x-4 gap-y-2.5 p-4 text-[13px]">
-              <Field k="Name" v={name} />
-              <Field k="Geburts-/Sterbedatum" v={`${d.geburtsdatum ?? "—"} · ${d.sterbedatum ?? "—"}`} />
-              <Field k="Konfession" v={d.konfession} />
-              <Field k="Anschrift" v={d.anschrift} />
-              <Field k="Größe · Gewicht" v={`${d.groesse_cm ?? "—"} cm · ${d.gewicht_kg ?? "—"} kg`} />
-              <Field k="Sargmaß" v={d.sargmass} />
-              <Field k="Herzschrittmacher" v={d.herzschrittmacher ? "Ja" : "Nein"} accent={d.herzschrittmacher} />
-              <Field k="Freigabe Einäscherung" v={d.freigabe_einaescherung ? "Ja" : "offen"} />
-            </div>
+            <p className="mb-2.5 max-w-[560px] text-[11.5px] leading-relaxed text-steel">
+              Die Gruppen bestimmen, wer welche Angabe später zu sehen bekommt.
+              Jede Gruppe wird für sich gespeichert — unvollständige Angaben in
+              einer Gruppe halten die übrigen nicht auf.
+            </p>
+            <VerstorbenePerson caseId={c.id} verstorbene={d} />
           </section>
 
           {/* Beteiligte */}
           <section>
             <div className="mb-2.5 text-[10px] font-medium text-fog">Beteiligte</div>
-            <div className="grid gap-2">
-              {c.beteiligte.map((p) => (
-                <div key={p.role} className="card flex items-center justify-between gap-3 px-3.5 py-2.5">
-                  <span>
-                    <b className="text-[13px] font-medium">{p.org ?? roleLabel[p.role]}</b>
-                    <span className="ml-2 text-[10.5px] text-fog">{roleLabel[p.role]}</span>
-                  </span>
-                  <span className={`badge ${p.joined ? "badge-green" : "badge-dim"}`}>
-                    {p.joined ? "beigetreten" : "offen"}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <Beteiligte caseId={c.id} beteiligte={c.beteiligte} />
           </section>
 
           {/* Dokumente */}
@@ -105,9 +107,7 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
         <aside className="grid gap-5">
           <section>
             <div className="mb-2.5 text-[10px] font-medium text-fog">Aufgaben</div>
-            <div className="grid gap-2">
-              {c.aufgaben.map((t) => <TaskItem key={t.id} caseId={c.id} task={t} />)}
-            </div>
+            <Aufgaben caseId={c.id} aufgaben={c.aufgaben} />
           </section>
 
           <section>
@@ -136,15 +136,6 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
         </aside>
       </div>
     </div>
-  );
-}
-
-function Field({ k, v, accent }: { k: string; v?: string | null; accent?: boolean }) {
-  return (
-    <span className="flex flex-col">
-      <span className="text-[10px] text-steel">{k}</span>
-      <span className={accent ? "text-coral" : "text-chalk"}>{v || "—"}</span>
-    </span>
   );
 }
 
