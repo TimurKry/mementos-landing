@@ -187,9 +187,18 @@ type MockAdminZugang = {
   sitzungen: MockAdminSitzung[]; zuletztGesehen: number | null;
 };
 
+/* Ein Journal, zwei Ansichten — wie in der Datenbank: die Plattform-Übersicht
+   liest daraus ihre Ereignisse, das Haus den Verlauf seines Vorgangs.
+
+   detail steht zweimal da: als fertige Zeile für die Übersicht (dort wird
+   jsonb ohnehin zu Text zusammengefasst) und roh für den Verlauf, der daraus
+   einen deutschen Halbsatz baut. In der Datenbank ist beides dieselbe
+   jsonb-Spalte; hier zwei Felder, damit der Mock keine jsonb-Umwandlung
+   nachbauen muss, die es gar nicht gibt. */
 type MockEreignis = {
   at: number; action: string; actorKind: string;
   actorRef: string | null; detail: string | null;
+  detailRoh?: Record<string, unknown> | null;
   fallId: string | null; fallRef: string | null;
 };
 
@@ -445,6 +454,48 @@ function neueFallNummer(): string {
 
 const fallVon = (caseId: string): Case | undefined => cases.find((c) => c.id === caseId);
 
+/* Kurzform der Sitzungs-Kennung, wie app.akteur_kurz in 0013: acht Zeichen.
+   Die volle Kennung ist ein Schlüssel auf Vorzeigen und verlässt den Server
+   auch im Mock nicht.
+
+   Gekürzt wird nur, was wie eine Kennung aussieht. In der Datenbank steht in
+   actor_ref ausnahmslos eine UUID; die erzeugten Beispieldaten der Übersicht
+   tragen dort dagegen Namen von Häusern, und «Bestattungshaus Lindenau» auf
+   «Bestattu» zu stutzen wäre kein Schutz, sondern ein Anzeigefehler. */
+const KENNUNG_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
+
+const akteurKurz = (ref: string | null): string | null => {
+  if (!ref || ref === "-") return null;
+  return KENNUNG_RE.test(ref) ? ref.slice(0, 8) : ref;
+};
+
+/* Ein Eintrag ins Journal aus dem laufenden Betrieb. Ohne diese Aufrufe
+   bliebe der Verlauf im Mock bei den erzeugten Beispieldaten stehen — und
+   die Vorführung zeigte, dass eine Änderung der Familie spurlos bleibt. */
+function protokolliere(
+  caseId: string,
+  actorKind: string,
+  actorRef: string | null,
+  action: string,
+  detail: Record<string, unknown> | null = null,
+): void {
+  const zeile = detail
+    ? Object.entries(detail)
+        .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : String(v)}`)
+        .join(" · ")
+    : null;
+  ereignisEintragen({
+    at: Date.now(),
+    action,
+    actorKind,
+    actorRef,
+    detail: zeile,
+    detailRoh: detail,
+    fallId: caseId,
+    fallRef: fallVon(caseId)?.ref ?? null,
+  });
+}
+
 export const mockStore = {
   listCases: (): Case[] => cases,
   getCase: (id: string): Case | undefined => cases.find((c) => c.id === id),
@@ -597,6 +648,9 @@ export const mockStore = {
     t.bis = bis;
     t.hinweis = hinweis;
     t.status = "bestaetigt";
+    protokolliere(c!.id, "invite", akteurKurz(sessionId), "termin.bestaetigt", {
+      role: inv.role, art: t.art,
+    });
     return true;
   },
 
@@ -610,6 +664,9 @@ export const mockStore = {
     sessions.set(sessionId, { inviteId: inv.id, expiresAt: now + SESSION_TTL_MS });
     inv.lastUsedAt = now;
     inv.sessionCount += 1;
+    protokolliere(inv.caseId, "invite", akteurKurz(sessionId), "invite.redeem", {
+      role: inv.role,
+    });
     return sessionId;
   },
 
@@ -655,8 +712,24 @@ export const mockStore = {
     if (!etwas) return false;
 
     c.verstorbene = { ...c.verstorbene, ...patch };
+    protokolliere(c.id, "invite", akteurKurz(sessionId), "angaben.ergaenzt", {
+      role: inv.role, felder: Object.keys(patch),
+    });
     return true;
   },
+
+  /* Verlauf eines Vorgangs — Spiegel von public.fall_verlauf (0013). */
+  listVerlauf: (caseId: string, limit: number) =>
+    plattform.ereignisse
+      .filter((e) => e.fallId === caseId)
+      .slice(0, limit)
+      .map((e) => ({
+        at: iso(e.at),
+        action: e.action,
+        actor_kind: e.actorKind,
+        actor_ref: akteurKurz(e.actorRef),
+        detail: e.detailRoh ?? null,
+      })),
 
   /* Der Token wird genau einmal zurückgegeben — danach nur noch die Zusammenfassung.
      Form wie app.new_token() in 0004: zwei UUIDs hex-verkettet, 64 Zeichen —
@@ -676,6 +749,9 @@ export const mockStore = {
     const token =
       crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
     const inv = addInvite(state, caseId, role, token, label);
+    /* Die Merkhilfe (label) geht bewusst NICHT mit: sie ist Freitext und
+       trägt in der Praxis Personennamen. Ins Journal gehört die Rolle. */
+    protokolliere(caseId, "user", "haus", "invite.create", { role });
     return { inviteId: inv.id, token: inv.token };
   },
 

@@ -31,31 +31,8 @@ export function zahl(wert: number): string {
   return fZahl.format(wert);
 }
 
-/* Die Kürzel stehen so im Journal der Datenbank (audit_log.action). Sie
-   bleiben sichtbar — die Betreuung sucht danach —, bekommen aber eine
-   deutsche Beschriftung daneben. */
-const aktionen: Record<string, string> = {
-  "invite.create": "Zugang ausgegeben",
-  "invite.redeem": "Zugang eingelöst",
-  "invite.redeem.failed": "Einlösung fehlgeschlagen",
-  "invite.revoke": "Zugang zurückgezogen",
-  "session.end": "Sitzung beendet",
-  "session.revoke": "Sitzung entzogen",
-  "case.view": "Vorgang geöffnet",
-};
-
-export function aktion(wert: string): string {
-  return aktionen[wert] ?? wert;
-}
-
-const akteure: Record<string, string> = {
-  haus: "Haus",
-  zugang: "Zugang",
-  plattform: "Betreuung",
-  anonym: "Unbekannt",
-  system: "System",
-};
-
-export function akteur(wert: string): string {
-  return akteure[wert] ?? wert;
-}
+/* Die Beschriftungen des Journals liegen seit 0013 in src/lib/verlauf.ts:
+   der Arbeitsbereich zeigt dasselbe Journal, und zwei Listen für dieselben
+   Kürzel laufen auseinander, sobald eine Aktion dazukommt. Hier bleiben nur
+   die Namen stehen, unter denen die Bildschirme der Übersicht sie kennen. */
+export { aktionLabel as aktion, akteurLabel as akteur } from "@/lib/verlauf";

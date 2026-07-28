@@ -48,14 +48,39 @@ export function AngabenBogen({
   const [fertig, setFertig] = useState(false);
   const [pending, start] = useTransition();
 
+  /* Der zuletzt gespeicherte Stand — Bezugspunkt dafür, was «geändert» ist.
+     Wird nach jedem erfolgreichen Speichern nachgezogen, sonst schickte der
+     zweite Klick dieselbe Änderung noch einmal. */
+  const [gespeichert, setGespeichert] = useState<Record<string, string>>(() => ({ ...entwurf }));
+
   function speichern(e: React.FormEvent) {
     e.preventDefault();
     setFehler(null);
     setFertig(false);
+
+    /* Nur die tatsächlich geänderten Felder. Sonst stünde nach jedem
+       Speichern im Journal des Hauses, die Familie habe alle fünf Angaben
+       geändert — auch wenn sie nur die Konfession berichtigt hat. Ein
+       Journal, das zu viel behauptet, ist so wenig wert wie eines, das
+       schweigt. */
+    const geaendert: Record<string, string> = {};
+    for (const [feld, wert] of Object.entries(entwurf)) {
+      if (wert !== gespeichert[feld]) geaendert[feld] = wert;
+    }
+
+    if (Object.keys(geaendert).length === 0) {
+      setFertig(true);   // nichts zu tun ist kein Fehler
+      return;
+    }
+
     start(async () => {
-      const res = await angabenErgaenzenAction(entwurf);
-      if (res.ok) setFertig(true);
-      else setFehler(res.fehler);
+      const res = await angabenErgaenzenAction(geaendert);
+      if (res.ok) {
+        setGespeichert({ ...entwurf });
+        setFertig(true);
+      } else {
+        setFehler(res.fehler);
+      }
     });
   }
 

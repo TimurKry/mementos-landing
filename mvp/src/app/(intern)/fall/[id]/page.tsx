@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCase, isMock, listInvites } from "@/lib/data";
+import { getCase, isMock, listInvites, listVerlauf } from "@/lib/data";
 import { phaseLabel } from "@/lib/access";
 import type { InviteSummary } from "@/lib/types";
 import { DEMO_CASE_ID, DEMO_FAMILY_TOKEN, DEMO_KREMATORIUM_TOKEN } from "@/lib/mock";
@@ -9,8 +9,10 @@ import { Beteiligte } from "./Beteiligte";
 import { Einladungen } from "./Einladungen";
 import { Termine } from "./Termine";
 import { VerstorbenePerson } from "./VerstorbenePerson";
+import { Verlauf } from "./Verlauf";
 import { Vorgang } from "./Vorgang";
 import { zuAnsicht } from "./invite-view";
+import type { Verlaufseintrag } from "@/lib/verlauf";
 
 /* Карточка фалла — полный вид владельца (Bestatter): все поля, участники,
    задачи, документы + ссылки-приглашения (роль-фильтрованный вид).
@@ -38,6 +40,16 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
     invites = await listInvites(id);
   } catch {
     ladefehler = true;
+  }
+
+  /* Dasselbe für den Verlauf: eine Störung hier darf weder den Fall
+     mitreissen noch aussehen wie «es ist nichts geschehen». */
+  let verlauf: Verlaufseintrag[] = [];
+  let verlaufFehler = false;
+  try {
+    verlauf = await listVerlauf(id);
+  } catch {
+    verlaufFehler = true;
   }
 
   return (
@@ -114,6 +126,18 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
                 </div>
               ))}
             </div>
+          </section>
+
+          {/* Verlauf — ganz unten: er wird gelesen, wenn etwas zu klären ist,
+              nicht bei jedem Öffnen der Akte. */}
+          <section>
+            <div className="mb-2.5 text-[10px] font-medium text-fog">Verlauf</div>
+            <p className="mb-2.5 max-w-[560px] text-[11.5px] leading-relaxed text-steel">
+              Wer wann was geändert hat. Beteiligte tragen inzwischen selbst
+              ein — bestätigte Zeiten und Angaben der Familie stehen hier mit
+              Zeitpunkt und Herkunft.
+            </p>
+            <Verlauf eintraege={verlauf} ladefehler={verlaufFehler} />
           </section>
         </div>
 

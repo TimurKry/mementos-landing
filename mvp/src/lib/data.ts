@@ -12,6 +12,7 @@
 import type {
   Case, Deceased, InviteSummary, Phase, Role, RoleView, Task, Termin,
 } from "./types";
+import type { Verlaufseintrag } from "./verlauf";
 import { getRuntimeMode, isMockMode } from "./env";
 import { mockStore } from "./mock";
 
@@ -258,6 +259,23 @@ export async function toggleTask(caseId: string, taskId: string): Promise<void> 
   await sb
     .from("tasks").update({ status: next })
     .eq("id", taskId).eq("case_id", caseId);
+}
+
+/* ── Verlauf eines Vorgangs (nur Eigentümer) ─────────────────────
+   Seit 0011 bestätigen Beteiligte Zeiten, seit 0012 ändert die Familie
+   Angaben — beides war für das Haus unsichtbar. Daten, die sich lautlos
+   ändern, sind genau das, was man in einer Akte nicht haben will.
+
+   fall_verlauf ist SECURITY DEFINER und prüft is_case_owner selbst; die
+   Tabelle audit_log bleibt für authenticated gesperrt. Die Sitzungs-Kennung
+   kommt gekürzt heraus — die volle wäre ein Schlüssel auf Vorzeigen. */
+export async function listVerlauf(caseId: string, limit = 50): Promise<Verlaufseintrag[]> {
+  if (getRuntimeMode() === "mock") return mockStore.listVerlauf(caseId, limit);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { data, error } = await sb.rpc("fall_verlauf", { p_case: caseId, p_limit: limit });
+  if (error) throw dbFehler(error.code);
+  return (data as Verlaufseintrag[]) ?? [];
 }
 
 /* ── Termine ─────────────────────────────────────────────────────
