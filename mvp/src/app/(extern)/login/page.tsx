@@ -7,7 +7,17 @@ import { LoginForm } from "./LoginForm";
 
 export const dynamic = "force-dynamic";
 
-export default function LoginPage() {
+/* Ein gescheiterter Anmeldelink sah bisher aus wie ein gewöhnlicher Aufruf
+   der Seite: beides führte wortlos hierher. Wer den Link anklickt und wieder
+   im Formular steht, hält das für einen Fehler der Anwendung — und ohne
+   Hinweis ist auch nicht zu erkennen, woran es lag. */
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ fehler?: string }>;
+}) {
+  const { fehler } = await searchParams;
+
   return (
     <div className="mx-auto max-w-[420px] py-8">
       <div className="text-[11px] font-medium text-signal">Arbeitsbereich</div>
@@ -16,6 +26,13 @@ export default function LoginPage() {
         Geben Sie Ihre E-Mail-Adresse ein. Sie erhalten einen einmaligen
         Anmeldelink — ein Passwort gibt es nicht.
       </p>
+
+      {fehler === "anmeldelink" && (
+        <div className="card mt-4 p-3.5 text-[12.5px] leading-relaxed text-chalk">
+          Dieser Anmeldelink ist nicht mehr gültig — er wurde bereits benutzt
+          oder ist abgelaufen. Bitte fordern Sie unten einen neuen an.
+        </div>
+      )}
 
       <LoginForm mock={isMock} />
 
