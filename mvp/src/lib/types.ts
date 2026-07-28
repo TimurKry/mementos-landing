@@ -194,4 +194,8 @@ export type RoleView = {
   /* Optional, weil eine vor 0011 angelegte Sitzung den Schlüssel noch nicht
      mitbringt — die Ansicht darf deswegen nicht weiss bleiben. */
   termine?: RollenTermin[];
+  /* Felder, die diese Rolle ÄNDERN darf (0012). Sehen und ändern sind
+     verschiedene Rechte: die Familie sieht die Gruppe op, schreiben darf sie
+     davon nichts. Leer oder fehlend = nur lesen. */
+  schreibbar?: (keyof Deceased)[];
 };

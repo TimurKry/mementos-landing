@@ -336,6 +336,31 @@ export async function terminBestaetigen(
   return data === true;
 }
 
+/* Angaben ergänzen durch einen Eingeladenen (0012). Der zweite schreibende
+   Weg des äusseren Umkreises — und der erste, der ein Feld über die
+   verstorbene Person berührt.
+
+   Wieder ohne case_id und ohne Rolle: beide hängen an der Sitzung. Welche
+   Felder ankommen dürfen, entscheidet app.felder_schreibbar in der Datenbank;
+   ein nicht erlaubter Schlüssel wird dort übergangen, nicht beanstandet —
+   sonst liesse sich über die Antwort abtasten, welche Felder es gibt.
+
+   false = «darf nicht, Sitzung abgelaufen oder Eingabe unförmig». */
+export async function angabenErgaenzen(
+  sessionId: string,
+  felder: Partial<Deceased>,
+): Promise<boolean> {
+  if (getRuntimeMode() === "mock") return mockStore.angabenErgaenzen(sessionId, felder);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { data, error } = await sb.rpc("angaben_ergaenzen", {
+    p_session: sessionId,
+    p_felder: felder,
+  });
+  if (error) throw new Error(ERR_DB);
+  return data === true;
+}
+
 /* ── Einladungen verwalten (nur Eigentümer) ──────────────────── */
 
 /* Der Token existiert genau einen Moment lang: create_invite gibt ihn einmal

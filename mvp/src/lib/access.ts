@@ -162,6 +162,49 @@ export function terminSichtbarFuerText(art: TerminArt): string {
   return `Sichtbar für ${aufzaehlung(namen)} — sobald ein Zugang dieser Rolle vergeben ist.`;
 }
 
+/* ── Schreibmatrix: welche Felder darf eine Rolle ÄNDERN ─────────
+   Spiegel von app.felder_schreibbar aus 0012_angaben_der_familie.sql.
+
+   Die vierte Matrix und die heikelste. Sehen und ändern fallen auch hier
+   auseinander: die Familie SIEHT nach allowedTiers die Gruppen kern, org und
+   op — ändern darf sie davon nur einen Teil. Sargmass und Gewicht misst das
+   Bestattungshaus, nicht die Tochter der Verstorbenen.
+
+   sterbedatum fehlt absichtlich: es steht in der Todesbescheinigung. Was aus
+   einer Urkunde kommt, wird nicht aus dem Gedächtnis überschrieben.
+
+   Die Klinik hat bewusst kein Schreibrecht auf die Gruppe sens — die
+   Begründung steht im Kopf der Migration. */
+export function felderSchreibbar(role: Role): (keyof Deceased)[] {
+  switch (role) {
+    case "familie":
+      return ["vorname", "nachname", "geburtsdatum", "konfession", "anschrift"];
+    default:
+      return [];
+  }
+}
+
+/* Alle Felder, die überhaupt je von aussen beschreibbar sind — die Formhürde
+   der Server Action. Welche davon eine konkrete Rolle darf, entscheidet die
+   Datenbank; hier wird nur verhindert, dass ein Direktaufruf ein Feld
+   mitschickt, das für keine Rolle vorgesehen ist. */
+export const VON_AUSSEN_SCHREIBBAR: (keyof Deceased)[] = [
+  ...new Set(
+    (Object.keys(roleLabel) as Role[]).flatMap((r) => felderSchreibbar(r)),
+  ),
+];
+
+/* Beschriftungen der Felder — ein Wortschatz für beide Umkreise. Stand
+   vorher zweimal da, im Arbeitsbereich und in der Ansicht der Eingeladenen. */
+export const feldLabel: Record<keyof Deceased, string> = {
+  vorname: "Vorname", nachname: "Nachname",
+  geburtsdatum: "Geburtsdatum", sterbedatum: "Sterbedatum",
+  konfession: "Konfession", anschrift: "Anschrift",
+  groesse_cm: "Größe (cm)", gewicht_kg: "Gewicht (kg)", sargmass: "Sargmaß",
+  herzschrittmacher: "Herzschrittmacher", infektionshinweis: "Infektionshinweis",
+  freigabe_einaescherung: "Freigabe Einäscherung",
+};
+
 /* какие поля Verstorbene относятся к какой группе */
 const tierFields: Record<Tier, (keyof Deceased)[]> = {
   kern: ["vorname", "nachname"],
@@ -216,6 +259,7 @@ export function caseForRole(c: Case, role: Role): RoleView {
     target_date: c.target_date,
     role,
     verstorbene: deceasedForRole(c.verstorbene, role),
+    schreibbar: felderSchreibbar(role),
     beteiligte: c.beteiligte.map((p) => ({
       role: p.role,
       org: isBestatter ? p.org ?? null : null, // внутренние имена скрыты

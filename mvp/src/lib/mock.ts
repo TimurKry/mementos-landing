@@ -12,7 +12,7 @@ import type {
   AdminEreignis, AdminFall, AdminFallKontext, AdminHaus, AdminUebersicht,
   AdminZugang, Case, Deceased, InviteSummary, Phase, Role, RoleView, Task, Termin,
 } from "./types";
-import { caseForRole, darfBestaetigen } from "./access";
+import { caseForRole, darfBestaetigen, felderSchreibbar } from "./access";
 
 /* фиксированные demo-токены (Demo-Ablauf im README) — müssen gültig bleiben.
    Sie gehören zu genau einem Fall: nur dort dürfen die beiden festen
@@ -626,6 +626,36 @@ export const mockStore = {
 
   endSession: (sessionId: string): void => {
     sessions.delete(sessionId);
+  },
+
+  /* Spiegel von public.angaben_ergaenzen (0012), in derselben Reihenfolge:
+     Sitzung lebendig → Rolle hat überhaupt ein Schreibrecht → nur erlaubte
+     Schlüssel werden übernommen, nicht erlaubte übergangen. */
+  angabenErgaenzen: (sessionId: string, felder: Partial<Deceased>): boolean => {
+    const now = Date.now();
+    const s = sessions.get(sessionId);
+    if (!s || s.expiresAt <= now) return false;
+    const inv = invites.get(s.inviteId);
+    if (!usable(inv, now)) return false;
+
+    const erlaubt = felderSchreibbar(inv.role);
+    if (erlaubt.length === 0) return false;
+
+    const c = cases.find((x) => x.id === inv.caseId);
+    if (!c) return false;
+
+    const patch: Partial<Deceased> = {};
+    let etwas = false;
+    for (const f of erlaubt) {
+      if (f in felder) {
+        (patch as Record<string, unknown>)[f] = felder[f] ?? null;
+        etwas = true;
+      }
+    }
+    if (!etwas) return false;
+
+    c.verstorbene = { ...c.verstorbene, ...patch };
+    return true;
   },
 
   /* Der Token wird genau einmal zurückgegeben — danach nur noch die Zusammenfassung.

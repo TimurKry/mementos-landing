@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCaseBySession } from "@/lib/data";
-import { roleLabel } from "@/lib/access";
+import { feldLabel, roleLabel } from "@/lib/access";
 import { ZUGANG_COOKIE } from "@/lib/zugang";
 import type { Deceased, RoleView, RollenTermin } from "@/lib/types";
+import { AngabenBogen } from "./AngabenBogen";
 import { ZugangBeenden } from "./ZugangBeenden";
 import { ZugangTermine } from "./ZugangTermine";
 
@@ -13,15 +14,6 @@ import { ZugangTermine } from "./ZugangTermine";
    ausgeblendet, sondern gar nicht erst geliefert. */
 
 export const dynamic = "force-dynamic";
-
-const fieldLabel: Record<keyof Deceased, string> = {
-  vorname: "Vorname", nachname: "Nachname",
-  geburtsdatum: "Geburtsdatum", sterbedatum: "Sterbedatum",
-  konfession: "Konfession", anschrift: "Anschrift",
-  groesse_cm: "Größe (cm)", gewicht_kg: "Gewicht (kg)", sargmass: "Sargmaß",
-  herzschrittmacher: "Herzschrittmacher", infektionshinweis: "Infektionshinweis",
-  freigabe_einaescherung: "Freigabe Einäscherung",
-};
 
 export default async function ZugangPage() {
   const session = (await cookies()).get(ZUGANG_COOKIE)?.value;
@@ -38,14 +30,21 @@ export default async function ZugangPage() {
   const d = view.verstorbene;
   /* null zählt wie «nicht vorhanden»: die Datenbankfunktion liefert für eine
      leere Angabe null, und «null» ist keine Auskunft, die jemand lesen soll. */
-  const fields = (Object.keys(d) as (keyof Deceased)[]).filter((k) => d[k] != null && d[k] !== "");
+  /* Was diese Rolle ändern darf (0012). Fehlt der Schlüssel, ist die Sitzung
+     älter als die Migration — dann nur lesen, wie bisher. */
+  const schreibbar = view.schreibbar ?? [];
+  /* Ein änderbares Feld steht im Bogen, nicht zusätzlich in der Leseliste:
+     zweimal dieselbe Angabe untereinander liest sich wie ein Fehler. */
+  const fields = (Object.keys(d) as (keyof Deceased)[])
+    .filter((k) => d[k] != null && d[k] !== "")
+    .filter((k) => !schreibbar.includes(k));
   const name = [d.vorname, d.nachname].filter(Boolean).join(" ");
   /* Fehlt der Schlüssel, ist die Sitzung älter als 0011 — dann keine Termine,
      aber auch kein Absturz. */
   const termine = view.termine ?? [];
   /* Floristik, Redner und Steinmetz sehen von der verstorbenen Person nichts
      — für sie ist der Termin die ganze Auskunft. Dann steht er oben. */
-  const terminZuerst = fields.length === 0;
+  const terminZuerst = fields.length === 0 && schreibbar.length === 0;
 
   return (
     <div className="mx-auto max-w-[720px]">
@@ -73,13 +72,22 @@ export default async function ZugangPage() {
           <div className="card grid grid-cols-2 gap-x-4 gap-y-2.5 p-4 text-[13px]">
             {fields.map((k) => (
               <span key={k} className="flex flex-col">
-                <span className="text-[10px] text-steel">{fieldLabel[k]}</span>
+                <span className="text-[10px] text-steel">{feldLabel[k]}</span>
                 <span className="text-chalk">
                   {typeof d[k] === "boolean" ? (d[k] ? "Ja" : "Nein") : String(d[k])}
                 </span>
               </span>
             ))}
           </div>
+        </section>
+      )}
+
+      {/* Was die Familie beitragen kann. Steht unter den bekannten Angaben:
+          erst zeigen, was schon da ist, dann fragen. */}
+      {schreibbar.length > 0 && (
+        <section className="mt-6">
+          <div className="mb-2.5 text-[10px] font-medium text-fog">Ihre Angaben</div>
+          <AngabenBogen felder={schreibbar} werte={d} />
         </section>
       )}
 

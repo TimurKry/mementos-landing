@@ -3,9 +3,14 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { endInviteSession, terminBestaetigen } from "@/lib/data";
+import { angabenErgaenzen, endInviteSession, terminBestaetigen } from "@/lib/data";
 import { ZUGANG_COOKIE, isSessionId } from "@/lib/zugang";
-import { GRENZEN, kennung, meldung, optMehrzeilig, pruefe, zeitfensterGeprueft } from "@/lib/eingaben";
+import { VON_AUSSEN_SCHREIBBAR, feldLabel } from "@/lib/access";
+import type { Deceased } from "@/lib/types";
+import {
+  GRENZEN, kennung, meldung, optDatum, optMehrzeilig, optText, pruefe,
+  zeitfensterGeprueft,
+} from "@/lib/eingaben";
 
 /* Zugang beenden: Sitzung serverseitig schliessen (end_session) und das
    Cookie entfernen. Beides — eines allein genügt nicht: ohne end_session
@@ -78,6 +83,69 @@ export async function terminBestaetigenAction(
 
   /* Nur der eigene Pfad — die Kennung des Falls ist hier nicht bekannt und
      hat in einer Adresse ohnehin nichts zu suchen. */
+  revalidatePath("/zugang");
+  return { ok: true };
+}
+
+/* ── Angaben ergänzen ────────────────────────────────────────────
+   Die Familie trägt ein, was nur sie weiss: Geburtsdatum, Konfession, letzte
+   Anschrift. Bisher lief das über einen Anruf und jemanden, der mitschreibt —
+   drei Gelegenheiten, etwas falsch zu übernehmen, an einem Tag, an dem
+   niemand konzentriert ist.
+
+   Dieselbe Bauart wie beim Bestätigen eines Termins: weder Fall-Kennung noch
+   Rolle kommen von aussen, beide hängen an der Sitzung im Cookie. Geprüft
+   wird hier nur die FORM. Welche Felder eine Rolle ändern darf, entscheidet
+   allein app.felder_schreibbar in der Datenbank — die Liste unten ist eine
+   Formhürde gegen einen Direktaufruf, keine zweite Wahrheit.
+
+   Die Meldung nennt bei einem Fehler das FELD, nie seinen Inhalt: eine
+   Anschrift in einer Fehlermeldung landet im Protokoll des Browsers und auf
+   Bildschirmfotos. */
+
+const FEHLER_ANGABEN =
+  "Diese Angaben lassen sich über Ihren Zugang nicht ändern.";
+const FEHLER_SPEICHERN =
+  "Das Speichern war gerade nicht möglich. Bitte in einigen Minuten erneut versuchen.";
+
+/* Längen je Feld — dieselben Zahlen wie app.feld_grenze in 0012. */
+const LAENGE: Partial<Record<keyof Deceased, number>> = {
+  vorname: GRENZEN.name,
+  nachname: GRENZEN.name,
+  konfession: GRENZEN.konfession,
+  anschrift: GRENZEN.anschrift,
+};
+
+export async function angabenErgaenzenAction(
+  eingaben: Record<string, string>,
+): Promise<BestaetigenErgebnis> {
+  const session = (await cookies()).get(ZUGANG_COOKIE)?.value;
+  if (!isSessionId(session)) return { ok: false, fehler: FEHLER_SITZUNG };
+
+  const g = pruefe(() => {
+    const felder: Partial<Deceased> = {};
+    for (const feld of VON_AUSSEN_SCHREIBBAR) {
+      if (!(feld in eingaben)) continue;
+      const roh = eingaben[feld];
+      const name = feldLabel[feld];
+      (felder as Record<string, unknown>)[feld] =
+        feld === "geburtsdatum"
+          ? optDatum(name, roh)
+          : optText(name, roh, LAENGE[feld] ?? GRENZEN.name);
+    }
+    return felder;
+  });
+  if (!g.ok) return { ok: false, fehler: meldung(g) };
+
+  if (Object.keys(g.wert).length === 0) return { ok: false, fehler: FEHLER_ANGABEN };
+
+  try {
+    const erlaubt = await angabenErgaenzen(session, g.wert);
+    if (!erlaubt) return { ok: false, fehler: FEHLER_ANGABEN };
+  } catch {
+    return { ok: false, fehler: FEHLER_SPEICHERN };
+  }
+
   revalidatePath("/zugang");
   return { ok: true };
 }
