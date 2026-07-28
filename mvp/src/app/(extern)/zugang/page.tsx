@@ -126,10 +126,23 @@ export default async function ZugangPage() {
           <div className="mb-2.5 text-[10px] font-medium text-fog">Unterlagen</div>
           <div className="grid gap-2">
             {view.dokumente.map((doc, i) => (
-              <div key={i} className="card flex items-center justify-between px-3.5 py-2.5">
+              <div key={doc.id ?? i} className="card flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5">
                 <span className="text-[13px] text-chalk">{doc.doc_type}</span>
-                <span className={`badge ${doc.verified ? "badge-green" : "badge-dim"}`}>
-                  {doc.verified ? "verifiziert" : "ausstehend"}
+                <span className="flex items-center gap-2">
+                  <span className={`badge ${doc.verified ? "badge-green" : "badge-dim"}`}>
+                    {doc.verified ? "verifiziert" : "ausstehend"}
+                  </span>
+                  {/* Wieder ein <a> statt next/link: dahinter steht ein Abruf,
+                      kein Bildschirm. In der Adresse steht nur die Kennung
+                      der Unterlage — welcher Fall, sagt das Cookie. */}
+                  {doc.id && (
+                    <a
+                      href={`/zugang/unterlage/${doc.id}`}
+                      className="btn-ghost px-2.5 py-1.5 text-[11.5px]"
+                    >
+                      Öffnen
+                    </a>
+                  )}
                 </span>
               </div>
             ))}

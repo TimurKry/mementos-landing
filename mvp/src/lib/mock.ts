@@ -12,6 +12,7 @@ import type {
   AdminEreignis, AdminFall, AdminFallKontext, AdminHaus, AdminUebersicht,
   AdminZugang, Case, Deceased, InviteSummary, Phase, Role, RoleView, Task, Termin,
 } from "./types";
+import type { Auslieferung } from "./data";
 import { caseForRole, darfBestaetigen, felderSchreibbar } from "./access";
 
 /* фиксированные demo-токены (Demo-Ablauf im README) — müssen gültig bleiben.
@@ -156,6 +157,9 @@ type MockInvite = {
 
 type MockSession = { inviteId: string; expiresAt: number };
 
+/* Hochgeladene Dateien im Mock — Kennung der Unterlage → Bytes. */
+type MockDatei = { inhalt: ArrayBuffer; mime: string; dateiname: string };
+
 /* ── Plattform-Übersicht: Beispieldaten ──────────────────────────
    Nur Metadaten. Kein Feld einer verstorbenen Person, kein Aufgabentext,
    kein Dokumentname — die Übersicht kennt sie nicht und soll sie nicht
@@ -213,6 +217,7 @@ type MockState = {
   cases: Case[];
   invites: Map<string, MockInvite>;   // id → Einladung
   sessions: Map<string, MockSession>; // Sitzungs-ID → Sitzung
+  dateien: Map<string, MockDatei>;    // Unterlagen-ID → Bytes
   plattform: MockPlattform;
   /* Wann ein im Betrieb angelegter Vorgang entstanden ist. Gehört in den
      Zustand und nicht in eine Modulkonstante: der Bundler legt dieses Modul
@@ -231,6 +236,7 @@ function initState(): MockState {
     cases: seedCases(),
     invites: new Map(),
     sessions: new Map(),
+    dateien: new Map(),
     plattform: seedPlattform(),
     angelegt: new Map(),
   };
@@ -422,7 +428,7 @@ function seedPlattform(): MockPlattform {
 }
 
 const state: MockState = (g.__mementoMock ??= initState());
-const { cases, invites, sessions, plattform, angelegt } = state;
+const { cases, invites, sessions, dateien, plattform, angelegt } = state;
 
 function inviteByToken(token: string): MockInvite | undefined {
   for (const inv of invites.values()) if (inv.token === token) return inv;
@@ -683,6 +689,73 @@ export const mockStore = {
 
   endSession: (sessionId: string): void => {
     sessions.delete(sessionId);
+  },
+
+  /* ── Unterlagen ───────────────────────────────────────────────
+     Im Mock gibt es keine Ablage, deshalb liegen die Bytes im Speicher des
+     Prozesses. Für die Vorführung genügt das; nach einem Neustart sind die
+     hochgeladenen Dateien weg, die Beispieldaten bleiben. */
+
+  addUnterlage: (
+    caseId: string,
+    u: {
+      docType: string; visibleTo: Role[]; dateiname: string;
+      mime: string; groesse: number; inhalt: ArrayBuffer;
+    },
+  ): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    const id = crypto.randomUUID();
+    dateien.set(id, { inhalt: u.inhalt, mime: u.mime, dateiname: u.dateiname });
+    c.dokumente.push({
+      id,
+      doc_type: u.docType,
+      verified: false,
+      uploaded_by: "bestatter",
+      visible_to: u.visibleTo,
+      dateiname: u.dateiname,
+      mime: u.mime,
+      groesse: u.groesse,
+      hochgeladen_am: iso(Date.now()),
+      hat_datei: true,
+    });
+  },
+
+  removeUnterlage: (caseId: string, docId: string): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    c.dokumente = c.dokumente.filter((d) => d.id !== docId);
+    dateien.delete(docId);
+  },
+
+  setUnterlageGeprueft: (caseId: string, docId: string, verified: boolean): void => {
+    const d = fallVon(caseId)?.dokumente.find((x) => x.id === docId);
+    if (d) d.verified = verified;
+  },
+
+  unterlageFuerHaus: (caseId: string, docId: string): Auslieferung | null => {
+    const d = fallVon(caseId)?.dokumente.find((x) => x.id === docId);
+    const datei = d?.id ? dateien.get(d.id) : undefined;
+    if (!d || !datei) return null;
+    return { art: "bytes", inhalt: datei.inhalt, mime: datei.mime, dateiname: datei.dateiname };
+  },
+
+  /* Spiegel von public.unterlage_fuer_sitzung (0014): die Rolle muss in
+     visible_to stehen, und die Unterlage muss zu DIESEM Vorgang gehören. */
+  unterlageFuerSitzung: (sessionId: string, docId: string): Auslieferung | null => {
+    const now = Date.now();
+    const s = sessions.get(sessionId);
+    if (!s || s.expiresAt <= now) return null;
+    const inv = invites.get(s.inviteId);
+    if (!usable(inv, now)) return null;
+
+    const c = cases.find((x) => x.id === inv.caseId);
+    const d = c?.dokumente.find((x) => x.id === docId);
+    if (!d || !(d.visible_to ?? []).includes(inv.role)) return null;
+
+    const datei = dateien.get(docId);
+    if (!datei) return null;
+    return { art: "bytes", inhalt: datei.inhalt, mime: datei.mime, dateiname: datei.dateiname };
   },
 
   /* Spiegel von public.angaben_ergaenzen (0012), in derselben Reihenfolge:

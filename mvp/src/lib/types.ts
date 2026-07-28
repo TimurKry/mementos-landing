@@ -57,7 +57,24 @@ export type Termin = {
    Datenbank in termin_bestaetigen — das Feld ist eine Auskunft, kein Recht. */
 export type RollenTermin = Omit<Termin, "zustaendig"> & { darf_bestaetigen: boolean };
 export type Task = { id?: string; title: string; assignee?: Role | null; due?: string | null; status: TaskStatus };
-export type Doc = { id?: string; doc_type: string; verified: boolean; uploaded_by?: Role; visible_to?: Role[] };
+/* Eine Unterlage. storage_path verlässt den Server nie — nach aussen geht
+   höchstens eine signierte Adresse, und die stellt der Server aus.
+   dateiname steht getrennt vom Pfad: im Pfad hat er nichts zu suchen
+   (Umlaute, Leerzeichen), beim Herunterladen soll er aber wieder da sein. */
+export type Doc = {
+  id?: string;
+  doc_type: string;
+  verified: boolean;
+  uploaded_by?: Role;
+  visible_to?: Role[];
+  dateiname?: string | null;
+  mime?: string | null;
+  groesse?: number | null;
+  hochgeladen_am?: string | null;
+  /* Nur ein Merkmal für die Oberfläche: liegt eine Datei dahinter oder ist
+     der Eintrag bisher nur ein Name? Der Pfad selbst bleibt im Server. */
+  hat_datei?: boolean;
+};
 export type Event = { actor: string; action: string; at: string };
 
 export type Case = {
@@ -190,7 +207,9 @@ export type RoleView = {
   verstorbene: Partial<Deceased>;
   beteiligte: { role: Role; org: string | null; joined: boolean }[];
   aufgaben: Task[];
-  dokumente: { doc_type: string; verified: boolean }[];
+  /* id ist nötig, um die Datei abzurufen — app.case_for_role liefert sie
+     mit. Der Ablagepfad bleibt draussen; ihn kennt nur der Server. */
+  dokumente: { id?: string; doc_type: string; verified: boolean }[];
   /* Optional, weil eine vor 0011 angelegte Sitzung den Schlüssel noch nicht
      mitbringt — die Ansicht darf deswegen nicht weiss bleiben. */
   termine?: RollenTermin[];

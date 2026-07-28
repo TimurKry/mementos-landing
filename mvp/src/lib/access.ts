@@ -268,7 +268,7 @@ export function caseForRole(c: Case, role: Role): RoleView {
     aufgaben: c.aufgaben.filter((t) => isBestatter || t.assignee === role),
     dokumente: c.dokumente
       .filter((d) => isBestatter || (d.visible_to ?? []).includes(role))
-      .map((d) => ({ doc_type: d.doc_type, verified: d.verified })),
+      .map((d) => ({ id: d.id, doc_type: d.doc_type, verified: d.verified })),
     /* Gefiltert nach Terminart, sortiert nach Beginn — Termine ohne Zeit ans
        Ende. zustaendig bleibt draussen: es ist eine Notiz des Hauses.
        darf_bestaetigen kommt je Zeile mit, wie in app.case_for_role. */

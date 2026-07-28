@@ -58,7 +58,11 @@ export async function getCase(id: string): Promise<Case | null> {
     sb.from("deceased").select("*").eq("case_id", id).maybeSingle(),
     sb.from("participants").select("id, role, org_name, joined, contact, sort").eq("case_id", id).order("sort"),
     sb.from("tasks").select("id, title, assignee, due, status").eq("case_id", id),
-    sb.from("documents").select("id, doc_type, verified, uploaded_by, visible_to").eq("case_id", id),
+    /* storage_path wird bewusst NICHT ausgewählt: er verlässt den Server
+       nicht. Ob eine Datei dahinterliegt, sagt hat_datei weiter unten. */
+    sb.from("documents")
+      .select("id, doc_type, verified, uploaded_by, visible_to, dateiname, mime, groesse, hochgeladen_am, storage_path")
+      .eq("case_id", id),
     /* Wie in app.case_for_role: nach Beginn, Termine ohne Zeit ans Ende. */
     sb.from("termine")
       .select("id, art, von, bis, ort_name, ort_adresse, zustaendig, status, hinweis")
@@ -71,7 +75,10 @@ export async function getCase(id: string): Promise<Case | null> {
     verstorbene: d ?? {},
     beteiligte: (p ?? []).map((x) => ({ id: x.id, role: x.role, org: x.org_name, joined: x.joined, contact: x.contact, sort: x.sort })),
     aufgaben: t ?? [],
-    dokumente: docs ?? [],
+    dokumente: (docs ?? []).map(({ storage_path, ...d }) => ({
+      ...d,
+      hat_datei: !!storage_path,
+    })),
     termine: term ?? [],
   } as Case;
 }
@@ -377,6 +384,178 @@ export async function angabenErgaenzen(
   });
   if (error) throw new Error(ERR_DB);
   return data === true;
+}
+
+/* ── Unterlagen ──────────────────────────────────────────────────
+   documents gibt es seit 0001, benutzt wurde die Tabelle nie: die Anwendung
+   zeigte Namen, hinter denen keine Datei lag.
+
+   Der Ablagepfad ist «<dokument_id>/<dateiname>» und trägt bewusst KEINE
+   Fall-Kennung — die stünde sonst in jeder signierten Adresse und damit im
+   Browser der Familie. Begründung im Kopf von 0014_unterlagen.sql.
+
+   Reihenfolge beim Hochladen: erst die Zeile, dann die Datei. Die Regel
+   unterlagen_eigentuemer lässt einen Upload nur an einen Pfad zu, den bereits
+   eine Zeile beansprucht — eine Datei ohne Eintrag kann so gar nicht
+   entstehen. Scheitert der Upload, wird die Zeile wieder entfernt: ein
+   Eintrag ohne Datei wäre eine Unterlage, die es nicht gibt. */
+
+export const UNTERLAGEN_EIMER = "unterlagen";
+
+/* Der Dateiname im Pfad, nicht der angezeigte: ASCII, kein Schrägstrich,
+   keine Leerzeichen. Der ursprüngliche Name steht in documents.dateiname und
+   kommt beim Herunterladen wieder zum Vorschein. */
+export function pfadName(name: string): string {
+  const ersetzt = name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")   // Akzente, die NFKD abgetrennt hat
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100);
+  return ersetzt.length > 0 ? ersetzt : "datei";
+}
+
+export type NeueUnterlage = {
+  docType: string;
+  visibleTo: Role[];
+  dateiname: string;
+  mime: string;
+  groesse: number;
+  inhalt: ArrayBuffer;
+};
+
+export async function addUnterlage(caseId: string, u: NeueUnterlage): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.addUnterlage(caseId, u);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+
+  const id = crypto.randomUUID();
+  const pfad = `${id}/${pfadName(u.dateiname)}`;
+
+  const { error: fehlerZeile } = await sb.from("documents").insert({
+    id,
+    case_id: caseId,
+    doc_type: u.docType,
+    uploaded_by: "bestatter",
+    visible_to: u.visibleTo,
+    storage_path: pfad,
+    dateiname: u.dateiname,
+    mime: u.mime,
+    groesse: u.groesse,
+    hochgeladen_am: new Date().toISOString(),
+  });
+  if (fehlerZeile) throw dbFehler(fehlerZeile.code);
+
+  const { error: fehlerDatei } = await sb.storage
+    .from(UNTERLAGEN_EIMER)
+    .upload(pfad, u.inhalt, { contentType: u.mime, upsert: false });
+
+  if (fehlerDatei) {
+    /* Zurückrollen. Schlägt auch das fehl, bleibt ein Eintrag ohne Datei
+       stehen — sichtbar als «keine Datei», nicht als stiller Verlust. */
+    await sb.from("documents").delete().eq("id", id).eq("case_id", caseId);
+    throw new Error(ERR_DB);
+  }
+}
+
+export async function removeUnterlage(caseId: string, docId: string): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.removeUnterlage(caseId, docId);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+
+  /* Erst den Pfad holen, dann die Zeile löschen, dann die Datei: nach dem
+     Löschen der Zeile lässt die Regel den Zugriff auf die Datei nicht mehr
+     zu — sie hinge sonst für immer im Eimer. */
+  const { data } = await sb
+    .from("documents").select("storage_path")
+    .eq("id", docId).eq("case_id", caseId).maybeSingle();
+
+  if (data?.storage_path) {
+    await sb.storage.from(UNTERLAGEN_EIMER).remove([data.storage_path]);
+  }
+  const { error } = await sb
+    .from("documents").delete()
+    .eq("id", docId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
+export async function setUnterlageGeprueft(
+  caseId: string,
+  docId: string,
+  verified: boolean,
+): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.setUnterlageGeprueft(caseId, docId, verified);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("documents").update({ verified })
+    .eq("id", docId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
+/* Was ein Abruf zum Ausliefern braucht. Im Mock-Betrieb liegen die Bytes
+   dabei, im Betrieb mit Datenbank eine signierte Adresse. */
+export type Auslieferung =
+  | { art: "adresse"; url: string; dateiname: string }
+  | { art: "bytes"; inhalt: ArrayBuffer; mime: string; dateiname: string };
+
+/* Kurz gültig: die Adresse wandert über einen Redirect direkt in den Browser
+   und wird nicht aufbewahrt. */
+const SIGNATUR_SEKUNDEN = 60;
+
+/* Für das Haus. Die Regel unterlagen_eigentuemer entscheidet — deshalb der
+   gewöhnliche Client mit der Anmeldung des Hauses, nicht service_role. */
+export async function unterlageFuerHaus(
+  caseId: string,
+  docId: string,
+): Promise<Auslieferung | null> {
+  if (getRuntimeMode() === "mock") return mockStore.unterlageFuerHaus(caseId, docId);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+
+  const { data } = await sb
+    .from("documents").select("storage_path, dateiname")
+    .eq("id", docId).eq("case_id", caseId).maybeSingle();
+  if (!data?.storage_path) return null;
+
+  const { data: signiert, error } = await sb.storage
+    .from(UNTERLAGEN_EIMER)
+    .createSignedUrl(data.storage_path, SIGNATUR_SEKUNDEN, {
+      download: data.dateiname ?? true,
+    });
+  if (error || !signiert?.signedUrl) return null;
+  return { art: "adresse", url: signiert.signedUrl, dateiname: data.dateiname ?? "Unterlage" };
+}
+
+/* Für einen Eingeladenen. Ob die Rolle die Unterlage sehen darf, entscheidet
+   public.unterlage_fuer_sitzung (0014) — hier steht keine zweite Prüfung.
+   Die signierte Adresse stellt anschliessend service_role aus: anon hat an
+   der Ablage nichts, und genau dafür gibt es diesen Schlüssel. */
+export async function unterlageFuerSitzung(
+  sessionId: string,
+  docId: string,
+): Promise<Auslieferung | null> {
+  if (getRuntimeMode() === "mock") return mockStore.unterlageFuerSitzung(sessionId, docId);
+  const { supabaseServer, supabaseService } = await import("./supabase/server");
+  const sb = await supabaseServer();
+
+  const { data: pfad, error } = await sb.rpc("unterlage_fuer_sitzung", {
+    p_session: sessionId,
+    p_dokument: docId,
+  });
+  if (error) throw new Error(ERR_DB);
+  if (!pfad) return null;
+
+  /* Der angezeigte Name steht in der Zeile; ihn holt derselbe Weg nicht mit,
+     weil die Funktion bewusst nur den Pfad herausgibt. Der letzte Abschnitt
+     des Pfades genügt als Rückfallname. */
+  const name = String(pfad).split("/").pop() || "Unterlage";
+
+  const { data: signiert, error: fehler } = await supabaseService().storage
+    .from(UNTERLAGEN_EIMER)
+    .createSignedUrl(String(pfad), SIGNATUR_SEKUNDEN, { download: name });
+  if (fehler || !signiert?.signedUrl) return null;
+  return { art: "adresse", url: signiert.signedUrl, dateiname: name };
 }
 
 /* ── Einladungen verwalten (nur Eigentümer) ──────────────────── */

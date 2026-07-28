@@ -8,6 +8,7 @@ import { Aufgaben } from "./Aufgaben";
 import { Beteiligte } from "./Beteiligte";
 import { Einladungen } from "./Einladungen";
 import { Termine } from "./Termine";
+import { Unterlagen } from "./Unterlagen";
 import { VerstorbenePerson } from "./VerstorbenePerson";
 import { Verlauf } from "./Verlauf";
 import { Vorgang } from "./Vorgang";
@@ -112,20 +113,14 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
             <Beteiligte caseId={c.id} beteiligte={c.beteiligte} />
           </section>
 
-          {/* Dokumente */}
+          {/* Unterlagen */}
           <section>
             <div className="mb-2.5 text-[10px] font-medium text-fog">Unterlagen</div>
-            <div className="grid gap-2">
-              {c.dokumente.length === 0 && <div className="text-[12px] text-steel">Noch keine Unterlagen.</div>}
-              {c.dokumente.map((doc) => (
-                <div key={doc.doc_type} className="card flex items-center justify-between gap-3 px-3.5 py-2.5">
-                  <span className="text-[13px] text-chalk">{doc.doc_type}</span>
-                  <span className={`badge ${doc.verified ? "badge-green" : "badge-dim"}`}>
-                    {doc.verified ? "verifiziert" : "ausstehend"}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <p className="mb-2.5 max-w-[560px] text-[11.5px] leading-relaxed text-steel">
+              Beim Hochladen wird festgelegt, wer die Unterlage sehen darf.
+              Ohne Auswahl bleibt sie im Haus.
+            </p>
+            <Unterlagen caseId={c.id} dokumente={c.dokumente} />
           </section>
 
           {/* Verlauf — ganz unten: er wird gelesen, wenn etwas zu klären ist,
