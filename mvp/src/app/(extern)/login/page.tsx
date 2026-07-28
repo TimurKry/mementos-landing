@@ -1,5 +1,7 @@
 import { isMock } from "@/lib/data";
 import { LoginForm } from "./LoginForm";
+import { PasswortForm } from "./PasswortForm";
+import { safeNext } from "@/lib/safe-next";
 
 /* Anmeldung der Bestatter — Magic Link, kein Passwort.
    Liegt im äußeren Umkreis: wer hier steht, ist noch nicht angemeldet und
@@ -14,9 +16,12 @@ export const dynamic = "force-dynamic";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ fehler?: string }>;
+  searchParams: Promise<{ fehler?: string; next?: string }>;
 }) {
-  const { fehler } = await searchParams;
+  const { fehler, next } = await searchParams;
+  /* Dasselbe Ziel wie beim Anmeldelink — und derselbe Riegel dagegen, dass
+     jemand von hier auf eine fremde Adresse geschickt wird. */
+  const ziel = safeNext(next, "https://mementos.local");
 
   return (
     <div className="mx-auto max-w-[420px] py-8">
@@ -35,6 +40,17 @@ export default async function LoginPage({
       )}
 
       <LoginForm mock={isMock} />
+
+      {!isMock && (
+        <div className="mt-7">
+          <div className="hair mb-5" />
+          <div className="text-[10px] font-medium text-fog">Oder mit Passwort</div>
+          <p className="mt-1.5 text-[11.5px] leading-relaxed text-steel">
+            Falls der Anmeldelink auf sich warten lässt.
+          </p>
+          <PasswortForm next={ziel} />
+        </div>
+      )}
 
       <p className="mt-8 text-[11px] leading-relaxed text-steel">
         Zugänge werden in der Pilotphase manuell freigeschaltet.
