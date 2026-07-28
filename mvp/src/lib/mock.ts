@@ -10,9 +10,9 @@
 
 import type {
   AdminEreignis, AdminFall, AdminFallKontext, AdminHaus, AdminUebersicht,
-  AdminZugang, Case, Deceased, InviteSummary, Phase, Role, RoleView, Task,
+  AdminZugang, Case, Deceased, InviteSummary, Phase, Role, RoleView, Task, Termin,
 } from "./types";
-import { caseForRole } from "./access";
+import { caseForRole, darfBestaetigen } from "./access";
 
 /* фиксированные demo-токены (Demo-Ablauf im README) — müssen gültig bleiben.
    Sie gehören zu genau einem Fall: nur dort dürfen die beiden festen
@@ -57,6 +57,42 @@ function seedCases(): Case[] {
       { id: "d2", doc_type: "Einäscherungsantrag", verified: false, uploaded_by: "bestatter", visible_to: ["krematorium"] },
       { id: "d3", doc_type: "Vollmacht der Familie", verified: false, uploaded_by: "familie", visible_to: [] },
     ],
+    /* Zeitpunkte als Weltzeit (Z), so wie timestamptz sie liefert. Die
+       Anzeige rechnet nach Europe/Berlin um — im Juli also +2 Stunden:
+       06:00Z steht auf dem Bildschirm als 08:00 Uhr. */
+    termine: [
+      {
+        id: "tm1", art: "abholung",
+        von: "2026-07-11T06:00:00.000Z", bis: "2026-07-11T08:00:00.000Z",
+        ort_name: "Klinikum St. Georg", ort_adresse: "Delitzscher Str. 141, 04129 Leipzig",
+        zustaendig: "transport", status: "bestaetigt", hinweis: "Zufahrt über die Rückseite, Pforte anmelden.",
+      },
+      {
+        id: "tm2", art: "ueberfuehrung",
+        von: "2026-07-22T07:30:00.000Z", bis: null,
+        ort_name: "Krematorium Südstadt", ort_adresse: "Friedhofsweg 3, 04277 Leipzig",
+        zustaendig: "transport", status: "geplant", hinweis: null,
+      },
+      {
+        id: "tm3", art: "einaescherung",
+        von: "2026-07-24T09:00:00.000Z", bis: null,
+        ort_name: "Krematorium Südstadt", ort_adresse: "Friedhofsweg 3, 04277 Leipzig",
+        zustaendig: "krematorium", status: "geplant", hinweis: null,
+      },
+      {
+        id: "tm4", art: "trauerfeier",
+        von: "2026-07-24T12:00:00.000Z", bis: "2026-07-24T13:00:00.000Z",
+        ort_name: "Friedhofskapelle Südfriedhof", ort_adresse: "Friedhofsweg 3, 04277 Leipzig",
+        zustaendig: "bestatter", status: "geplant", hinweis: null,
+      },
+      {
+        /* Ohne Zeit: der Termin steht fest, die Uhrzeit noch nicht. */
+        id: "tm5", art: "abschiednahme",
+        von: null, bis: null,
+        ort_name: "Abschiedsraum im Haus", ort_adresse: null,
+        zustaendig: "bestatter", status: "geplant", hinweis: null,
+      },
+    ],
     verlauf: [
       { actor: "Krematorium Südstadt", action: "Fall angelegt", at: "Do 09:12" },
       { actor: "System", action: "Hinweis: Herzschrittmacher markiert", at: "Do 11:40" },
@@ -84,6 +120,20 @@ function seedCases(): Case[] {
       { id: "t5", title: "Erstgespräch mit Familie", assignee: "bestatter", due: "morgen", status: "offen" },
     ],
     dokumente: [],
+    termine: [
+      {
+        id: "tm6", art: "abholung",
+        von: "2026-07-16T15:00:00.000Z", bis: null,
+        ort_name: "Seniorenheim Lindenhof", ort_adresse: "Lindenstr. 12, 04103 Leipzig",
+        zustaendig: "transport", status: "geplant", hinweis: null,
+      },
+      {
+        id: "tm7", art: "beisetzung",
+        von: "2026-07-30T11:00:00.000Z", bis: null,
+        ort_name: "Südfriedhof Leipzig, Abteilung 12", ort_adresse: "Friedhofsweg 3, 04277 Leipzig",
+        zustaendig: "friedhof", status: "geplant", hinweis: null,
+      },
+    ],
     verlauf: [{ actor: "Sie", action: "Fall angelegt", at: "Mi 16:20" }],
   },
   ];
@@ -429,6 +479,7 @@ export const mockStore = {
       beteiligte: [],
       aufgaben: [],
       dokumente: [],
+      termine: [],
       verlauf: [],
     });
     angelegt.set(id, Date.now());
@@ -488,6 +539,65 @@ export const mockStore = {
     const c = fallVon(caseId);
     if (!c) return;
     c.aufgaben = c.aufgaben.filter((t) => t.id !== taskId);
+  },
+
+  /* ── Termine ──────────────────────────────────────────────── */
+
+  addTermin: (caseId: string, t: Omit<Termin, "id" | "status">): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    c.termine.push({
+      id: crypto.randomUUID(),
+      art: t.art,
+      von: t.von ?? null,
+      bis: t.bis ?? null,
+      ort_name: t.ort_name ?? null,
+      ort_adresse: t.ort_adresse ?? null,
+      zustaendig: t.zustaendig ?? null,
+      status: "geplant",
+      hinweis: t.hinweis ?? null,
+    });
+  },
+
+  updateTermin: (caseId: string, terminId: string, patch: Partial<Termin>): void => {
+    const t = fallVon(caseId)?.termine.find((x) => x.id === terminId);
+    if (!t) return;
+    Object.assign(t, patch);
+  },
+
+  removeTermin: (caseId: string, terminId: string): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    c.termine = c.termine.filter((t) => t.id !== terminId);
+  },
+
+  /* Spiegel von public.termin_bestaetigen (0011) — in derselben Reihenfolge,
+     damit der Mock nicht durchlässt, was die Datenbank abweist:
+     Sitzung lebendig → Termin gehört zu DIESEM Fall → Rolle darf diese Art. */
+  terminBestaetigen: (
+    sessionId: string,
+    terminId: string,
+    von: string | null,
+    bis: string | null,
+    hinweis: string | null,
+  ): boolean => {
+    const now = Date.now();
+    const s = sessions.get(sessionId);
+    if (!s || s.expiresAt <= now) return false;
+    const inv = invites.get(s.inviteId);
+    if (!usable(inv, now)) return false;
+
+    const c = cases.find((x) => x.id === inv.caseId);
+    const t = c?.termine.find((x) => x.id === terminId);
+    if (!t) return false;
+
+    if (!darfBestaetigen(inv.role, t.art)) return false;
+
+    t.von = von;
+    t.bis = bis;
+    t.hinweis = hinweis;
+    t.status = "bestaetigt";
+    return true;
   },
 
   /* Token → Sitzung. Ungültig/abgelaufen/zurückgezogen ⇒ null (kein Fehler:

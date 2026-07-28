@@ -3,7 +3,9 @@
    в live-режиме фильтрует сервер, здесь — mock-режим, подписи в UI и аудит.
    Матрица tier'ов менялась только вместе с миграцией. Держать синхронно! */
 
-import type { Role, Tier, Deceased, Case, Phase, RoleView } from "./types";
+import type {
+  Role, Tier, Deceased, Case, Phase, RoleView, TerminArt, TerminStatus,
+} from "./types";
 
 /* Phasen eines Vorgangs — eine Beschriftung für alle Bildschirme
    (Arbeitsbereich und Plattform-Übersicht). */
@@ -66,6 +68,98 @@ export const einladbareRollen: Role[] = (Object.keys(roleLabel) as Role[])
    Formular. Die harte Grenze bleibt die Datenbank. */
 export function istEinladbareRolle(value: unknown): value is Role {
   return typeof value === "string" && (einladbareRollen as string[]).includes(value);
+}
+
+/* ── Termine: zwei Matrizen, nicht eine ──────────────────────────
+   Spiegel von app.termine_fuer_rolle und app.darf_bestaetigen aus
+   0011_termine.sql. Sehen und ändern sind verschiedene Rechte und fallen hier
+   bewusst auseinander: eine Floristik sieht die Trauerfeier, bestätigen kann
+   sie sie nicht. Ein Krematorium sieht die Überführung, bestätigt aber nur die
+   Einäscherung.
+
+   Bemerkenswert an der oberen Matrix: Floristik, Redner und Steinmetz sehen
+   nach allowedTiers von der verstorbenen Person NICHTS — kein Name, kein
+   Datum. Das bleibt so. Zeit und Ort der Trauerfeier brauchen sie trotzdem,
+   sonst wissen sie nicht, wohin die Blumen sollen. Der Termin gibt ihnen genau
+   das und kein Feld mehr über den Menschen.
+
+   Beide Matrizen gehören zur Migration und dürfen nur zusammen mit ihr
+   wandern. Die harte Grenze bleibt die Datenbank. */
+
+export const terminArtLabel: Record<TerminArt, string> = {
+  abholung: "Abholung",
+  ueberfuehrung: "Überführung",
+  einaescherung: "Einäscherung",
+  trauerfeier: "Trauerfeier",
+  beisetzung: "Beisetzung",
+  abschiednahme: "Abschiednahme",
+};
+
+/* Was an der Terminart hängt — ein Satz, damit im Bogen nicht geraten wird,
+   wofür «Überführung» steht. */
+export const terminArtHinweis: Record<TerminArt, string> = {
+  abholung: "Abholung der verstorbenen Person",
+  ueberfuehrung: "Fahrt zum Krematorium oder zur Kühlung",
+  einaescherung: "Im Krematorium",
+  trauerfeier: "Feier mit den Angehörigen",
+  beisetzung: "Grab oder Urnenbeisetzung",
+  abschiednahme: "Abschied der Angehörigen am Sarg",
+};
+
+export const terminStatusLabel: Record<TerminStatus, string> = {
+  geplant: "geplant", bestaetigt: "bestätigt",
+  erledigt: "erledigt", abgesagt: "abgesagt",
+};
+
+export const TERMIN_ARTEN = Object.keys(terminArtLabel) as TerminArt[];
+export const TERMIN_STATUS = Object.keys(terminStatusLabel) as TerminStatus[];
+
+/* Welche Terminarten sieht eine Rolle? */
+export function termineFuerRolle(role: Role): TerminArt[] {
+  switch (role) {
+    case "bestatter":
+      return ["abholung", "ueberfuehrung", "einaescherung",
+              "trauerfeier", "beisetzung", "abschiednahme"];
+    case "transport": return ["abholung", "ueberfuehrung"];
+    case "krematorium": return ["ueberfuehrung", "einaescherung"];
+    case "friedhof": return ["beisetzung"];
+    case "familie": return ["abholung", "abschiednahme", "trauerfeier", "beisetzung"];
+    case "klinik": return ["abholung"];
+    case "floristik": return ["trauerfeier", "beisetzung"];
+    case "redner": return ["trauerfeier"];
+    case "steinmetz": return ["beisetzung"];
+    default: return []; // standesamt, verbund
+  }
+}
+
+/* Wer darf welchen Termin bestätigen? Gilt nur für Eingeladene ohne Konto —
+   der Eigentümer pflegt seine Termine ohnehin direkt. */
+export function darfBestaetigen(role: Role, art: TerminArt): boolean {
+  switch (role) {
+    case "transport": return art === "abholung" || art === "ueberfuehrung";
+    case "krematorium": return art === "einaescherung";
+    case "friedhof": return art === "beisetzung";
+    default: return false;
+  }
+}
+
+/* Reihenfolge wie in der Datenbank: «order by von asc nulls last». Ein Termin
+   ohne Zeit steht am Ende, nicht am Anfang — er ist noch nicht verabredet. */
+export function nachBeginn(a: { von?: string | null }, b: { von?: string | null }): number {
+  if (!a.von && !b.von) return 0;
+  if (!a.von) return 1;
+  if (!b.von) return -1;
+  return a.von < b.von ? -1 : a.von > b.von ? 1 : 0;
+}
+
+/* Ein Satz für den Bogen: wer diesen Termin zu sehen bekommt. Aus der Matrix
+   abgeleitet, damit Beschriftung und Filter nicht auseinanderlaufen. */
+export function terminSichtbarFuerText(art: TerminArt): string {
+  const namen = (Object.keys(roleLabel) as Role[])
+    .filter((r) => r !== "bestatter" && termineFuerRolle(r).includes(art))
+    .map((r) => roleLabel[r]);
+  if (namen.length === 0) return "Bleibt im Haus.";
+  return `Sichtbar für ${aufzaehlung(namen)} — sobald ein Zugang dieser Rolle vergeben ist.`;
 }
 
 /* какие поля Verstorbene относятся к какой группе */
@@ -131,5 +225,16 @@ export function caseForRole(c: Case, role: Role): RoleView {
     dokumente: c.dokumente
       .filter((d) => isBestatter || (d.visible_to ?? []).includes(role))
       .map((d) => ({ doc_type: d.doc_type, verified: d.verified })),
+    /* Gefiltert nach Terminart, sortiert nach Beginn — Termine ohne Zeit ans
+       Ende. zustaendig bleibt draussen: es ist eine Notiz des Hauses.
+       darf_bestaetigen kommt je Zeile mit, wie in app.case_for_role. */
+    termine: c.termine
+      .filter((t) => termineFuerRolle(role).includes(t.art))
+      .slice()
+      .sort(nachBeginn)
+      .map(({ zustaendig: _egal, ...t }) => ({
+        ...t,
+        darf_bestaetigen: darfBestaetigen(role, t.art),
+      })),
   };
 }

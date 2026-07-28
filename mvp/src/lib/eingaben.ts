@@ -13,6 +13,8 @@
    Protokoll des Browsers, in Fehlerberichten und in Bildschirmfotos. Deshalb
    trägt Eingabefehler nur den Feldnamen, und den setzen wir selbst. */
 
+import { ausWanduhr } from "./zeit";
+
 export class Eingabefehler extends Error {
   /* `hinweis` ist ausschliesslich ein von uns geschriebener, fester Satz —
      nie ein Wert aus der Eingabe. Wer hier je etwas Eingegebenes einsetzt,
@@ -62,6 +64,9 @@ export const GRENZEN = {
   org: 120,
   aufgabe: 160,
   frist: 40,
+  ort_name: 120,
+  ort_adresse: 200,
+  termin_hinweis: 300,
 } as const;
 
 /* Kennung eines Datensatzes. Live sind das UUIDs; im Mock stehen kurze
@@ -126,6 +131,39 @@ export function optDatum(feld: string, v: unknown): string | null {
     throw new Eingabefehler(feld);
   }
   return v;
+}
+
+/* ── Zeitpunkt ───────────────────────────────────────────────────
+   Aus dem Feld <input type="datetime-local"> kommt eine Wanduhrzeit ohne
+   Zone. Umgerechnet wird in Europe/Berlin — die Begründung steht in
+   src/lib/zeit.ts. Ergebnis ist ein ISO-Zeitpunkt für timestamptz.
+
+   Leer bleibt zulässig: ein Termin wird oft angelegt, bevor die Zeit
+   feststeht. */
+export function optZeitpunkt(feld: string, v: unknown): string | null {
+  if (v === null || v === undefined || v === "") return null;
+  const iso = ausWanduhr(v);
+  if (iso === null) throw new Eingabefehler(feld);
+  return iso;
+}
+
+/* Ein Zeitfenster als Paar. Ein Ende vor dem Anfang ist keine Kleinigkeit:
+   daraus liest ein Fahrdienst eine Abholung, die es nicht gibt. */
+export function zeitfensterGeprueft(
+  feldVon: string,
+  feldBis: string,
+  von: unknown,
+  bis: unknown,
+): { von: string | null; bis: string | null } {
+  const a = optZeitpunkt(feldVon, von);
+  const b = optZeitpunkt(feldBis, bis);
+  if (a && b && b < a) {
+    throw new Eingabefehler(feldBis, "Das Ende liegt vor dem Beginn. Bitte beide Zeiten prüfen.");
+  }
+  if (!a && b) {
+    throw new Eingabefehler(feldVon, "Ohne Beginn lässt sich kein Ende eintragen.");
+  }
+  return { von: a, bis: b };
 }
 
 /* ── Zahlen ──────────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import { DEMO_CASE_ID, DEMO_FAMILY_TOKEN, DEMO_KREMATORIUM_TOKEN } from "@/lib/m
 import { Aufgaben } from "./Aufgaben";
 import { Beteiligte } from "./Beteiligte";
 import { Einladungen } from "./Einladungen";
+import { Termine } from "./Termine";
 import { VerstorbenePerson } from "./VerstorbenePerson";
 import { Vorgang } from "./Vorgang";
 import { zuAnsicht } from "./invite-view";
@@ -78,6 +79,19 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
               einer Gruppe halten die übrigen nicht auf.
             </p>
             <VerstorbenePerson caseId={c.id} verstorbene={d} />
+          </section>
+
+          {/* Termine — Zeit und Ort. Steht bewusst vor den Beteiligten:
+              wer beteiligt ist, ergibt sich meist erst daraus, was wann
+              wo geschieht. */}
+          <section>
+            <div className="mb-2.5 text-[10px] font-medium text-fog">Termine</div>
+            <p className="mb-2.5 max-w-[560px] text-[11.5px] leading-relaxed text-steel">
+              Zeit und Ort der einzelnen Schritte. Die Terminart bestimmt, wer
+              den Termin zu sehen bekommt — Fahrdienst, Krematorium und
+              Friedhof sehen sonst kein Datum und keine Adresse.
+            </p>
+            <Termine caseId={c.id} termine={c.termine} />
           </section>
 
           {/* Beteiligte */}

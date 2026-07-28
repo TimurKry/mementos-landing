@@ -9,7 +9,9 @@
    Alle lesenden Aufrufe laufen mit dem anon-Schlüssel; service_role wird hier
    nie benutzt. Und: keine Tokens/Sitzungs-IDs in Logs. */
 
-import type { Case, Deceased, InviteSummary, Phase, Role, RoleView, Task } from "./types";
+import type {
+  Case, Deceased, InviteSummary, Phase, Role, RoleView, Task, Termin,
+} from "./types";
 import { getRuntimeMode, isMockMode } from "./env";
 import { mockStore } from "./mock";
 
@@ -42,7 +44,7 @@ export async function listCases(): Promise<Case[]> {
   const sb = await supabaseServer();
   // владелец видит свои фаллы; детальные поля тянем на странице фалла
   const { data } = await sb.from("cases").select("id, ref, bestattungsart, phase, target_date").order("created_at", { ascending: false });
-  return (data ?? []).map((c) => ({ ...c, verstorbene: {}, beteiligte: [], aufgaben: [], dokumente: [] })) as Case[];
+  return (data ?? []).map((c) => ({ ...c, verstorbene: {}, beteiligte: [], aufgaben: [], dokumente: [], termine: [] })) as Case[];
 }
 
 export async function getCase(id: string): Promise<Case | null> {
@@ -50,12 +52,17 @@ export async function getCase(id: string): Promise<Case | null> {
   const { supabaseServer } = await import("./supabase/server");
   const sb = await supabaseServer();
   // владелец (Bestatter) видит всё — собираем из таблиц; RLS пускает только к своим
-  const [{ data: c }, { data: d }, { data: p }, { data: t }, { data: docs }] = await Promise.all([
+  const [{ data: c }, { data: d }, { data: p }, { data: t }, { data: docs }, { data: term }] = await Promise.all([
     sb.from("cases").select("*").eq("id", id).maybeSingle(),
     sb.from("deceased").select("*").eq("case_id", id).maybeSingle(),
     sb.from("participants").select("id, role, org_name, joined, contact, sort").eq("case_id", id).order("sort"),
     sb.from("tasks").select("id, title, assignee, due, status").eq("case_id", id),
     sb.from("documents").select("id, doc_type, verified, uploaded_by, visible_to").eq("case_id", id),
+    /* Wie in app.case_for_role: nach Beginn, Termine ohne Zeit ans Ende. */
+    sb.from("termine")
+      .select("id, art, von, bis, ort_name, ort_adresse, zustaendig, status, hinweis")
+      .eq("case_id", id)
+      .order("von", { ascending: true, nullsFirst: false }),
   ]);
   if (!c) return null;
   return {
@@ -64,6 +71,7 @@ export async function getCase(id: string): Promise<Case | null> {
     beteiligte: (p ?? []).map((x) => ({ id: x.id, role: x.role, org: x.org_name, joined: x.joined, contact: x.contact, sort: x.sort })),
     aufgaben: t ?? [],
     dokumente: docs ?? [],
+    termine: term ?? [],
   } as Case;
 }
 
@@ -250,6 +258,82 @@ export async function toggleTask(caseId: string, taskId: string): Promise<void> 
   await sb
     .from("tasks").update({ status: next })
     .eq("id", taskId).eq("case_id", caseId);
+}
+
+/* ── Termine ─────────────────────────────────────────────────────
+   Für das Haus gewöhnliche Tabellenzugriffe: die Regel termine_owner (0011)
+   lässt nur den Eigentümer des Vorgangs durch. Wie bei den Aufgaben ist jede
+   Anweisung an das Paar (Fall, Termin) gebunden. */
+
+export type NeuerTermin = Pick<
+  Termin, "art" | "von" | "bis" | "ort_name" | "ort_adresse" | "zustaendig" | "hinweis"
+>;
+
+export type TerminAenderung = Partial<Omit<Termin, "id">>;
+
+export async function addTermin(caseId: string, t: NeuerTermin): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.addTermin(caseId, t);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb.from("termine").insert({ case_id: caseId, ...t });
+  if (error) throw dbFehler(error.code);
+}
+
+export async function updateTermin(
+  caseId: string,
+  terminId: string,
+  patch: TerminAenderung,
+): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.updateTermin(caseId, terminId, patch);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("termine").update(patch)
+    .eq("id", terminId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
+export async function removeTermin(caseId: string, terminId: string): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.removeTermin(caseId, terminId);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("termine").delete()
+    .eq("id", terminId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
+/* Bestätigung durch einen Eingeladenen ohne Konto — der einzige schreibende
+   Weg des äusseren Umkreises.
+
+   Die Sitzung ist das ganze Argument: welcher Fall dahintersteht, welche
+   Rolle, und ob diese Rolle diese Terminart bestätigen darf, entscheidet
+   ausschliesslich public.termin_bestaetigen (0011). Von hier geht keine
+   case_id mit — sie ist auf dieser Seite gar nicht bekannt.
+
+   false heisst «darf nicht oder Sitzung ist abgelaufen» und ist kein Fehler:
+   die Oberfläche muss das von einer Störung unterscheiden können. */
+export async function terminBestaetigen(
+  sessionId: string,
+  terminId: string,
+  von: string | null,
+  bis: string | null,
+  hinweis: string | null,
+): Promise<boolean> {
+  if (getRuntimeMode() === "mock") {
+    return mockStore.terminBestaetigen(sessionId, terminId, von, bis, hinweis);
+  }
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { data, error } = await sb.rpc("termin_bestaetigen", {
+    p_session: sessionId,
+    p_termin: terminId,
+    p_von: von,
+    p_bis: bis,
+    p_hinweis: hinweis,
+  });
+  if (error) throw new Error(ERR_DB);
+  return data === true;
 }
 
 /* ── Einladungen verwalten (nur Eigentümer) ──────────────────── */

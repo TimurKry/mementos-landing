@@ -24,6 +24,38 @@ export type Deceased = {
    Beteiligter nicht gezielt entfernen: zwei Zeilen dürfen dieselbe Rolle
    tragen (zwei Fahrdienste, zwei Angehörige). */
 export type Participant = { id?: string; role: Role; org?: string | null; joined: boolean; contact?: ContactStatus; sort?: number };
+
+/* ── Termine (0011_termine.sql) ──────────────────────────────────
+   Bis dahin hatte ein Vorgang genau ein Datum (Case.target_date) — der
+   Wunschtermin der Familie. Wann abzuholen ist und wo die Trauerfeier
+   stattfindet, stand nirgends. Ein Termin trägt beides: Zeitfenster und Ort.
+
+   von/bis sind ISO-Zeitpunkte (timestamptz) und dürfen fehlen: ein Termin
+   wird oft angelegt, bevor die Zeit feststeht. Zwei statt einem, weil eine
+   Abholung in der Praxis ein Fenster ist («zwischen 8 und 10»). */
+export type TerminArt =
+  | "abholung" | "ueberfuehrung" | "einaescherung"
+  | "trauerfeier" | "beisetzung" | "abschiednahme";
+
+export type TerminStatus = "geplant" | "bestaetigt" | "erledigt" | "abgesagt";
+
+export type Termin = {
+  id?: string;
+  art: TerminArt;
+  von?: string | null;
+  bis?: string | null;
+  ort_name?: string | null;
+  ort_adresse?: string | null;
+  zustaendig?: Role | null;
+  status: TerminStatus;
+  hinweis?: string | null;
+};
+
+/* Ein Termin, wie ihn ein Eingeladener sieht. darf_bestaetigen kommt vom
+   Server mit (app.darf_bestaetigen je Zeile), damit die Oberfläche weiss, ob
+   sie ein Formular zeigen darf. Die Entscheidung selbst trifft weiterhin die
+   Datenbank in termin_bestaetigen — das Feld ist eine Auskunft, kein Recht. */
+export type RollenTermin = Omit<Termin, "zustaendig"> & { darf_bestaetigen: boolean };
 export type Task = { id?: string; title: string; assignee?: Role | null; due?: string | null; status: TaskStatus };
 export type Doc = { id?: string; doc_type: string; verified: boolean; uploaded_by?: Role; visible_to?: Role[] };
 export type Event = { actor: string; action: string; at: string };
@@ -38,6 +70,7 @@ export type Case = {
   beteiligte: Participant[];
   aufgaben: Task[];
   dokumente: Doc[];
+  termine: Termin[];
   verlauf?: Event[];
 };
 
@@ -158,4 +191,7 @@ export type RoleView = {
   beteiligte: { role: Role; org: string | null; joined: boolean }[];
   aufgaben: Task[];
   dokumente: { doc_type: string; verified: boolean }[];
+  /* Optional, weil eine vor 0011 angelegte Sitzung den Schlüssel noch nicht
+     mitbringt — die Ansicht darf deswegen nicht weiss bleiben. */
+  termine?: RollenTermin[];
 };

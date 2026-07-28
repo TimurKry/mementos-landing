@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import { getCaseBySession } from "@/lib/data";
 import { roleLabel } from "@/lib/access";
 import { ZUGANG_COOKIE } from "@/lib/zugang";
-import type { Deceased, RoleView } from "@/lib/types";
+import type { Deceased, RoleView, RollenTermin } from "@/lib/types";
 import { ZugangBeenden } from "./ZugangBeenden";
+import { ZugangTermine } from "./ZugangTermine";
 
 /* Ansicht der Eingeladenen. Der Token steht nicht mehr in der Adresszeile —
    die Sitzung kommt aus dem Cookie, gefiltert wird serverseitig nach Rolle
@@ -39,6 +40,12 @@ export default async function ZugangPage() {
      leere Angabe null, und «null» ist keine Auskunft, die jemand lesen soll. */
   const fields = (Object.keys(d) as (keyof Deceased)[]).filter((k) => d[k] != null && d[k] !== "");
   const name = [d.vorname, d.nachname].filter(Boolean).join(" ");
+  /* Fehlt der Schlüssel, ist die Sitzung älter als 0011 — dann keine Termine,
+     aber auch kein Absturz. */
+  const termine = view.termine ?? [];
+  /* Floristik, Redner und Steinmetz sehen von der verstorbenen Person nichts
+     — für sie ist der Termin die ganze Auskunft. Dann steht er oben. */
+  const terminZuerst = fields.length === 0;
 
   return (
     <div className="mx-auto max-w-[720px]">
@@ -46,11 +53,18 @@ export default async function ZugangPage() {
         <span className="h-1 w-1 rounded-full bg-current" />
         Ansicht als {roleLabel[view.role]}
       </div>
-      <div className="text-[10px] font-medium text-fog">{view.ref} · {view.bestattungsart}</div>
+      {/* Ohne Namen wäre die Kennung zweimal zu lesen — Floristik, Redner und
+          Steinmetz bekommen keinen Namen zu sehen, und «M-2026-0147» über
+          «M-2026-0147» sieht aus wie ein Fehler. */}
+      <div className="text-[10px] font-medium text-fog">
+        {name ? `${view.ref} · ${view.bestattungsart}` : view.bestattungsart}
+      </div>
       <h1 className="mt-1 text-[26px] leading-tight">{name || view.ref}</h1>
       <p className="mt-2 text-[13px] text-fog">
         Sie sehen nur, was Ihre Rolle betrifft. Alles andere bleibt verborgen.
       </p>
+
+      {terminZuerst && <TermineAbschnitt termine={termine} />}
 
       {/* видимые поля */}
       {fields.length > 0 && (
@@ -68,6 +82,8 @@ export default async function ZugangPage() {
           </div>
         </section>
       )}
+
+      {!terminZuerst && <TermineAbschnitt termine={termine} />}
 
       {/* участники (без внутренних имён) */}
       <section className="mt-6">
@@ -133,5 +149,24 @@ export default async function ZugangPage() {
         </p>
       </section>
     </div>
+  );
+}
+
+/* Termine der eigenen Rolle. Ein leerer Abschnitt bleibt weg — aber nur,
+   wenn wirklich keiner vorliegt: «keine Termine» ist eine Auskunft, eine
+   leere Fläche ist keine. */
+function TermineAbschnitt({ termine }: { termine: RollenTermin[] }) {
+  return (
+    <section className="mt-6">
+      <div className="mb-2.5 text-[10px] font-medium text-fog">Termine</div>
+      {termine.length === 0 ? (
+        <p className="text-[12.5px] leading-relaxed text-steel">
+          Für Ihre Rolle ist noch kein Termin eingetragen. Sobald das
+          Bestattungshaus Zeit und Ort festlegt, stehen sie hier.
+        </p>
+      ) : (
+        <ZugangTermine termine={termine} />
+      )}
+    </section>
   );
 }

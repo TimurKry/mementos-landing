@@ -24,15 +24,18 @@
 
 import { revalidatePath } from "next/cache";
 import {
-  addParticipant, addTask, createInvite, istKeinZugriff, removeParticipant,
-  removeTask, revokeInvite, setParticipantJoined, toggleTask, updateCase,
-  updateDeceased,
+  addParticipant, addTask, addTermin, createInvite, istKeinZugriff,
+  removeParticipant, removeTask, removeTermin, revokeInvite,
+  setParticipantJoined, toggleTask, updateCase, updateDeceased, updateTermin,
 } from "@/lib/data";
-import { istEinladbareRolle, phaseLabel, roleLabel } from "@/lib/access";
+import {
+  TERMIN_ARTEN, TERMIN_STATUS, istEinladbareRolle, phaseLabel, roleLabel,
+} from "@/lib/access";
 import type { Deceased, Phase, Role, Tier } from "@/lib/types";
 import {
   BEREICH, Eingabefehler, GRENZEN, ausListe, jaNein, kennung, meldung,
   optDatum, optGanzzahl, optMehrzeilig, optText, pflichtText, pruefe,
+  zeitfensterGeprueft,
 } from "@/lib/eingaben";
 
 const FEHLER_ZUGRIFF = "Für diesen Fall besteht kein Zugriff.";
@@ -267,6 +270,89 @@ export async function aufgabeUmschaltenAction(
 
   const { fall, id } = g.wert;
   return schreibe(fall, () => toggleTask(fall, id));
+}
+
+/* ── Termine ─────────────────────────────────────────────────────
+   Ort und Hinweis sind freier Text und deshalb begrenzt. Zeitpunkte kommen
+   als Wanduhrzeit aus dem Formular und gehen als Zeitpunkt in die Datenbank
+   (optZeitpunkt); ein Ende ohne Beginn und ein Ende vor dem Beginn werden
+   abgelehnt, statt sie stillschweigend zu übernehmen.
+
+   Die Terminart bestimmt, welche Rolle den Termin später zu sehen bekommt
+   (app.termine_fuer_rolle). Sie darf deshalb nicht frei sein: geprüft wird
+   gegen die Aufzählung, nicht gegen den Text im Formular. */
+
+export type TerminEingabe = {
+  art: string;
+  von: string;
+  bis: string;
+  ort_name: string;
+  ort_adresse: string;
+  zustaendig: string;
+  hinweis: string;
+};
+
+const OHNE_ZUSTAENDIGKEIT = "";
+
+function terminFelder(e: TerminEingabe | undefined) {
+  const { von, bis } = zeitfensterGeprueft("Beginn", "Ende", e?.von, e?.bis);
+  return {
+    art: ausListe("Terminart", e?.art, TERMIN_ARTEN),
+    von,
+    bis,
+    ort_name: optText("Ort", e?.ort_name ?? "", GRENZEN.ort_name),
+    ort_adresse: optText("Adresse", e?.ort_adresse ?? "", GRENZEN.ort_adresse),
+    zustaendig:
+      (e?.zustaendig ?? OHNE_ZUSTAENDIGKEIT) === OHNE_ZUSTAENDIGKEIT
+        ? null
+        : ausListe("Zuständig", e!.zustaendig, ROLLEN),
+    hinweis: optMehrzeilig("Hinweis", e?.hinweis ?? "", GRENZEN.termin_hinweis),
+  };
+}
+
+export async function terminHinzufuegenAction(
+  caseId: string,
+  e: TerminEingabe,
+): Promise<Ergebnis> {
+  const g = pruefe(() => ({
+    fall: kennung("Vorgang", caseId),
+    termin: terminFelder(e),
+  }));
+  if (!g.ok) return { ok: false, fehler: meldung(g) };
+
+  const { fall, termin } = g.wert;
+  return schreibe(fall, () => addTermin(fall, termin));
+}
+
+export async function terminSpeichernAction(
+  caseId: string,
+  terminId: string,
+  e: TerminEingabe,
+  status: string,
+): Promise<Ergebnis> {
+  const g = pruefe(() => ({
+    fall: kennung("Vorgang", caseId),
+    id: kennung("Termin", terminId),
+    patch: { ...terminFelder(e), status: ausListe("Status", status, TERMIN_STATUS) },
+  }));
+  if (!g.ok) return { ok: false, fehler: meldung(g) };
+
+  const { fall, id, patch } = g.wert;
+  return schreibe(fall, () => updateTermin(fall, id, patch));
+}
+
+export async function terminEntfernenAction(
+  caseId: string,
+  terminId: string,
+): Promise<Ergebnis> {
+  const g = pruefe(() => ({
+    fall: kennung("Vorgang", caseId),
+    id: kennung("Termin", terminId),
+  }));
+  if (!g.ok) return { ok: false, fehler: meldung(g) };
+
+  const { fall, id } = g.wert;
+  return schreibe(fall, () => removeTermin(fall, id));
 }
 
 /* ── Einladungen ─────────────────────────────────────────────── */
