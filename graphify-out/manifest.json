@@ -440,14 +440,14 @@
     "semantic_hash": "239f3ebf717465dc636818a1a619398d"
   },
   "src/app/datenmodell/page.tsx": {
-    "mtime": 1784689586.4704268,
-    "ast_hash": "ed3ba45f78271c40b596d5504c88ea24",
-    "semantic_hash": "ed3ba45f78271c40b596d5504c88ea24"
+    "mtime": 1785360890.0478458,
+    "ast_hash": "8e71d4c02d7c793dcdfc7df9b8787989",
+    "semantic_hash": ""
   },
   "src/app/demo/page.tsx": {
-    "mtime": 1784596450.8739595,
-    "ast_hash": "1ff2273afecaf34f282e819c4bb905dc",
-    "semantic_hash": "1ff2273afecaf34f282e819c4bb905dc"
+    "mtime": 1785360890.04845,
+    "ast_hash": "9ec447e9d3964b5cd0bead1c4bf32d8c",
+    "semantic_hash": ""
   },
   "src/app/fuer-bestatter/page.tsx": {
     "mtime": 1784753001.567918,
@@ -480,9 +480,9 @@
     "semantic_hash": "f60950eb17bae29561560178879ac786"
   },
   "src/app/layout.tsx": {
-    "mtime": 1784595886.9836564,
-    "ast_hash": "b14151f7f4663deb269e67dc558d0c94",
-    "semantic_hash": "b14151f7f4663deb269e67dc558d0c94"
+    "mtime": 1785360837.2082443,
+    "ast_hash": "40006170b5339585a1c373978aa14a01",
+    "semantic_hash": ""
   },
   "src/app/page.tsx": {
     "mtime": 1784806296.6190436,
@@ -490,29 +490,29 @@
     "semantic_hash": "fd9600d1c76658443605bd43b21b6db3"
   },
   "src/app/preise/page.tsx": {
-    "mtime": 1784753001.567918,
-    "ast_hash": "fafbe98fd84067b25280daf3eafdb172",
-    "semantic_hash": "fafbe98fd84067b25280daf3eafdb172"
+    "mtime": 1785360890.0486643,
+    "ast_hash": "5bba4ccdbaecff6f2ad7ddc0666d37d0",
+    "semantic_hash": ""
   },
   "src/app/sicherheit/page.tsx": {
-    "mtime": 1784806296.6190436,
-    "ast_hash": "8da67abd491b7b1c4e484ef6da531d79",
-    "semantic_hash": "8da67abd491b7b1c4e484ef6da531d79"
+    "mtime": 1785360890.0490198,
+    "ast_hash": "e41d2b2c1f0c6aeb6b4dfe2fbfad514d",
+    "semantic_hash": ""
   },
   "src/app/so-funktioniert-es/page.tsx": {
-    "mtime": 1784806296.6230438,
-    "ast_hash": "dac8b58d27b126e557d45a53b4701813",
-    "semantic_hash": "dac8b58d27b126e557d45a53b4701813"
+    "mtime": 1785360890.0492914,
+    "ast_hash": "0db624dd77ba0c40ece3fab2d46209cc",
+    "semantic_hash": ""
   },
   "src/app/ueber-uns/page.tsx": {
-    "mtime": 1784806296.6230438,
-    "ast_hash": "c45dda4c9cbb9908ad0b1cdc02446aee",
-    "semantic_hash": "c45dda4c9cbb9908ad0b1cdc02446aee"
+    "mtime": 1785360890.0495012,
+    "ast_hash": "19770f36dde21fad2c9922f63f203dbb",
+    "semantic_hash": ""
   },
   "src/app/workspace/page.tsx": {
-    "mtime": 1784597829.6849704,
-    "ast_hash": "210a0d417c9855008e98ec8d321e4602",
-    "semantic_hash": "210a0d417c9855008e98ec8d321e4602"
+    "mtime": 1785360890.0499053,
+    "ast_hash": "770ec9a6fda5a08bd24379f28955d66d",
+    "semantic_hash": ""
   },
   "src/components/AccessTeaser.tsx": {
     "mtime": 1784689586.4704268,
@@ -600,9 +600,9 @@
     "semantic_hash": "4fc1a32ae7dd249322ac7a9924ae60f4"
   },
   "src/components/audience/AudiencePage.tsx": {
-    "mtime": 1784753001.5716312,
-    "ast_hash": "25526ffb0bb3a1d9ebc4d66928d7d123",
-    "semantic_hash": "25526ffb0bb3a1d9ebc4d66928d7d123"
+    "mtime": 1785360858.7842438,
+    "ast_hash": "3760a34c5cb1ffa45eb8e9d511a1d771",
+    "semantic_hash": ""
   },
   "src/components/audience/FaqSection.tsx": {
     "mtime": 1784753001.5716312,
@@ -827,6 +827,31 @@
   "pnpm-workspace.yaml": {
     "mtime": 1784571534.6277027,
     "ast_hash": "3bcf8dcf7e83d16f32c49fe0db5ae722",
+    "semantic_hash": ""
+  },
+  "src/app/robots.ts": {
+    "mtime": 1785360754.5762463,
+    "ast_hash": "65cfb600bf42c6d0f358b1adf65fd4d2",
+    "semantic_hash": ""
+  },
+  "src/app/sitemap.ts": {
+    "mtime": 1785360746.0802464,
+    "ast_hash": "eb87ac52e4e647924a110267937b6814",
+    "semantic_hash": ""
+  },
+  "src/components/Schema.tsx": {
+    "mtime": 1785360728.5682468,
+    "ast_hash": "c0853026cd3d3553b726d4e24dd6fc75",
+    "semantic_hash": ""
+  },
+  "src/lib/site.ts": {
+    "mtime": 1785360815.252245,
+    "ast_hash": "4847c3bd59711b0c1866f328e6991fcd",
+    "semantic_hash": ""
+  },
+  "public/og.png": {
+    "mtime": 1785360952.6402416,
+    "ast_hash": "875721cd9e366e6bb36dd12c7fdac8fe",
     "semantic_hash": ""
   }
 }
