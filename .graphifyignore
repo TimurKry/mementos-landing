@@ -1,0 +1,53 @@
+# Was NICHT in den Wissensgraph gehört.
+#
+# Leitgedanke: erzeugte Artefakte raus, Quelltext und Begründungen rein. Die
+# Migrationen und docs/ sind hier besonders wichtig — dort steht, WARUM eine
+# Rechteregel so aussieht, und genau das soll der Graph auffindbar machen.
+
+# Abhängigkeiten und Baustände
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+
+# Prüfläufe
+playwright-report/
+test-results/
+
+# Erzeugtes, nicht Geschriebenes
+*.map
+*.min.js
+*.tsbuildinfo
+next-env.d.ts
+
+# Geheimnisse. Doppelt gesichert: .env* steht auch in .gitignore, aber der
+# Graph liest das Arbeitsverzeichnis, nicht den Git-Index.
+.env
+.env.*
+!.env.example
+
+# Der eigene Ausgabeordner — sonst indexiert der Graph sich selbst
+graphify-out/
+
+# Betriebssystem
+.DS_Store
+
+# Die mitgelieferte Dokumentation von Graphify selbst. Sie beschreibt das
+# Werkzeug, nicht dieses Projekt — im Graph würde sie die Suche nach
+# Projektwissen mit Anleitungstexten verwässern.
+.claude/skills/graphify/
+
+# Schmuck-Symbole. Jedes Bild bekäme einen eigenen Auswertungslauf mit
+# Bilderkennung, und ein Sarg-Symbol trägt kein Wissen über die Anwendung.
+assets/icons/
+
+# Das Markenzeichen ist eine Rekonstruktion und ein Platzhalter; was daran zu
+# wissen ist, steht in assets/brand/README.md — und die wird indexiert.
+assets/brand/mementoos-mark.svg
+
+# Bewusst NICHT ausgeschlossen und deshalb hier benannt, damit niemand sie
+# später versehentlich hinzufügt:
+#   src/  mvp/  supabase/  migrations/  docs/  assets/brand/
+#   CLAUDE.md  README*.md  package.json  tsconfig.json  next.config.*

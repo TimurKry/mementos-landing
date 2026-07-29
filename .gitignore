@@ -6,3 +6,24 @@ next-env.d.ts
 .env*
 !.env.example
 .DS_Store
+
+# Graphify: die tragbaren Artefakte (graph.json, GRAPH_REPORT.md, graph.html,
+# manifest.json) bleiben versionierbar — sie sind der Nutzen für die nächste
+# Sitzung. Draussen bleibt, was an genau eine Maschine gebunden ist.
+graphify-out/cost.json
+graphify-out/cache/
+
+# Enthalten absolute Pfade dieses Rechners (Interpreter bzw. Scan-Wurzel) und
+# werden beim ersten Lauf neu geschrieben.
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+
+# Ebenfalls maschinengebunden: graphify schreibt die Hook-Befehle mit dem
+# absoluten Pfad der eigenen Binärdatei (hier /root/.local/bin/graphify).
+# Auf einem anderen Rechner zeigt der ins Leere, und weil die Hooks JEDEN
+# Bash-, Read- und Grep-Aufruf abfangen, wäre die Folge kein stiller Ausfall,
+# sondern ein blockierter Arbeitsbereich.
+#
+# Nach dem Klonen einmal selbst erzeugen:
+#   graphify install --project --strict
+.claude/settings.json

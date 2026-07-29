@@ -1,0 +1,7 @@
+# Ausgabe des Wissensgraphen. Sie ändert sich bei jedem Lauf und würde sonst
+# den Prompt-Cache bei jeder Aktualisierung entwerten.
+#
+# Der Graph wird über `graphify query` befragt, nicht gelesen — er muss dem
+# Modell also nicht als Datei zur Verfügung stehen.
+graph.json
+graphify-out/
