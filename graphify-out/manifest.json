@@ -1,9 +1,4 @@
 {
-  ".claude/settings.json": {
-    "mtime": 1785359398.9864442,
-    "ast_hash": "bb4bb611e85a659f4b82354806591f4e",
-    "semantic_hash": "bb4bb611e85a659f4b82354806591f4e"
-  },
   "mvp/next.config.ts": {
     "mtime": 1785243683.3721843,
     "ast_hash": "5c92bbc2f58838318d43080b88c126de",
@@ -733,5 +728,105 @@
     "mtime": 1785243683.3812854,
     "ast_hash": "8a5815f5f7488b50b73d7af0e49ea53c",
     "semantic_hash": "8a5815f5f7488b50b73d7af0e49ea53c"
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1785359398.9854767,
+    "ast_hash": "9b31786b637be3c13978bec4c2330752",
+    "semantic_hash": ""
+  },
+  ".claude/agents/architect.md": {
+    "mtime": 1784685362.636181,
+    "ast_hash": "c4e0ab7cb71f3721d450d34746f61fc4",
+    "semantic_hash": ""
+  },
+  ".claude/agents/doc-writer.md": {
+    "mtime": 1784685362.6368313,
+    "ast_hash": "57013f1d9d794d5241e3fd0353c29b3c",
+    "semantic_hash": ""
+  },
+  ".claude/agents/implementer.md": {
+    "mtime": 1784685362.6368313,
+    "ast_hash": "9a6cc56cee20ff4a81fb73890cd9c36c",
+    "semantic_hash": ""
+  },
+  ".claude/agents/reviewer.md": {
+    "mtime": 1784685362.6368313,
+    "ast_hash": "377024356997c394ee1c1c5876652c1c",
+    "semantic_hash": ""
+  },
+  ".claude/skills/team/SKILL.md": {
+    "mtime": 1784685362.6378946,
+    "ast_hash": "1772e904d885a1101f62043641ba8d15",
+    "semantic_hash": ""
+  },
+  ".github/workflows/deploy.yml": {
+    "mtime": 1784571534.6255655,
+    "ast_hash": "fe5c4db1b1e277308831fe450f04a0da",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1785359398.9860241,
+    "ast_hash": "6d1a97997330478e13af22fcdc5753a3",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1785243683.3681843,
+    "ast_hash": "7a374f787e4d09947d23b5ab375d57a3",
+    "semantic_hash": ""
+  },
+  "assets/brand/README.md": {
+    "mtime": 1785250617.8843536,
+    "ast_hash": "3896ff9e064e208424f4203d53658a4a",
+    "semantic_hash": ""
+  },
+  "docs/WORKING_CONTEXT.md": {
+    "mtime": 1785359596.5642726,
+    "ast_hash": "c8dcfb090b4ee27cfb1cc72412bc4a2b",
+    "semantic_hash": ""
+  },
+  "docs/components.md": {
+    "mtime": 1784571534.6277027,
+    "ast_hash": "b91d7dae25c64be997cc4315065b02d0",
+    "semantic_hash": ""
+  },
+  "docs/design-systems.md": {
+    "mtime": 1785243683.3681843,
+    "ast_hash": "f751ef97373e506ede7e07b4e3983085",
+    "semantic_hash": ""
+  },
+  "docs/features/audience-pages.md": {
+    "mtime": 1784753001.567918,
+    "ast_hash": "abecfa776b2b60621f8b2de61de751c5",
+    "semantic_hash": ""
+  },
+  "docs/features/datenmodell.md": {
+    "mtime": 1784689586.4704268,
+    "ast_hash": "ea3dbf8261dfa4a4920e4e65a11b33c0",
+    "semantic_hash": ""
+  },
+  "docs/features/mvp-sicherheit.md": {
+    "mtime": 1785336389.6025083,
+    "ast_hash": "1067456db1be1376b5b290a1663ba473",
+    "semantic_hash": ""
+  },
+  "docs/features/vertrauen-und-ablauf.md": {
+    "mtime": 1784823359.4089077,
+    "ast_hash": "c87f86f143a1f3d1fdf6bf8d334d27e4",
+    "semantic_hash": ""
+  },
+  "docs/projekt-karte.md": {
+    "mtime": 1785243683.3721843,
+    "ast_hash": "3720038badf1e01b1c2203b8b8b6c483",
+    "semantic_hash": ""
+  },
+  "mvp/README.md": {
+    "mtime": 1785243683.3721843,
+    "ast_hash": "fd610bd2542c4261660de9d03dc8480f",
+    "semantic_hash": ""
+  },
+  "pnpm-workspace.yaml": {
+    "mtime": 1784571534.6277027,
+    "ast_hash": "3bcf8dcf7e83d16f32c49fe0db5ae722",
+    "semantic_hash": ""
   }
 }
