@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="240" height="240"
+     viewBox="0 0 240 240"
+     role="img" aria-labelledby="title desc">
+  <title id="title">MementoOS symbol</title>
+  <desc id="desc">Three black circles in a triangular arrangement.</desc>
+  <g fill="#000000">
+    <circle cx="74" cy="76" r="42"/>
+    <circle cx="166" cy="76" r="42"/>
+    <circle cx="120" cy="158" r="42"/>
+  </g>
+</svg>
