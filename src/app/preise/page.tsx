@@ -4,15 +4,17 @@ import { AudienceCta } from "@/components/audience/AudienceCta";
 import { AudienceFooter } from "@/components/audience/AudienceFooter";
 import { Pricing } from "@/components/pricing/Pricing";
 import type { PricingSpec } from "@/components/pricing/types";
+import { seite } from "@/lib/site";
 
 /* Preise — Steep, role-neutral. Nav + Pricing (full, defaultPlans)
    + CTA + Footer. Keine Zahlen: Konditionen nur als Text. */
 
-export const metadata: Metadata = {
-  title: "MementoOS — Preise",
-  description:
+export const metadata: Metadata = seite({
+  titel: "MementoOS — Preise",
+  beschreibung:
     "Das Kernmodell rechnet pro abgeschlossenem Fall ab. Für Häuser und Verbünde mit konstantem Volumen gibt es Abos. Konditionen legen wir in der Pilotphase gemeinsam fest.",
-};
+  pfad: "preise",
+});
 
 const pricing: PricingSpec = {
   variant: "full",

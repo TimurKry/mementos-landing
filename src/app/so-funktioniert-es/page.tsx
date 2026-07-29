@@ -3,12 +3,14 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { HubDiagram } from "@/components/HubDiagram";
+import { seite } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "MementoOS — So funktioniert es",
-  description:
+export const metadata: Metadata = seite({
+  titel: "MementoOS — So funktioniert es",
+  beschreibung:
     "Von der Buchung bis zum Archiv: ein Fall, alle Beteiligten, jeder Schritt sichtbar. So läuft ein Vorgang in MementoOS — vom bestätigten Termin bis zum Abschluss.",
-};
+  pfad: "so-funktioniert-es",
+});
 
 // Schritte 01–05 — der Weg eines Vorgangs
 const steps = [

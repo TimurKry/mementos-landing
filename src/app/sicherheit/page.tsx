@@ -3,12 +3,14 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { IconSchild, IconDokument, IconCheck, IconMenschen } from "@/components/icons";
+import { seite } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "MementoOS — Datenschutz & Vertrauen",
-  description:
+export const metadata: Metadata = seite({
+  titel: "MementoOS — Datenschutz & Vertrauen",
+  beschreibung:
     "Sensible Daten verdienen klare Regeln. In MementoOS sieht jede Organisation nur, was sie betrifft — feldgenauer Zugriff nach Rolle, lückenloses Protokoll, DSGVO im Blick.",
-};
+  pfad: "sicherheit",
+});
 
 // Vier Vertrauens-Bausteine (Vorschau — keine verbindlichen Angaben)
 const blocks = [

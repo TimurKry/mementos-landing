@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/icons";
 import { BestatterWorkspace } from "@/components/workspace/BestatterWorkspace";
+import { seite } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "MementoOS — Der Arbeitsbereich (Konzept)",
-  description:
+export const metadata: Metadata = seite({
+  titel: "MementoOS — Der Arbeitsbereich (Konzept)",
+  beschreibung:
     "Interaktives Konzept-Mockup: Dashboard, Vorgangs-Pipeline, Beteiligten-Matrix und KI-Schnellerfassung für Bestattungsunternehmen.",
-};
+  pfad: "workspace",
+});
 
 /* «Default» dark-CRM chrome: void-холст, sticky-навигация 72px с
    hairline-границей, костяная CTA. Контент — BestatterWorkspace. */

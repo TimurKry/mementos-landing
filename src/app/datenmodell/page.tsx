@@ -8,12 +8,14 @@ import { EntityDiagram } from "@/components/datamodel/EntityDiagram";
 import { EntityCard } from "@/components/datamodel/EntityCard";
 import { DocTable } from "@/components/datamodel/DocTable";
 import { RoleHead, GroupKey } from "@/components/datamodel/ui";
+import { seite } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "MementoOS — Datenmodell & Zugriff",
-  description:
+export const metadata: Metadata = seite({
+  titel: "MementoOS — Datenmodell & Zugriff",
+  beschreibung:
     "Das Datenmodell von MementoOS: Tabellen mit Feldern, wer sie schreibt und welche Rolle welche Feldgruppe liest — feldgenauer Zugriff für jede Beteiligte.",
-};
+  pfad: "datenmodell",
+});
 
 const roleOrder: RoleId[] = [
   "bestatter", "familie", "krematorium", "transport", "friedhof",

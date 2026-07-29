@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/icons";
 import { DemoFlow } from "@/components/demo/DemoFlow";
+import { seite } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "MementoOS — Demo: der digitale Vorgang",
-  description:
+export const metadata: Metadata = seite({
+  titel: "MementoOS — Demo: der digitale Vorgang",
+  beschreibung:
     "Klickbare Testversion: vom bestätigten Termin bis zum abgeschlossenen Fall — der ganze Ablauf in sechs Schritten.",
-};
+  pfad: "demo",
+});
 
 export default function DemoPage() {
   return (

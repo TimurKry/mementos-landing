@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { seite } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "MementoOS — Über uns",
-  description:
+export const metadata: Metadata = seite({
+  titel: "MementoOS — Über uns",
+  beschreibung:
     "MementoOS ist eine Vorschau und wird in Leipzig entwickelt — im direkten Austausch mit Bestattern, Krematorien und Partnern. Hinter MementoOS steht Memora.",
-};
+  pfad: "ueber-uns",
+});
 
 export default function UeberUnsPage() {
   return (
