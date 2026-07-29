@@ -154,8 +154,17 @@ begin
     );
   $regel$;
 
-  -- anon bekommt an der Ablage nichts. Eingeladene laden ausschliesslich
-  -- über eine signierte Adresse herunter, die der Server ausstellt.
+  -- Versuch, anon die Tabellenrechte zu nehmen. WIRKUNGSLOS auf Supabase und
+  -- hier nur der Vollständigkeit halber: storage.objects gehört
+  -- supabase_storage_admin, die Migration läuft als postgres. REVOKE durch
+  -- einen Nicht-Eigentümer bricht nicht ab, es tut schlicht nichts.
+  --
+  -- Der Riegel ist deshalb NICHT dieser Aufruf, sondern die Regel oben. Am
+  -- laufenden Projekt geprüft: anon wird bei SELECT wie bei INSERT auf
+  -- storage.objects abgewiesen — die Regel schlägt in public.documents nach,
+  -- und daran hat anon seit 0004 kein Tabellenrecht. Zweite Linie: sie ruft
+  -- public.is_case_owner, das anon ebenfalls nicht ausführen darf. Dritte:
+  -- ohne Anmeldung ist auth.uid() leer und die Prüfung wäre false.
   execute 'revoke all on storage.objects from anon';
 end
 $$;
@@ -219,6 +228,25 @@ grant execute on function public.admin_sitzung_beenden(uuid)             to auth
 -- select polname from pg_policy where polrelid = 'storage.objects'::regclass
 --   and polname = 'unterlagen_eigentuemer';
 --
--- 5) anon hat an der Ablage nichts — erwartet: 0 Zeilen.
--- select privilege_type from information_schema.role_table_grants
--- where grantee = 'anon' and table_schema = 'storage' and table_name = 'objects';
+-- 5) anon kommt an keine Ablage-Zeile. Die Tabellenrechte BLEIBEN bestehen
+--    (siehe Kommentar oben), geprüft wird deshalb das Verhalten, nicht die
+--    ACL. Erwartet: beide Male «abgewiesen».
+-- create or replace function pg_temp.probe() returns table(was text, ergebnis text)
+-- language plpgsql as $probe$
+-- declare n int;
+-- begin
+--   begin
+--     set local role anon; select count(*) into n from storage.objects; reset role;
+--     was := 'anon SELECT'; ergebnis := n::text || ' Zeilen'; return next;
+--   exception when others then
+--     reset role; was := 'anon SELECT'; ergebnis := 'abgewiesen: ' || sqlerrm; return next;
+--   end;
+--   begin
+--     set local role anon;
+--     insert into storage.objects (bucket_id, name) values ('unterlagen','fremd/x.pdf');
+--     reset role; was := 'anon INSERT'; ergebnis := 'DURCHGELASSEN — Loch!'; return next;
+--   exception when others then
+--     reset role; was := 'anon INSERT'; ergebnis := 'abgewiesen: ' || sqlerrm; return next;
+--   end;
+-- end $probe$;
+-- select * from pg_temp.probe();
