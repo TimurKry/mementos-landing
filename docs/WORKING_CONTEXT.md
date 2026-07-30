@@ -224,6 +224,23 @@ Ausführlich in `docs/features/mvp-sicherheit.md`.
   überschreiben). Der Fehler der pauschalen Zuschreibung kostet eine
   Rückfrage.
 
+### Was die Supabase-Advisors melden und warum das grösstenteils so bleibt
+
+Der Bericht ist lang, neu ist darin nichts. Er ist so zu lesen:
+
+- **«anon darf SECURITY-DEFINER-Funktionen aufrufen» (sechsmal)** — das sind
+  genau die sechs Funktionen des öffentlichen Vertrags. Genau so gewollt.
+- **Dieselbe Meldung für `authenticated`** — die Funktionen des Hauses und der
+  Verwaltung. Ebenfalls gewollt.
+- **`platform_admins` hat RLS an und keine Policy** — Absicht, oben
+  festgehalten.
+- **Leaked Password Protection ist aus.** Nicht vergessen, sondern **erst ab
+  dem Pro-Tarif verfügbar**; das Projekt liegt auf `free`. Kein offener
+  Punkt, solange der Tarif steht. Stattdessen sind Mindestlänge und
+  Zeichenklassen des Passworts angezogen — die greifen auf jedem Tarif.
+  Bestandsnutzer mit schwachem Passwort kommen weiter herein, bekommen aber
+  bei `signInWithPassword` einen `WeakPasswordError`.
+
 ---
 
 ## CONFIRMED — fertig und auf der echten Datenbank geprüft
@@ -341,15 +358,12 @@ Rechtstexte (Impressum, Datenschutzerklärung), Auswertung, Kontaktformular.
   Voraussetzung welchen Termin blockiert, ist Branchenwissen und fehlt
   weiterhin. Der Eigentümer hat die Antworten eines Branchenkenners zugesagt
   («10 Abhängigkeiten», «wo Fälle stehenbleiben»). Bis dahin stehen drei
-  ausdrücklich als Annahme markierte Zeilen in der Matrix, und `0017` bleibt
-  unangewandt. Mit der Liste kommt eine **neue** Migration — die angewandte
-  wird nicht bearbeitet.
+  ausdrücklich als Annahme markierte Zeilen in der Matrix. `0017` selbst ist
+  angewandt (siehe CONFIRMED) — offen ist nur die Liste. Mit ihr kommt eine
+  **neue** Migration; die angewandte wird nicht bearbeitet.
 - **Floristik und Trauerredner sehen kein Feld.** Auf dem Schleifenband steht
   in der Praxis der Name; ein Trauerredner braucht Name, Lebensdaten und
   Konfession. 0015 hat das absichtlich nicht mitentschieden.
-- **Leaked Password Protection** ist im Supabase-Projekt aus. Seit es
-  Passwort-Anmeldung gibt, sollte sie an sein. Nur über das Dashboard
-  schaltbar, nicht über die Programmierschnittstelle.
 - **Signierte Commits**: die Schlüsseldatei im Container ist 0 Byte, es gibt
   keinen privaten Schlüssel. Autor und Committer sind korrekt; GitHub zeigt
   «Unverified». Nachträgliches Signieren ist ohne Schlüssel nicht möglich.
