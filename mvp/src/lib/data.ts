@@ -10,7 +10,8 @@
    nie benutzt. Und: keine Tokens/Sitzungs-IDs in Logs. */
 
 import type {
-  Case, Deceased, InviteSummary, Phase, Role, RoleView, Task, Termin,
+  AngabenErgebnis, Case, Deceased, InviteSummary, Korrektur, Phase, Role,
+  RoleView, Task, Termin, TerminErgebnis, Voraussetzung,
 } from "./types";
 import type { Verlaufseintrag } from "./verlauf";
 import { getRuntimeMode, isMockMode } from "./env";
@@ -45,7 +46,7 @@ export async function listCases(): Promise<Case[]> {
   const sb = await supabaseServer();
   // владелец видит свои фаллы; детальные поля тянем на странице фалла
   const { data } = await sb.from("cases").select("id, ref, bestattungsart, phase, target_date").order("created_at", { ascending: false });
-  return (data ?? []).map((c) => ({ ...c, verstorbene: {}, beteiligte: [], aufgaben: [], dokumente: [], termine: [] })) as Case[];
+  return (data ?? []).map((c) => ({ ...c, verstorbene: {}, beteiligte: [], aufgaben: [], dokumente: [], termine: [], voraussetzungen: [] })) as Case[];
 }
 
 export async function getCase(id: string): Promise<Case | null> {
@@ -53,7 +54,7 @@ export async function getCase(id: string): Promise<Case | null> {
   const { supabaseServer } = await import("./supabase/server");
   const sb = await supabaseServer();
   // владелец (Bestatter) видит всё — собираем из таблиц; RLS пускает только к своим
-  const [{ data: c }, { data: d }, { data: p }, { data: t }, { data: docs }, { data: term }] = await Promise.all([
+  const [{ data: c }, { data: d }, { data: p }, { data: t }, { data: docs }, { data: term }, { data: vor }] = await Promise.all([
     sb.from("cases").select("*").eq("id", id).maybeSingle(),
     sb.from("deceased").select("*").eq("case_id", id).maybeSingle(),
     sb.from("participants").select("id, role, org_name, joined, contact, sort").eq("case_id", id).order("sort"),
@@ -68,6 +69,12 @@ export async function getCase(id: string): Promise<Case | null> {
       .select("id, art, von, bis, ort_name, ort_adresse, zustaendig, status, hinweis")
       .eq("case_id", id)
       .order("von", { ascending: true, nullsFirst: false }),
+    /* Voraussetzungen (0017). Nach Art sortiert und nicht nach Zeitpunkt:
+       die Liste ist kurz und soll bei jedem Laden gleich aussehen. */
+    sb.from("voraussetzung")
+      .select("id, art, zustaendig, erfuellt, erfuellt_am, hinweis")
+      .eq("case_id", id)
+      .order("art"),
   ]);
   if (!c) return null;
   return {
@@ -80,6 +87,7 @@ export async function getCase(id: string): Promise<Case | null> {
       hat_datei: !!storage_path,
     })),
     termine: term ?? [],
+    voraussetzungen: vor ?? [],
   } as Case;
 }
 
@@ -328,6 +336,76 @@ export async function removeTermin(caseId: string, terminId: string): Promise<vo
   if (error) throw dbFehler(error.code);
 }
 
+/* ── Voraussetzungen (0017) ──────────────────────────────────────
+   Für das Haus gewöhnliche Tabellenzugriffe: die Regel voraussetzung_owner
+   lässt nur den Eigentümer des Vorgangs durch. Wie bei Aufgaben und Terminen
+   ist jede Anweisung an das Paar (Fall, Zeile) gebunden.
+
+   Es gibt hier bewusst KEINEN Weg aus dem äusseren Umkreis: wer eine
+   Voraussetzung erfüllt meldet, ist eine eigene Rechtefrage — sonst erteilt
+   das Krematorium seine eigene Freigabe. Begründung im Kopf der Migration. */
+
+export type NeueVoraussetzung = Pick<
+  Voraussetzung, "art" | "zustaendig" | "hinweis"
+>;
+
+export type VoraussetzungAenderung = Partial<Omit<Voraussetzung, "id" | "art">>;
+
+export async function addVoraussetzung(
+  caseId: string,
+  v: NeueVoraussetzung,
+): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.addVoraussetzung(caseId, v);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb.from("voraussetzung").insert({ case_id: caseId, ...v });
+  if (error) throw dbFehler(error.code);
+}
+
+/* erfuellt_am wird hier gesetzt und nicht von einem Auslöser: die Spalte ist
+   eine Notiz für das Telefonat («seit wann steht das»), keine Grundlage einer
+   Entscheidung. Wer sie fälscht, fälscht seine eigene Akte. */
+export async function setVoraussetzungErfuellt(
+  caseId: string,
+  vorId: string,
+  erfuellt: boolean,
+): Promise<void> {
+  if (getRuntimeMode() === "mock") {
+    return mockStore.setVoraussetzungErfuellt(caseId, vorId, erfuellt);
+  }
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("voraussetzung")
+    .update({ erfuellt, erfuellt_am: erfuellt ? new Date().toISOString() : null })
+    .eq("id", vorId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
+export async function updateVoraussetzung(
+  caseId: string,
+  vorId: string,
+  patch: VoraussetzungAenderung,
+): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.updateVoraussetzung(caseId, vorId, patch);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("voraussetzung").update(patch)
+    .eq("id", vorId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
+export async function removeVoraussetzung(caseId: string, vorId: string): Promise<void> {
+  if (getRuntimeMode() === "mock") return mockStore.removeVoraussetzung(caseId, vorId);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { error } = await sb
+    .from("voraussetzung").delete()
+    .eq("id", vorId).eq("case_id", caseId);
+  if (error) throw dbFehler(error.code);
+}
+
 /* Bestätigung durch einen Eingeladenen ohne Konto — der einzige schreibende
    Weg des äusseren Umkreises.
 
@@ -336,15 +414,16 @@ export async function removeTermin(caseId: string, terminId: string): Promise<vo
    ausschliesslich public.termin_bestaetigen (0011). Von hier geht keine
    case_id mit — sie ist auf dieser Seite gar nicht bekannt.
 
-   false heisst «darf nicht oder Sitzung ist abgelaufen» und ist kein Fehler:
-   die Oberfläche muss das von einer Störung unterscheiden können. */
+   Seit 0017 jsonb statt boolean: «darf nicht oder Sitzung abgelaufen» und
+   «eine Voraussetzung fehlt» sind zwei verschiedene Auskünfte. Beide sind
+   kein Fehler — die Oberfläche muss sie von einer Störung unterscheiden. */
 export async function terminBestaetigen(
   sessionId: string,
   terminId: string,
   von: string | null,
   bis: string | null,
   hinweis: string | null,
-): Promise<boolean> {
+): Promise<TerminErgebnis> {
   if (getRuntimeMode() === "mock") {
     return mockStore.terminBestaetigen(sessionId, terminId, von, bis, hinweis);
   }
@@ -358,7 +437,23 @@ export async function terminBestaetigen(
     p_hinweis: hinweis,
   });
   if (error) throw new Error(ERR_DB);
-  return data === true;
+  return alsTerminErgebnis(data);
+}
+
+/* Wie alsErgebnis weiter unten: die Antwort kommt als jsonb und wird geprüft,
+   nicht behauptet. Eine Datenbank, die noch die boolean-Fassung aus 0011
+   trägt, liefert hier `true` — das soll «bestätigt» heissen und nicht
+   abstürzen, sonst bricht die Oberfläche an einer Stelle, an der die
+   Datenbank gerade ihre Arbeit getan hat. */
+function alsTerminErgebnis(data: unknown): TerminErgebnis {
+  if (data === true) return { ok: true };
+  if (!data || typeof data !== "object") return { ok: false };
+  const o = data as Record<string, unknown>;
+  if (o.ok === true) return { ok: true };
+  const blockiert = Array.isArray(o.blockiert)
+    ? (o.blockiert.filter((x) => typeof x === "string") as Voraussetzung["art"][])
+    : undefined;
+  return blockiert && blockiert.length > 0 ? { ok: false, blockiert } : { ok: false };
 }
 
 /* Angaben ergänzen durch einen Eingeladenen (0012). Der zweite schreibende
@@ -370,17 +465,62 @@ export async function terminBestaetigen(
    ein nicht erlaubter Schlüssel wird dort übergangen, nicht beanstandet —
    sonst liesse sich über die Antwort abtasten, welche Felder es gibt.
 
-   false = «darf nicht, Sitzung abgelaufen oder Eingabe unförmig». */
+   {ok:false} = «darf nicht, Sitzung abgelaufen oder Eingabe unförmig».
+
+   Seit 0016 zwei Listen statt eines Wahrheitswerts: was übernommen wurde und
+   was als Vorschlag beim Haus liegt. Beide enthalten nur Felder, die der
+   Aufrufer selbst geschickt hat. */
 export async function angabenErgaenzen(
   sessionId: string,
   felder: Partial<Deceased>,
-): Promise<boolean> {
+): Promise<AngabenErgebnis> {
   if (getRuntimeMode() === "mock") return mockStore.angabenErgaenzen(sessionId, felder);
   const { supabaseServer } = await import("./supabase/server");
   const sb = await supabaseServer();
   const { data, error } = await sb.rpc("angaben_ergaenzen", {
     p_session: sessionId,
     p_felder: felder,
+  });
+  if (error) throw new Error(ERR_DB);
+  return alsErgebnis(data);
+}
+
+/* Die Antwort kommt als jsonb und ist damit für TypeScript unbekannt. Statt
+   sie zu behaupten, wird sie geprüft: eine Fassung der Datenbank, die etwas
+   anderes zurückgibt, soll «nicht erlaubt» heissen und nicht abstürzen. */
+function alsErgebnis(data: unknown): AngabenErgebnis {
+  if (!data || typeof data !== "object") return { ok: false };
+  const o = data as Record<string, unknown>;
+  if (o.ok !== true) return { ok: false };
+  const liste = (v: unknown): (keyof Deceased)[] =>
+    Array.isArray(v) ? (v.filter((x) => typeof x === "string") as (keyof Deceased)[]) : [];
+  return {
+    ok: true,
+    uebernommen: liste(o.uebernommen),
+    vorgeschlagen: liste(o.vorgeschlagen),
+  };
+}
+
+/* ── Korrekturvorschläge (0016) ──────────────────────────────────
+   Die Schlange des Hauses: was jemand anders anders sieht. Beide Funktionen
+   prüfen die Eigentümerschaft in der Datenbank selbst — sie sind SECURITY
+   DEFINER und umgehen RLS, deshalb steht die Prüfung dort und nicht nur hier. */
+export async function korrekturen(caseId: string): Promise<Korrektur[]> {
+  if (getRuntimeMode() === "mock") return mockStore.korrekturen(caseId);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { data, error } = await sb.rpc("korrekturen", { p_case: caseId });
+  if (error) throw new Error(ERR_DB);
+  return Array.isArray(data) ? (data as Korrektur[]) : [];
+}
+
+export async function korrekturEntscheiden(id: string, annehmen: boolean): Promise<boolean> {
+  if (getRuntimeMode() === "mock") return mockStore.korrekturEntscheiden(id, annehmen);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { data, error } = await sb.rpc("korrektur_entscheiden", {
+    p_id: id,
+    p_annehmen: annehmen,
   });
   if (error) throw new Error(ERR_DB);
   return data === true;

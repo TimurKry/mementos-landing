@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { terminArtLabel, terminStatusLabel } from "@/lib/access";
+import { terminArtLabel, terminStatusLabel, voraussetzungsartLabel } from "@/lib/access";
 import type { RollenTermin } from "@/lib/types";
 import { kartenLink, zeitfenster, zuWanduhr } from "@/lib/zeit";
 import { terminBestaetigenAction } from "./actions";
@@ -17,7 +17,14 @@ import { terminBestaetigenAction } from "./actions";
    darf_bestaetigen kommt vom Server je Zeile mit. Es entscheidet hier nur,
    ob ein Formular überhaupt erscheint — die Entscheidung selbst trifft
    public.termin_bestaetigen (0011). Eine Oberfläche, die etwas anzeigt, hat
-   damit noch kein Recht erteilt. */
+   damit noch kein Recht erteilt.
+
+   Dasselbe gilt seit 0017 für blockiert_durch: steht dort etwas offen, wird
+   der Bogen gar nicht erst angeboten. Ein Formular, das beim Absenden immer
+   abgewiesen wird, ist eine Falle. Die Meldung aus der Server Action bleibt
+   trotzdem nötig — zwischen dem Laden dieser Seite und dem Absenden kann das
+   Haus eine Voraussetzung nachtragen, und dann ist die Datenbank diejenige,
+   die es merkt. */
 
 export function ZugangTermine({ termine }: { termine: RollenTermin[] }) {
   return (
@@ -39,7 +46,12 @@ function TerminKarte({ termin }: { termin: RollenTermin }) {
   const [pending, start] = useTransition();
 
   const bestaetigt = termin.status === "bestaetigt" || termin.status === "erledigt";
-  const kannBestaetigen = termin.darf_bestaetigen && !!termin.id && termin.status !== "abgesagt";
+  /* Fehlt der Schlüssel, ist die Ansicht älter als 0017 — dann wird nichts
+     angezeigt, und die Datenbank weist einen Versuch trotzdem ab. */
+  const offeneVor = termin.blockiert_durch ?? [];
+  const kannBestaetigen =
+    termin.darf_bestaetigen && !!termin.id && termin.status !== "abgesagt"
+    && offeneVor.length === 0;
 
   function absenden(e: React.FormEvent) {
     e.preventDefault();
@@ -92,6 +104,27 @@ function TerminKarte({ termin }: { termin: RollenTermin }) {
         <p role="status" aria-live="polite" className="mt-2.5 text-[12px] text-mint">
           Bestätigt. Das Bestattungshaus sieht die Zeit sofort.
         </p>
+      )}
+
+      {/* Angehalten. Steht nur bei denen, die diesen Termin überhaupt
+          bestätigen dürfen: für alle anderen wäre es eine Auskunft über einen
+          Ablauf, mit dem sie nichts zu tun haben. */}
+      {offeneVor.length > 0 && termin.darf_bestaetigen && (
+        <div className="mt-3">
+          <div className="hair mb-3" />
+          <div className="text-[10px] uppercase tracking-wide text-steel">Angehalten</div>
+          <p className="mt-1 text-[12.5px] leading-relaxed text-fog">
+            {offeneVor.length > 1 ? "Es fehlen noch" : "Es fehlt noch"}:{" "}
+            <span className="text-chalk">
+              {offeneVor.map((a) => voraussetzungsartLabel[a]).join(", ")}
+            </span>
+            . Sobald das vorliegt, lässt sich die Zeit hier bestätigen.
+          </p>
+          <p className="mt-1.5 text-[11.5px] leading-relaxed text-steel">
+            Das Bestattungshaus sieht, was offen ist — eine Rückmeldung von
+            Ihnen ist dafür nicht nötig.
+          </p>
+        </div>
       )}
 
       {kannBestaetigen && !offen && (

@@ -19,6 +19,34 @@ export type Deceased = {
   herzschrittmacher?: boolean | null; infektionshinweis?: string | null; freigabe_einaescherung?: boolean | null; // sens
 };
 
+/* ── Quelle je Angabe (0016_quelle_je_angabe.sql) ────────────────
+   Jede gesetzte Angabe hat einen Urheber. Wer die Quelle ist, ändert direkt;
+   wer es nicht ist, macht einen Vorschlag. Deshalb genügt «gespeichert» als
+   Antwort nicht mehr: ein Aufruf kann teils übernommen und teils
+   vorgeschlagen worden sein, und wer das nicht unterscheidet, lässt die
+   Familie glauben, ihre Korrektur stehe schon. */
+export type AngabenErgebnis =
+  | { ok: false }
+  | { ok: true; uebernommen: (keyof Deceased)[]; vorgeschlagen: (keyof Deceased)[] };
+
+/* Ein offener Vorschlag, wie das Haus ihn sieht: der neue Wert UND der
+   bisherige, sonst entscheidet es im Blindflug. `bisher` kommt aus der Zeile
+   und kann deshalb auch Zahl oder Wahrheitswert sein.
+
+   `quelle` ist die Rolle, die den bisherigen Wert gesetzt hat, `rolle` die,
+   die den neuen vorschlägt. Beide gehören in die Anzeige: «die Familie
+   widerspricht dem Haus» und «der Friedhof widerspricht der Familie» sind für
+   das Haus zwei verschiedene Vorgänge. */
+export type Korrektur = {
+  id: string;
+  feld: keyof Deceased;
+  neu: string | null;
+  bisher: string | number | boolean | null;
+  quelle: Role | null;
+  rolle: Role;
+  erstellt: string;
+};
+
 /* id ist nur im Arbeitsbereich des Hauses bekannt — die rollengefilterte
    Ansicht (RoleView) gibt sie nicht heraus. Ohne sie liesse sich ein
    Beteiligter nicht gezielt entfernen: zwei Zeilen dürfen dieselbe Rolle
@@ -54,8 +82,50 @@ export type Termin = {
 /* Ein Termin, wie ihn ein Eingeladener sieht. darf_bestaetigen kommt vom
    Server mit (app.darf_bestaetigen je Zeile), damit die Oberfläche weiss, ob
    sie ein Formular zeigen darf. Die Entscheidung selbst trifft weiterhin die
-   Datenbank in termin_bestaetigen — das Feld ist eine Auskunft, kein Recht. */
-export type RollenTermin = Omit<Termin, "zustaendig"> & { darf_bestaetigen: boolean };
+   Datenbank in termin_bestaetigen — das Feld ist eine Auskunft, kein Recht.
+
+   blockiert_durch (0017) ist dieselbe Art von Auskunft: was diesem Termin
+   noch fehlt. Optional, weil eine vor 0017 gelieferte Ansicht den Schlüssel
+   nicht kennt — dann wird nichts angezeigt, und die Datenbank weist einen
+   Versuch trotzdem ab. */
+export type RollenTermin = Omit<Termin, "zustaendig"> & {
+  darf_bestaetigen: boolean;
+  blockiert_durch?: Voraussetzungsart[];
+};
+
+/* ── Voraussetzungen und Freigaben (0017_voraussetzungen.sql) ────
+   Was beigebracht sein muss, bevor ein Termin bestätigt werden kann.
+
+   Die Zuordnung «welche Terminart braucht welche Voraussetzung» ist die
+   fünfte Matrix und steht in access.ts (voraussetzungenFuerTermin) — als
+   Spiegel von app.voraussetzungen_fuer_termin. JEDE ihrer Zeilen ist eine
+   Annahme; die Begründung steht im Kopf der Migration.
+
+   Zwei Regeln, die man beim Lesen des Codes sonst nicht sieht:
+   · Nur eine ERFASSTE Voraussetzung blockiert. Eine fehlende Zeile hält
+     nichts auf.
+   · Blockiert wird ausschliesslich der äussere Umkreis. Das Haus sieht den
+     Blocker und entscheidet selbst. */
+export type Voraussetzungsart =
+  | "todesbescheinigung" | "zweite_leichenschau" | "grabstelle";
+
+/* zustaendig ist eine Notiz des Hauses, keine Regel: sie erteilt niemandem
+   ein Recht und steht deshalb auch in keiner Matrix. */
+export type Voraussetzung = {
+  id?: string;
+  art: Voraussetzungsart;
+  zustaendig?: Role | null;
+  erfuellt: boolean;
+  erfuellt_am?: string | null;
+  hinweis?: string | null;
+};
+
+/* Die Antwort von public.termin_bestaetigen. Seit 0017 jsonb statt boolean:
+   «darf nicht» und «etwas fehlt noch» sind zwei verschiedene Auskünfte, und
+   wer am Ofen steht, muss sie unterscheiden können. */
+export type TerminErgebnis =
+  | { ok: true }
+  | { ok: false; blockiert?: Voraussetzungsart[] };
 export type Task = { id?: string; title: string; assignee?: Role | null; due?: string | null; status: TaskStatus };
 /* Eine Unterlage. storage_path verlässt den Server nie — nach aussen geht
    höchstens eine signierte Adresse, und die stellt der Server aus.
@@ -88,6 +158,9 @@ export type Case = {
   aufgaben: Task[];
   dokumente: Doc[];
   termine: Termin[];
+  /* 0017. Optional, weil listCases die Kindtabellen nicht mitlädt — dort
+     steht überall eine leere Liste. */
+  voraussetzungen: Voraussetzung[];
   verlauf?: Event[];
 };
 

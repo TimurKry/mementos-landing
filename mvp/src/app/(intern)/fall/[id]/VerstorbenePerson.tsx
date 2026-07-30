@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { sichtbarFuerText, tierGruppenTitel } from "@/lib/access";
+import { sichtbarFuerGruppe, tierGruppenTitel } from "@/lib/access";
 import type { Deceased, Tier } from "@/lib/types";
 import { verstorbeneSpeichernAction } from "./actions";
 import { Speicherstand, type Stand } from "./speicherstand";
 
 /* Die Angaben zur verstorbenen Person — nach Feldgruppen getrennt.
 
-   Die Gruppierung ist keine Gestaltung. Sie ist genau die Grenze, an der die
-   Datenbank später filtert: was in «Medizinische Hinweise» steht, bekommt
-   das Krematorium zu sehen und die Familie nicht. Deshalb steht unter jeder
-   Überschrift, wer die Gruppe sieht — abgeleitet aus derselben Matrix, die
-   auch filtert (allowedTiers in src/lib/access.ts, Spiegel von
-   app.allowed_tiers).
+   Die Gruppierung ordnet den Bogen und bestimmt, was ein Knopf speichert.
+   Über den Zugriff entscheidet sie seit 0015 NICHT mehr: gefiltert wird je
+   Feld. Deshalb steht unter der Überschrift nicht ein Satz, sondern ein Satz
+   je Empfängerkreis — Geburts- und Sterbedatum sieht der Steinmetz, Konfession
+   und Anschrift daneben nicht. Abgeleitet aus derselben Matrix, die auch
+   filtert (sichtbareFelder in src/lib/access.ts, Spiegel von
+   app.sichtbare_felder).
 
    Jede Gruppe hat ihren eigenen Knopf und wird für sich gespeichert. Wer am
    Telefon nur den Namen erfährt, speichert den Namen; ein unvollständiges
@@ -222,7 +223,12 @@ function Gruppe({
   return (
     <section className="card p-4">
       <div className="text-[10px] font-medium text-fog">{tierGruppenTitel[tier]}</div>
-      <p className="mt-1 text-[10.5px] leading-relaxed text-steel">{sichtbarFuerText(tier)}</p>
+      {sichtbarFuerGruppe(tier).map((kreis) => (
+        <p key={kreis.satz} className="mt-1 text-[10.5px] leading-relaxed text-steel">
+          {kreis.felder && <span className="text-fog">{kreis.felder}: </span>}
+          {kreis.satz}
+        </p>
+      ))}
 
       <div className="mt-3">{children}</div>
 

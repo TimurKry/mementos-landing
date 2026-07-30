@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCase, isMock, listInvites, listVerlauf } from "@/lib/data";
+import { getCase, isMock, korrekturen as ladeKorrekturen, listInvites, listVerlauf } from "@/lib/data";
 import { phaseLabel } from "@/lib/access";
-import type { InviteSummary } from "@/lib/types";
+import type { InviteSummary, Korrektur } from "@/lib/types";
 import { DEMO_CASE_ID, DEMO_FAMILY_TOKEN, DEMO_KREMATORIUM_TOKEN } from "@/lib/mock";
 import { Aufgaben } from "./Aufgaben";
 import { Beteiligte } from "./Beteiligte";
 import { Einladungen } from "./Einladungen";
+import { Korrekturen } from "./Korrekturen";
 import { Termine } from "./Termine";
 import { Unterlagen } from "./Unterlagen";
+import { Voraussetzungen } from "./Voraussetzungen";
 import { VerstorbenePerson } from "./VerstorbenePerson";
 import { Verlauf } from "./Verlauf";
 import { Vorgang } from "./Vorgang";
@@ -43,6 +45,18 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
     ladefehler = true;
   }
 
+  /* Offene Vorschläge (0016). Wie bei den Einladungen: eine Störung hier darf
+     den Fall nicht mitreissen. Anders als dort wird sie NICHT gemeldet — eine
+     leere Schlange und eine gestörte Schlange sehen für das Haus gleich aus,
+     und eine Fehlermeldung an einer Stelle, an der meistens nichts steht,
+     wäre in der Summe Lärm. Der Verlauf hält die Vorschläge ohnehin fest. */
+  let vorschlaege: Korrektur[] = [];
+  try {
+    vorschlaege = await ladeKorrekturen(id);
+  } catch {
+    /* stumm */
+  }
+
   /* Dasselbe für den Verlauf: eine Störung hier darf weder den Fall
      mitreissen noch aussehen wie «es ist nichts geschehen». */
   let verlauf: Verlaufseintrag[] = [];
@@ -72,6 +86,11 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="grid gap-6">
+          {/* Vorschläge — ganz oben und nur, wenn etwas offen ist. Solange die
+              Schlange steht, hat jemand etwas gesagt, worauf niemand
+              geantwortet hat; weiter unten würde das übersehen. */}
+          <Korrekturen caseId={c.id} korrekturen={vorschlaege} />
+
           {/* Vorgang — Bestattungsart, Termin, Phase */}
           <section>
             <div className="mb-2.5 text-[10px] font-medium text-fog">Vorgang</div>
@@ -104,7 +123,21 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
               den Termin zu sehen bekommt — Fahrdienst, Krematorium und
               Friedhof sehen sonst kein Datum und keine Adresse.
             </p>
-            <Termine caseId={c.id} termine={c.termine} />
+            <Termine caseId={c.id} termine={c.termine} voraussetzungen={c.voraussetzungen} />
+          </section>
+
+          {/* Voraussetzungen — direkt unter den Terminen, weil sie nur dort
+              wirken. Weiter oben wäre es eine Liste ohne erkennbaren Bezug,
+              weiter unten eine, die man beim Planen eines Termins nicht
+              sieht. */}
+          <section>
+            <div className="mb-2.5 text-[10px] font-medium text-fog">Voraussetzungen</div>
+            <p className="mb-2.5 max-w-[560px] text-[11.5px] leading-relaxed text-steel">
+              Was vorliegen muss, bevor Beteiligte einen Termin bestätigen
+              können. Nur was hier steht, hält etwas auf — und aufgehalten
+              werden Eingeladene, nicht Sie.
+            </p>
+            <Voraussetzungen caseId={c.id} voraussetzungen={c.voraussetzungen} />
           </section>
 
           {/* Beteiligte */}

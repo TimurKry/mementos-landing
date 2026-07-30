@@ -2,10 +2,13 @@
 
 import { useState, useTransition } from "react";
 import {
-  TERMIN_ARTEN, TERMIN_STATUS, roleLabel, terminArtHinweis, terminArtLabel,
-  terminSichtbarFuerText, terminStatusLabel,
+  TERMIN_ARTEN, TERMIN_STATUS, offeneVoraussetzungen, roleLabel,
+  terminArtHinweis, terminArtLabel, terminSichtbarFuerText, terminStatusLabel,
+  voraussetzungsartLabel,
 } from "@/lib/access";
-import type { Role, Termin, TerminArt, TerminStatus } from "@/lib/types";
+import type {
+  Role, Termin, TerminArt, TerminStatus, Voraussetzung, Voraussetzungsart,
+} from "@/lib/types";
 import { zeitfenster, zuWanduhr } from "@/lib/zeit";
 import {
   terminEntfernenAction, terminHinzufuegenAction, terminSpeichernAction,
@@ -54,7 +57,15 @@ const LEER: Entwurf = {
   ort_adresse: "", zustaendig: OHNE_ZUSTAENDIGKEIT, hinweis: "",
 };
 
-export function Termine({ caseId, termine }: { caseId: string; termine: Termin[] }) {
+export function Termine({
+  caseId,
+  termine,
+  voraussetzungen,
+}: {
+  caseId: string;
+  termine: Termin[];
+  voraussetzungen: Voraussetzung[];
+}) {
   return (
     <div className="grid gap-2.5">
       {termine.length === 0 && (
@@ -65,7 +76,12 @@ export function Termine({ caseId, termine }: { caseId: string; termine: Termin[]
       )}
 
       {termine.map((t) => (
-        <TerminKarte key={t.id ?? `${t.art}-${t.von ?? ""}`} caseId={caseId} termin={t} />
+        <TerminKarte
+          key={t.id ?? `${t.art}-${t.von ?? ""}`}
+          caseId={caseId}
+          termin={t}
+          offen={offeneVoraussetzungen(t.art, voraussetzungen)}
+        />
       ))}
 
       <NeuerTermin caseId={caseId} />
@@ -77,7 +93,13 @@ export function Termine({ caseId, termine }: { caseId: string; termine: Termin[]
    Zugeklappt steht da, was gilt: Art, Zeitfenster, Ort. Aufgeklappt wird
    daraus der Bogen. Zugeklappt, weil ein Vorgang leicht sechs Termine hat —
    sechs offene Formulare wären keine Übersicht mehr. */
-function TerminKarte({ caseId, termin }: { caseId: string; termin: Termin }) {
+function TerminKarte({
+  caseId, termin, offen: offeneVor,
+}: {
+  caseId: string;
+  termin: Termin;
+  offen: Voraussetzungsart[];
+}) {
   const [offen, setOffen] = useState(false);
   const [e, setE] = useState<Entwurf>(() => entwurfAus(termin));
   const [status, setStatus] = useState<TerminStatus>(termin.status);
@@ -126,6 +148,20 @@ function TerminKarte({ caseId, termin }: { caseId: string; termin: Termin }) {
           {termin.zustaendig && (
             <div className="mt-1 text-[10.5px] text-steel">
               Zuständig: {roleLabel[termin.zustaendig]}
+            </div>
+          )}
+
+          {/* Was diesen Termin aufhält (0017). Für das Haus eine Auskunft und
+              keine Sperre: es sieht sie und entscheidet selbst — der Blocker
+              gilt allein für Eingeladene. Genau das steht auch da, sonst
+              versucht jemand hier vergeblich, ihn wegzuklicken. */}
+          {offeneVor.length > 0 && (
+            <div className="mt-1.5 text-[11px] leading-relaxed text-fog">
+              Für Beteiligte angehalten:{" "}
+              <span className="text-chalk">
+                {offeneVor.map((a) => voraussetzungsartLabel[a]).join(", ")}
+              </span>
+              <span className="text-steel"> — Sie können den Termin trotzdem führen.</span>
             </div>
           )}
         </div>

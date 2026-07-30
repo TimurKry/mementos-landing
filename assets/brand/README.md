@@ -41,26 +41,25 @@ findet so den richtigen.
 Die Geometrie steht an vier Stellen; die Kommentare dort verweisen zurück
 hierher.
 
-## Offen: zwei verschiedene Wortmarken
+## Entschieden: die Datei gewinnt
 
 Die Wortmarke in `mementoos-logo.svg` ist **nicht** die Schrift, in der die
-Seite «MementoOS» setzt. Die Seite benutzt Instrument Serif 400; die Wortmarke
-in der Datei ist breiter, mit offeneren Ovalen und anderem Strichkontrast.
-Nachgeprüft durch Gegenüberstellung mit der echten, aus dem Build geladenen
-Schrift — nicht nach Augenmaß aus dem Gedächtnis.
+Seite gesetzt ist. Die Seite benutzt Instrument Serif 400; die Wortmarke in der
+Datei ist breiter, mit offeneren Ovalen und anderem Strichkontrast. Nachgeprüft
+durch Gegenüberstellung mit der echten, aus dem Build geladenen Schrift — nicht
+nach Augenmaß aus dem Gedächtnis.
 
-Solange das so bleibt, existieren zwei Fassungen des Namens: eine in
-Präsentationen und Unterschriften, eine auf der Seite. Das ist die Art
-Unstimmigkeit, die niemandem einzeln auffällt und in der Summe unsauber wirkt.
+Damit gab es zwei Fassungen des Namens: eine in Präsentationen und
+Unterschriften, eine auf der Seite. Entscheidung des Eigentümers: **die Datei
+gewinnt.** Der Name wird also gezeichnet, nicht gesetzt.
 
-Zu entscheiden ist eines von beiden:
+- `src/components/Wordmark.tsx` und `mvp/src/components/Wordmark.tsx` werden
+  aus `../mementoos-logo.svg` **erzeugt**, nicht von Hand gepflegt. Zeichen und
+  Umriss stehen in einem Block, `currentColor`, eine Fassung für beide Umkreise.
+- Preis: rund 8 KB je Bündel. Dafür sieht die Marke überall gleich aus.
+- Der Zusatz daneben («Arbeitsbereich», «Zugang», «Plattform») bleibt lebender
+  Text — er sagt, wo man ist, und gehört nicht zur Marke.
+- Der Abstand zwischen Zeichen und Wort kommt aus der Vorlage. Deshalb steht in
+  den Verweisen **kein** eigenes `gap`; sonst stünde er zweimal.
 
-1. **Die Datei gewinnt** — die Wortmarke wird als SVG in die Kopfzeile
-   eingesetzt. Kostet rund 8 KB je Seite und nimmt der Kopfzeile die
-   Möglichkeit, der Typografie zu folgen.
-2. **Die Seite gewinnt** — die Wortmarke wird in Instrument Serif neu gesetzt
-   und die Datei ersetzt. Eine Schrift, ein Name, überall.
-
-Bis die Entscheidung fällt, wird ausschliesslich das **Zeichen** verwendet und
-der Name daneben als lebender Text gesetzt. Damit ist nichts falsch, und es
-muss später nichts zurückgebaut werden.
+Wird `mementoos-logo.svg` geändert, sind beide `Wordmark.tsx` neu zu erzeugen.

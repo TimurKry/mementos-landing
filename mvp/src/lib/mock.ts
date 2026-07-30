@@ -10,10 +10,13 @@
 
 import type {
   AdminEreignis, AdminFall, AdminFallKontext, AdminHaus, AdminUebersicht,
-  AdminZugang, Case, Deceased, InviteSummary, Phase, Role, RoleView, Task, Termin,
+  AdminZugang, AngabenErgebnis, Case, Deceased, InviteSummary, Korrektur,
+  Phase, Role, RoleView, Task, Termin, TerminErgebnis, Voraussetzung,
 } from "./types";
 import type { Auslieferung } from "./data";
-import { caseForRole, darfBestaetigen, felderSchreibbar } from "./access";
+import {
+  caseForRole, darfBestaetigen, felderSchreibbar, offeneVoraussetzungen,
+} from "./access";
 
 /* фиксированные demo-токены (Demo-Ablauf im README) — müssen gültig bleiben.
    Sie gehören zu genau einem Fall: nur dort dürfen die beiden festen
@@ -94,6 +97,21 @@ function seedCases(): Case[] {
         zustaendig: "bestatter", status: "geplant", hinweis: null,
       },
     ],
+    /* Voraussetzungen (0017), Beispieldaten. Absichtlich so gesetzt, dass die
+       Vorführung beides zeigt: die Todesbescheinigung liegt vor, die zweite
+       Leichenschau nicht. Das Krematorium sieht damit seine Überführung
+       offen und die Einäscherung angehalten — und zwar mit dem Grund. */
+    voraussetzungen: [
+      {
+        id: "v1", art: "todesbescheinigung", zustaendig: "klinik",
+        erfuellt: true, erfuellt_am: "2026-07-11T09:20:00.000Z", hinweis: null,
+      },
+      {
+        id: "v2", art: "zweite_leichenschau", zustaendig: "klinik",
+        erfuellt: false, erfuellt_am: null,
+        hinweis: "Amtsarzt kommt Dienstag.",
+      },
+    ],
     verlauf: [
       { actor: "Krematorium Südstadt", action: "Fall angelegt", at: "Do 09:12" },
       { actor: "System", action: "Hinweis: Herzschrittmacher markiert", at: "Do 11:40" },
@@ -133,6 +151,12 @@ function seedCases(): Case[] {
         von: "2026-07-30T11:00:00.000Z", bis: null,
         ort_name: "Südfriedhof Leipzig, Abteilung 12", ort_adresse: "Friedhofsweg 3, 04277 Leipzig",
         zustaendig: "friedhof", status: "geplant", hinweis: null,
+      },
+    ],
+    voraussetzungen: [
+      {
+        id: "v3", art: "grabstelle", zustaendig: "friedhof",
+        erfuellt: false, erfuellt_am: null, hinweis: null,
       },
     ],
     verlauf: [{ actor: "Sie", action: "Fall angelegt", at: "Mi 16:20" }],
@@ -213,11 +237,27 @@ type MockPlattform = {
   ereignisse: MockEreignis[];    // absteigend nach Zeitpunkt
 };
 
+/* Spiegel von public.feldquelle und public.korrekturvorschlag (0016). Ohne
+   diese beiden lügt der Mock-Betrieb an der wichtigsten Stelle: er liesse die
+   Familie überschreiben, was in der echten Datenbank ein Vorschlag würde. */
+type MockKorrektur = {
+  id: string;
+  caseId: string;
+  feld: keyof Deceased;
+  wert: string | null;
+  rolle: Role;
+  erstelltAm: number;
+  stand: "offen" | "angenommen" | "abgelehnt";
+};
+
 type MockState = {
   cases: Case[];
   invites: Map<string, MockInvite>;   // id → Einladung
   sessions: Map<string, MockSession>; // Sitzungs-ID → Sitzung
   dateien: Map<string, MockDatei>;    // Unterlagen-ID → Bytes
+  /* «<fallId>|<feld>» → Rolle, die die Angabe gesetzt hat. */
+  quellen: Map<string, Role>;
+  korrekturen: MockKorrektur[];
   plattform: MockPlattform;
   /* Wann ein im Betrieb angelegter Vorgang entstanden ist. Gehört in den
      Zustand und nicht in eine Modulkonstante: der Bundler legt dieses Modul
@@ -237,9 +277,21 @@ function initState(): MockState {
     invites: new Map(),
     sessions: new Map(),
     dateien: new Map(),
+    quellen: new Map(),
+    korrekturen: [],
     plattform: seedPlattform(),
     angelegt: new Map(),
   };
+  /* Wie der Nachtrag in Abschnitt 3 von 0016: alles, was in den
+     Beispieldaten schon steht, gehört dem Haus. Sonst dürfte die Familie im
+     Vorführ-Betrieb direkt überschreiben und der Mock zeigte den Vorschlagsweg
+     nie — also genau das, was hier vorzuführen ist. */
+  for (const c of state.cases) {
+    for (const [feld, wert] of Object.entries(c.verstorbene)) {
+      if (wert === null || wert === undefined || wert === false) continue;
+      state.quellen.set(`${c.id}|${feld}`, "bestatter");
+    }
+  }
   /* Demo-Einladungen: die beiden Ansichten aus dem README (Beispieldaten) */
   addInvite(state, DEMO_CASE_ID, "familie", DEMO_FAMILY_TOKEN, "Familie Weber");
   addInvite(state, DEMO_CASE_ID, "krematorium", DEMO_KREMATORIUM_TOKEN, "Krematorium Südstadt");
@@ -428,7 +480,7 @@ function seedPlattform(): MockPlattform {
 }
 
 const state: MockState = (g.__mementoMock ??= initState());
-const { cases, invites, sessions, dateien, plattform, angelegt } = state;
+const { cases, invites, sessions, dateien, quellen, korrekturen, plattform, angelegt } = state;
 
 function inviteByToken(token: string): MockInvite | undefined {
   for (const inv of invites.values()) if (inv.token === token) return inv;
@@ -459,6 +511,20 @@ function neueFallNummer(): string {
 }
 
 const fallVon = (caseId: string): Case | undefined => cases.find((c) => c.id === caseId);
+
+/* ── Quelle je Angabe (0016) ─────────────────────────────────────
+   Spiegel des Auslösers app.feldquelle_pflegen: wer schreibt, wird Quelle;
+   wer leert, gibt die Quelle ab. Deshalb an EINER Stelle und nicht an jeder
+   Schreibstelle einzeln — genau wie in der Datenbank. */
+const quellenschluessel = (caseId: string, feld: string) => `${caseId}|${feld}`;
+
+function quelleSetzen(caseId: string, patch: Partial<Deceased>, rolle: Role): void {
+  for (const [feld, wert] of Object.entries(patch)) {
+    const k = quellenschluessel(caseId, feld);
+    if (wert === null || wert === undefined) quellen.delete(k);
+    else quellen.set(k, rolle);
+  }
+}
 
 /* Kurzform der Sitzungs-Kennung, wie app.akteur_kurz in 0013: acht Zeichen.
    Die volle Kennung ist ein Schlüssel auf Vorzeigen und verlässt den Server
@@ -537,6 +603,10 @@ export const mockStore = {
       aufgaben: [],
       dokumente: [],
       termine: [],
+      /* Leer, wie in der Datenbank: ein neuer Vorgang bringt keine
+         Voraussetzung mit. Was gilt, trägt das Haus ein — eine nicht
+         erfasste Voraussetzung blockiert nicht (0017). */
+      voraussetzungen: [],
       verlauf: [],
     });
     angelegt.set(id, Date.now());
@@ -560,6 +630,8 @@ export const mockStore = {
     const c = fallVon(caseId);
     if (!c) return;
     c.verstorbene = { ...c.verstorbene, ...patch };
+    /* Nur das Haus kommt hierher: dieser Weg hängt am Konto des Eigentümers. */
+    quelleSetzen(caseId, patch, "bestatter");
   },
 
   addParticipant: (caseId: string, role: Role, org: string): void => {
@@ -628,27 +700,86 @@ export const mockStore = {
     c.termine = c.termine.filter((t) => t.id !== terminId);
   },
 
-  /* Spiegel von public.termin_bestaetigen (0011) — in derselben Reihenfolge,
-     damit der Mock nicht durchlässt, was die Datenbank abweist:
-     Sitzung lebendig → Termin gehört zu DIESEM Fall → Rolle darf diese Art. */
+  /* ── Voraussetzungen (0017) ──────────────────────────────────
+     Wie bei den Terminen: im Mock gibt es kein is_case_owner, geprüft wird
+     nur der Fallbezug. Einen Weg aus dem äusseren Umkreis gibt es auch hier
+     nicht — er existiert in der Datenbank nicht. */
+
+  addVoraussetzung: (
+    caseId: string,
+    v: { art: Voraussetzung["art"]; zustaendig?: Role | null; hinweis?: string | null },
+  ): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    /* Spiegel des eindeutigen Index voraussetzung_je_fall: eine Zeile je Art.
+       Zwei «Grabstelle» wären zwei Wahrheiten über dieselbe Sache. */
+    if (c.voraussetzungen.some((x) => x.art === v.art)) return;
+    c.voraussetzungen.push({
+      id: crypto.randomUUID(),
+      art: v.art,
+      zustaendig: v.zustaendig ?? null,
+      erfuellt: false,
+      erfuellt_am: null,
+      hinweis: v.hinweis ?? null,
+    });
+  },
+
+  setVoraussetzungErfuellt: (caseId: string, vorId: string, erfuellt: boolean): void => {
+    const v = fallVon(caseId)?.voraussetzungen.find((x) => x.id === vorId);
+    if (!v) return;
+    v.erfuellt = erfuellt;
+    v.erfuellt_am = erfuellt ? new Date().toISOString() : null;
+  },
+
+  updateVoraussetzung: (
+    caseId: string,
+    vorId: string,
+    patch: Partial<Omit<Voraussetzung, "id" | "art">>,
+  ): void => {
+    const v = fallVon(caseId)?.voraussetzungen.find((x) => x.id === vorId);
+    if (!v) return;
+    Object.assign(v, patch);
+  },
+
+  removeVoraussetzung: (caseId: string, vorId: string): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    c.voraussetzungen = c.voraussetzungen.filter((v) => v.id !== vorId);
+  },
+
+  /* Spiegel von public.termin_bestaetigen (0011, neu gefasst in 0017) — in
+     derselben Reihenfolge, damit der Mock nicht durchlässt, was die Datenbank
+     abweist: Sitzung lebendig → Termin gehört zu DIESEM Fall → Rolle darf
+     diese Art → nichts steht offen.
+
+     Der Blocker steht auch hier zuletzt: wer nicht bestätigen darf, soll über
+     die Antwort nicht erfahren, was einem fremden Termin fehlt. */
   terminBestaetigen: (
     sessionId: string,
     terminId: string,
     von: string | null,
     bis: string | null,
     hinweis: string | null,
-  ): boolean => {
+  ): TerminErgebnis => {
     const now = Date.now();
     const s = sessions.get(sessionId);
-    if (!s || s.expiresAt <= now) return false;
+    if (!s || s.expiresAt <= now) return { ok: false };
     const inv = invites.get(s.inviteId);
-    if (!usable(inv, now)) return false;
+    if (!usable(inv, now)) return { ok: false };
 
     const c = cases.find((x) => x.id === inv.caseId);
     const t = c?.termine.find((x) => x.id === terminId);
-    if (!t) return false;
+    if (!t) return { ok: false };
 
-    if (!darfBestaetigen(inv.role, t.art)) return false;
+    if (!darfBestaetigen(inv.role, t.art)) return { ok: false };
+
+    const offen = offeneVoraussetzungen(t.art, c!.voraussetzungen);
+    if (offen.length > 0) {
+      protokolliere(c!.id, "invite", akteurKurz(sessionId), "termin.blockiert", {
+        role: inv.role, art: t.art, offen,
+      });
+      return { ok: false, blockiert: offen };
+    }
 
     t.von = von;
     t.bis = bis;
@@ -657,7 +788,7 @@ export const mockStore = {
     protokolliere(c!.id, "invite", akteurKurz(sessionId), "termin.bestaetigt", {
       role: inv.role, art: t.art,
     });
-    return true;
+    return { ok: true };
   },
 
   /* Token → Sitzung. Ungültig/abgelaufen/zurückgezogen ⇒ null (kein Fehler:
@@ -758,36 +889,116 @@ export const mockStore = {
     return { art: "bytes", inhalt: datei.inhalt, mime: datei.mime, dateiname: datei.dateiname };
   },
 
-  /* Spiegel von public.angaben_ergaenzen (0012), in derselben Reihenfolge:
-     Sitzung lebendig → Rolle hat überhaupt ein Schreibrecht → nur erlaubte
-     Schlüssel werden übernommen, nicht erlaubte übergangen. */
-  angabenErgaenzen: (sessionId: string, felder: Partial<Deceased>): boolean => {
+  /* Spiegel von public.angaben_ergaenzen (0012, neu gefasst in 0016), in
+     derselben Reihenfolge: Sitzung lebendig → Rolle hat überhaupt ein
+     Schreibrecht → nur erlaubte Schlüssel, nicht erlaubte übergangen.
+
+     Neu aus 0016 die Verzweigung je Feld — dieselben drei Fälle wie in der
+     Datenbank: leer oder ohne Quelle → direkt; eigene Quelle → direkt;
+     fremde Quelle → Vorschlag. Der bisherige Wert bleibt dabei stehen. */
+  angabenErgaenzen: (sessionId: string, felder: Partial<Deceased>): AngabenErgebnis => {
     const now = Date.now();
     const s = sessions.get(sessionId);
-    if (!s || s.expiresAt <= now) return false;
+    if (!s || s.expiresAt <= now) return { ok: false };
     const inv = invites.get(s.inviteId);
-    if (!usable(inv, now)) return false;
+    if (!usable(inv, now)) return { ok: false };
 
     const erlaubt = felderSchreibbar(inv.role);
-    if (erlaubt.length === 0) return false;
+    if (erlaubt.length === 0) return { ok: false };
 
     const c = cases.find((x) => x.id === inv.caseId);
-    if (!c) return false;
+    if (!c) return { ok: false };
 
-    const patch: Partial<Deceased> = {};
-    let etwas = false;
+    const direkt: Partial<Deceased> = {};
+    const uebernommen: (keyof Deceased)[] = [];
+    const vorgeschlagen: (keyof Deceased)[] = [];
+
     for (const f of erlaubt) {
-      if (f in felder) {
-        (patch as Record<string, unknown>)[f] = felder[f] ?? null;
-        etwas = true;
+      if (!(f in felder)) continue;
+      const wert = felder[f] ?? null;
+      const bisher = c.verstorbene[f];
+      const quelle = quellen.get(quellenschluessel(c.id, f));
+
+      if (bisher === null || bisher === undefined || !quelle || quelle === inv.role) {
+        (direkt as Record<string, unknown>)[f] = wert;
+        uebernommen.push(f);
+      } else {
+        vorgeschlagen.push(f);
+        /* Ein zweiter Vorschlag derselben Rolle ersetzt den ersten — Spiegel
+           des Teilindex korrekturvorschlag_offen. */
+        const offen = korrekturen.find(
+          (k) => k.caseId === c.id && k.feld === f
+            && k.rolle === inv.role && k.stand === "offen",
+        );
+        const text = wert === null ? null : String(wert);
+        if (offen) {
+          offen.wert = text;
+          offen.erstelltAm = now;
+        } else {
+          korrekturen.push({
+            id: crypto.randomUUID(), caseId: c.id, feld: f,
+            wert: text, rolle: inv.role, erstelltAm: now, stand: "offen",
+          });
+        }
       }
     }
-    if (!etwas) return false;
 
-    c.verstorbene = { ...c.verstorbene, ...patch };
-    protokolliere(c.id, "invite", akteurKurz(sessionId), "angaben.ergaenzt", {
-      role: inv.role, felder: Object.keys(patch),
-    });
+    if (uebernommen.length === 0 && vorgeschlagen.length === 0) return { ok: false };
+
+    if (uebernommen.length > 0) {
+      c.verstorbene = { ...c.verstorbene, ...direkt };
+      quelleSetzen(c.id, direkt, inv.role);
+      protokolliere(c.id, "invite", akteurKurz(sessionId), "angaben.ergaenzt", {
+        role: inv.role, felder: uebernommen,
+      });
+    }
+    if (vorgeschlagen.length > 0) {
+      protokolliere(c.id, "invite", akteurKurz(sessionId), "korrektur.vorgeschlagen", {
+        role: inv.role, felder: vorgeschlagen,
+      });
+    }
+
+    return { ok: true, uebernommen, vorgeschlagen };
+  },
+
+  /* Spiegel von public.korrekturen: der neue UND der bisherige Wert. */
+  korrekturen: (caseId: string): Korrektur[] =>
+    korrekturen
+      .filter((k) => k.caseId === caseId && k.stand === "offen")
+      .sort((a, b) => a.erstelltAm - b.erstelltAm)
+      .map((k) => ({
+        id: k.id,
+        feld: k.feld,
+        neu: k.wert,
+        bisher: (fallVon(caseId)?.verstorbene[k.feld] ?? null) as Korrektur["bisher"],
+        quelle: quellen.get(quellenschluessel(caseId, k.feld)) ?? null,
+        rolle: k.rolle,
+        erstellt: new Date(k.erstelltAm).toISOString(),
+      })),
+
+  /* Spiegel von public.korrektur_entscheiden. Auch hier wird der Inhalt nach
+     der Entscheidung gelöscht — bei Annahme steht er in der Zeile, bei
+     Ablehnung wollte ihn das Haus nicht. */
+  korrekturEntscheiden: (id: string, annehmen: boolean): boolean => {
+    const k = korrekturen.find((x) => x.id === id && x.stand === "offen");
+    if (!k) return false;
+    const c = fallVon(k.caseId);
+    if (!c) return false;
+
+    if (annehmen) {
+      if (k.wert === null) return false;
+      const patch = { [k.feld]: k.wert } as Partial<Deceased>;
+      c.verstorbene = { ...c.verstorbene, ...patch };
+      /* Quelle wird die vorschlagende Rolle, nicht das Haus: der Wert kommt
+         von ihr, freigegeben hat ihn nur das Haus. */
+      quelleSetzen(c.id, patch, k.rolle);
+    }
+
+    k.stand = annehmen ? "angenommen" : "abgelehnt";
+    k.wert = null;
+    protokolliere(c.id, "konto", null,
+      annehmen ? "korrektur.angenommen" : "korrektur.abgelehnt",
+      { feld: k.feld, role: k.rolle });
     return true;
   },
 

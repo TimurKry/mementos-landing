@@ -53,18 +53,34 @@ Mit **„Zugang beenden"** endet die Sitzung sofort; ein erneuter Aufruf von
 ## Feldgenauer Zugriff — wie er erzwungen wird
 
 Der Zugriff ist **nicht** nur UI-Logik. Er ist an **eine** Regel gebunden:
-welche *Feld­gruppen (Tiers)* eine Rolle sehen darf.
+welche *Felder* eine Rolle sehen darf.
 
-| Tier | Felder | Beispiel-Rollen mit Zugriff |
-|------|--------|------------------------------|
-| `kern` (Identität) | Vor-/Nachname | alle Beteiligten |
-| `org` (Persönlich) | Geburts-/Sterbedatum, Konfession, Anschrift | Familie, Friedhof, Standesamt |
-| `op` (Körperlich) | Größe, Gewicht, Sargmaß | Familie, Krematorium, Transport, Klinik |
-| `sens` (Medizinisch) | Herzschrittmacher, Infektionshinweis, Freigabe | Krematorium, Klinik |
+Seit [`0015_rechte_je_feld.sql`](supabase/migrations/0015_rechte_je_feld.sql)
+steht die Regel **je Feld** und nicht mehr je Feldgruppe. Grund: eine Gruppe
+verspricht, dass ihre Felder immer gemeinsam wandern — für Vor- und Nachname
+stimmt das, für Geburtsdatum und Anschrift nicht. Ein Steinmetz braucht die
+Lebensdaten und nicht die Anschrift des Haushalts; mit Gruppen liess sich das
+nicht sagen. Nebeneffekt und eigentlicher Gewinn: eine neue Spalte ist für
+niemanden sichtbar, bis sie in der Matrix steht.
 
-- **Quelle der Wahrheit ist die Datenbank**: `app.allowed_tiers(role)` und
+Die Gruppen sind geblieben, aber nur als Überschrift im Erfassungsbogen und
+als Eintrag im Protokoll:
+
+| Tier | Felder | Wer sieht welches Feld |
+|------|--------|------------------------|
+| `kern` (Identität) | Vor-/Nachname | alle Beteiligten ausser Floristik und Redner |
+| `org` (Persönlich) | Geburts-/Sterbedatum, Konfession, Anschrift | Daten auch Steinmetz und (Sterbedatum) Krematorium; Konfession und Anschrift nur Familie, Friedhof, Standesamt |
+| `op` (Körperlich) | Größe, Gewicht, Sargmaß | Sargmaß und Gewicht auch Friedhof; Größe nur Krematorium, Transport, Klinik, Familie |
+| `sens` (Medizinisch) | Herzschrittmacher, Infektionshinweis, Freigabe | Infektionshinweis auch Transport; die übrigen zwei nur Krematorium und Klinik |
+
+Die vollständige Matrix steht in der Migration, mit der Begründung neben jeder
+Zeile. Zum Gegenlesen taugt am besten die umgekehrte Sicht — «wer sieht dieses
+Feld» — sie liegt als Abfrage im Verifikationsblock von `0015`.
+
+- **Quelle der Wahrheit ist die Datenbank**: `app.sichtbare_felder(role)` und
   `app.case_for_role(case, role)` in
-  [`supabase/migrations/0004_hardening.sql`](supabase/migrations/0004_hardening.sql)
+  [`supabase/migrations/0015_rechte_je_feld.sql`](supabase/migrations/0015_rechte_je_feld.sql)
+  bzw. [`0004_hardening.sql`](supabase/migrations/0004_hardening.sql)
   bauen serverseitig ein gefiltertes JSON. Sie liegen im Schema `app`, auf das
   von aussen niemand zugreifen kann — erreichbar sind sie nur über die drei
   Funktionen aus dem Abschnitt *Sicherheitsmodell*. Row-Level-Security
@@ -78,6 +94,41 @@ welche *Feld­gruppen (Tiers)* eine Rolle sehen darf.
 
 So ergibt sich: **Wer nicht berechtigt ist, bekommt das Feld gar nicht erst
 geliefert** — nicht ausgeblendet im Browser, sondern nie gesendet.
+
+---
+
+## Jede Angabe hat eine Quelle
+
+[`0016_quelle_je_angabe.sql`](supabase/migrations/0016_quelle_je_angabe.sql)
+behebt den schwersten Fehler des bisherigen Stands: bis dahin schrieb ein
+Eingeladener **direkt** in die Angaben. Hatte das Haus «Erika Weber»
+eingetragen und die Tochter schickte «Erica Weber», war der Eintrag des Hauses
+weg — ohne Rückfrage, ohne Hinweis.
+
+Jetzt gilt: **wer die Quelle einer Angabe ist, ändert sie direkt; wer es nicht
+ist, macht einen Vorschlag.** Drei Fälle, und nur drei:
+
+| Zustand des Feldes | Was passiert |
+|---|---|
+| leer | direkt geschrieben — wer eine Lücke füllt, überschreibt niemanden |
+| Quelle ist dieselbe Rolle | direkt geschrieben — man korrigiert sich selbst |
+| Quelle ist eine andere Rolle | **Korrekturvorschlag**; der bisherige Wert bleibt stehen |
+
+Der Vorschlag landet in der Fallkarte, ganz oben, mit dem bisherigen **und**
+dem neuen Wert. Ohne beide wäre das eine Entscheidung im Blindflug.
+
+**Was bewusst NICHT gespeichert wird:** keine Werteverlaufstabelle. Der Zweck
+ist erfüllt, wenn bekannt ist, *wer* eine Angabe gesetzt hat — nicht, was
+frühere Fassungen enthielten. Ein Verlauf würde jeden personenbezogenen Wert
+ein zweites Mal und dauerhaft ablegen. `public.feldquelle` trägt deshalb Rolle
+und Zeitpunkt je Feld und **keinen Wert**. Der vorgeschlagene Wert muss
+zwischengespeichert werden, sonst kann niemand entscheiden — er wird nach der
+Entscheidung auf `NULL` gesetzt, in beiden Richtungen.
+
+Geschrieben wird `feldquelle` ausschliesslich von einem Auslöser auf
+`public.deceased`; kein Konto hat `INSERT`, `UPDATE` oder `DELETE` darauf.
+Sonst liesse sich eine Quelle nachträglich umschreiben und danach eine fremde
+Angabe «als eigene» überschreiben.
 
 ---
 
