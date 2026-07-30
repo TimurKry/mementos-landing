@@ -189,6 +189,16 @@ Ausführlich in `docs/features/mvp-sicherheit.md`.
   Nur der Auslöser und die beiden `SECURITY DEFINER`-Funktionen schreiben.
   Sonst liesse sich eine Quelle umschreiben und danach eine fremde Angabe
   «als eigene» überschreiben.
+- **anon hat auf KEINE Tabelle in `public` ein Recht** — die dritte Invariante,
+  neben den zwei für Funktionen. Supabase gewährt anon und authenticated per
+  `ALTER DEFAULT PRIVILEGES` Rechte auf jede neue Tabelle in `public`; ein
+  `grant … to authenticated` sagt deshalb nichts darüber, was anon hat. Ab
+  0011 wurde nur noch gewährt und nie entzogen, und dadurch stand
+  `public.termine` für anon **schreibend** offen (SELECT/INSERT/UPDATE/DELETE),
+  `feldquelle` und `korrekturvorschlag` lesend. Aufgefangen hat es allein RLS.
+  0017 entzieht es und misst es ab jetzt bei jeder Migration über alle
+  Tabellen. Eine neue Tabelle braucht immer ein ausdrückliches
+  `revoke all on … from anon`.
 - **Eine Blockade gilt nur nach aussen** (0017). `public.termin_bestaetigen`
   prüft offene Voraussetzungen; auf `public.termine` liegt **kein** Auslöser,
   der dem Haus dazwischenfährt. Das Haus weiss mehr als die Anwendung (die
@@ -274,9 +284,11 @@ Mock-Betrieb, einschliesslich des Wettrennens: Bogen offen, Freigabe
 zwischendurch zurückgenommen, Absenden wird mit Nennung des Fehlenden
 abgewiesen und steht als `termin.blockiert` im Verlauf.
 
-Nicht auf der Datenbank, weil die fachliche Liste weiterhin fehlt und mit ihr
-vermutlich Zeilen der Matrix wandern. Die zwei Invarianten prüft die Datei
-beim Anwenden selbst (Abschnitt 8) und bricht ab.
+Die Invarianten prüft die Datei beim Anwenden selbst (Abschnitt 8) und bricht
+ab. Der erste Anwendungsversuch tat das auch: Prüfung 8.6 hat die offenen
+Tabellenrechte von anon gefunden (siehe oben). Nichts wurde dabei angewandt —
+die Datei läuft in einer Transaktion, und eine gescheiterte Prüfung nimmt
+alles zurück. Der Riegel ist jetzt in derselben Migration mit drin.
 
 ---
 

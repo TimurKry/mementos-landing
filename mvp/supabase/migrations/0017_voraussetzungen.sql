@@ -88,6 +88,15 @@
 -- voreingestellten PUBLIC EXECUTE weiter (Lehre aus 0004/0005). Der
 -- öffentliche Vertrag bleibt bei sechs Funktionen — Abschnitt 8.3 misst das.
 --
+-- ── Nebenbefund, der hier mitbehoben wird ─────────────────────────────
+-- Der erste Anwendungsversuch dieser Migration brach an Prüfung 8.6 ab und
+-- legte dabei etwas offen, das seit 0011 im System stand: anon hatte auf
+-- public.termine volle Tabellenrechte und auf feldquelle/korrekturvorschlag
+-- Leserechte — Voreinstellung von Supabase, nie entzogen. RLS hat es
+-- aufgefangen, die Zusage «der äussere Umkreis kommt an keine Tabelle heran»
+-- galt trotzdem nicht mehr. Abschnitt 7 entzieht es, Prüfung 8.6 misst ab
+-- jetzt alle Tabellen. Begründung an beiden Stellen.
+--
 -- Das Skript ist idempotent und setzt den Stand nach 0001–0016 voraus.
 --
 -- Abschnitte:
@@ -412,6 +421,45 @@ revoke all on schema app from public, anon, authenticated;
 revoke execute on function public.termin_bestaetigen(uuid, uuid, timestamptz, timestamptz, text)
   from public, anon, authenticated;
 
+-- ── Der Riegel, den die Voreinstellung offen lässt ────────────────────
+-- Supabase legt für JEDE neue Tabelle in public per ALTER DEFAULT PRIVILEGES
+-- Rechte für anon und authenticated an. Ein «grant … to authenticated» sagt
+-- deshalb nichts darüber, was anon hat — das lag schon vorher da, und ohne
+-- ausdrückliches REVOKE bleibt es liegen.
+--
+-- Gefunden beim ersten Anwenden dieser Migration: Prüfung 8.6 hat den Lauf
+-- abgebrochen. Der Befund geht über 0017 hinaus und betrifft alles, was seit
+-- 0011 angelegt wurde:
+--
+--   public.termine            (0011) — anon hatte SELECT, INSERT, UPDATE, DELETE
+--   public.feldquelle         (0016) — anon hatte SELECT
+--   public.korrekturvorschlag (0016) — anon hatte SELECT
+--
+-- Die älteren Tabellen sind sauber: 0004/0005 haben sie einzeln entzogen.
+-- Ab 0011 wurde nur noch gewährt und nie entzogen.
+--
+-- Ausgenutzt werden konnte es nicht: auf allen dreien ist RLS an, und jede
+-- Regel läuft über public.is_case_owner, das ohne Anmeldung nie wahr wird.
+-- Aber die Zusage des Projekts lautet, dass der äussere Umkreis an keine
+-- Tabelle herankommt, und sie galt seit 0011 nicht mehr. Eine einzige zu weit
+-- gefasste Regel hätte daraus den Vollzugriff auf alle Termine gemacht — bei
+-- public.termine sogar schreibend, über das offene Netz.
+--
+-- Weshalb es niemandem auffiel: Prüfung 8.4 in 0016 sah nur INSERT, UPDATE
+-- und DELETE nach, nicht SELECT. Sie lief grün, während zwei Tabellen offen
+-- standen. Eine Prüfung, die den halben Fall abdeckt, ist gefährlicher als
+-- keine — sie erzeugt die Ruhe, die zur ganzen gehört hätte.
+--
+-- Die Voreinstellung selbst wird hier NICHT angefasst. Sie gehört Supabase,
+-- wird beim Anlegen von Erweiterungen neu gesetzt, und 0004 hat bereits
+-- gezeigt, dass ALTER DEFAULT PRIVILEGES auf diesem Projekt nicht greift.
+-- Verlassen wird sich stattdessen auf das ausdrückliche REVOKE je Tabelle —
+-- und auf Prüfung 8.6, die ab jetzt bei jeder Migration ALLE Tabellen misst.
+revoke all on public.voraussetzung      from anon;
+revoke all on public.termine            from anon;
+revoke all on public.feldquelle         from anon;
+revoke all on public.korrekturvorschlag from anon;
+
 -- Der öffentliche Vertrag: unverändert sechs Funktionen für anon.
 -- termin_bestaetigen ist dieselbe Tür wie vorher, sie antwortet nur
 -- ausführlicher.
@@ -558,19 +606,34 @@ begin
   end if;
 end $$;
 
--- 8.6  Der äussere Umkreis kommt an die Tabelle nicht heran — auch nicht
--- lesend. Eine Voraussetzung trägt eine Notiz des Hauses; nach aussen geht
--- ausschliesslich die ART über app.case_for_role.
+-- 8.6  Der äussere Umkreis kommt an KEINE Tabelle in public heran.
+--
+-- Bewusst über alle Tabellen und alle vier Rechte, nicht nur über die neue:
+-- genau die Verengung auf «die Tabellen dieser Migration» hat in 0016
+-- übersehen, dass zwei Tabellen für anon lesbar blieben. Eine Prüfung, die
+-- nur das misst, was die eigene Migration anfasst, findet nie etwas, das
+-- vorher schief ging.
+--
+-- Damit steht neben den zwei Invarianten für Funktionen — genau sechs für
+-- anon, keine ohne eigene ACL — jetzt eine dritte für Tabellen: null.
 do $$
-declare v_recht text; v_rolle text;
+declare v_offen text;
 begin
-  foreach v_rolle in array array['anon'] loop
-    foreach v_recht in array array['SELECT', 'INSERT', 'UPDATE', 'DELETE'] loop
-      if has_table_privilege(v_rolle, 'public.voraussetzung', v_recht) then
-        raise exception '% darf % auf public.voraussetzung', v_rolle, v_recht;
-      end if;
-    end loop;
-  end loop;
+  select string_agg(format('%s(%s)', t.relname, t.recht), ', ' order by t.relname, t.recht)
+    into v_offen
+  from (
+    select c.relname, r.recht
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace,
+         unnest(array['SELECT', 'INSERT', 'UPDATE', 'DELETE']) as r(recht)
+    where n.nspname = 'public'
+      and c.relkind = 'r'
+      and has_table_privilege('anon', c.oid, r.recht)
+  ) t;
+
+  if v_offen is not null then
+    raise exception 'anon hat Tabellenrechte in public: %', v_offen;
+  end if;
 end $$;
 
 -- ═══════════════════════════════════════════════════════════════
@@ -609,3 +672,14 @@ end $$;
 -- 7) Keine Funktion ohne eigene ACL — erwartet: 0.
 -- select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
 -- where n.nspname in ('public','app') and p.proacl is null;
+--
+-- 8) Die dritte Invariante: anon hat auf keine Tabelle in public ein Recht.
+--    Erwartet: leer. Vor 0017 stand hier
+--    «feldquelle(SELECT), korrekturvorschlag(SELECT), termine(DELETE),
+--     termine(INSERT), termine(SELECT), termine(UPDATE)».
+-- select c.relname, r.recht
+-- from pg_class c join pg_namespace n on n.oid = c.relnamespace,
+--      unnest(array['SELECT','INSERT','UPDATE','DELETE']) as r(recht)
+-- where n.nspname='public' and c.relkind='r'
+--   and has_table_privilege('anon', c.oid, r.recht)
+-- order by 1, 2;

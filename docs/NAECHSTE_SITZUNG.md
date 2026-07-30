@@ -17,7 +17,7 @@ Commit betrifft `0017`.
 | Anwendung (`mvp/`) | läuft, SSR auf Vercel |
 | Datenbank | Migrationen `0001`–`0016` **angewandt und nachgemessen** |
 | `0017` | geschrieben und im Mock-Betrieb geprüft, **noch nicht angewandt** |
-| Öffentlicher Vertrag | genau sechs `anon`-Funktionen, null Funktionen ohne ACL |
+| Öffentlicher Vertrag | genau sechs `anon`-Funktionen, null Funktionen ohne ACL, **null Tabellenrechte für `anon`** (dritte Invariante, ab 0017) |
 
 Die letzten drei Migrationen:
 

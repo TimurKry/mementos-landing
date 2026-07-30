@@ -780,8 +780,8 @@
     "semantic_hash": ""
   },
   "docs/WORKING_CONTEXT.md": {
-    "mtime": 1785437526.7011554,
-    "ast_hash": "c3ac0da68030e5ca9dec804dfd0379bb",
+    "mtime": 1785446092.0516295,
+    "ast_hash": "8017e4fe5d2ec8a0fb249108460cf7e0",
     "semantic_hash": ""
   },
   "docs/components.md": {
@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "docs/features/mvp-sicherheit.md": {
-    "mtime": 1785437565.7171545,
-    "ast_hash": "ec0884e9fc51ff62d8df0c984ad18048",
+    "mtime": 1785446113.3676288,
+    "ast_hash": "a6e2f8952effa93831077269f36bc88d",
     "semantic_hash": ""
   },
   "docs/features/vertrauen-und-ablauf.md": {
@@ -910,8 +910,8 @@
     "semantic_hash": ""
   },
   "docs/NAECHSTE_SITZUNG.md": {
-    "mtime": 1785437435.5171576,
-    "ast_hash": "9fec06dfbea3a98b6539634c42d4ec09",
+    "mtime": 1785446097.2196293,
+    "ast_hash": "4785065a72a25552b97b4ef541e8b1e6",
     "semantic_hash": ""
   },
   "mvp/src/app/(intern)/fall/[id]/Voraussetzungen.tsx": {
@@ -920,8 +920,8 @@
     "semantic_hash": ""
   },
   "mvp/supabase/migrations/0017_voraussetzungen.sql": {
-    "mtime": 1785436639.5051758,
-    "ast_hash": "b9dc8a4dca7787ba7bc58b206ff16cb0",
+    "mtime": 1785446075.02363,
+    "ast_hash": "4063302a3cbc291ec21a0ec79398592e",
     "semantic_hash": ""
   }
 }
