@@ -4,7 +4,7 @@ Dieses Dokument hält fest, was künftige Sitzungen wissen müssen, ohne die
 gesamte Gesprächsgeschichte zu rekonstruieren. Es enthält **keine**
 Zugangsdaten, Schlüssel, Tokens oder Werte von Umgebungsvariablen.
 
-Stand: 2026-07-29. Arbeitszweig `claude/memento-os-design-fx5ev8`.
+Stand: 2026-07-30. Arbeitszweig `claude/memento-os-design-fx5ev8`.
 
 ---
 
@@ -173,6 +173,22 @@ Ausführlich in `docs/features/mvp-sicherheit.md`.
   `no-store`; sie werden nie im Umkreis der Anwendung angezeigt.
 - **Prüfungen erfolgen durch Ausführung**, nicht durch Lesen. Eine Probe, die
   Unerreichbares behauptet, ist schlechter als keine.
+- **Jede Angabe hat eine Quelle, aber es gibt keinen Werteverlauf** (0016).
+  Wer die Quelle ist, ändert direkt; wer es nicht ist, macht einen Vorschlag.
+  Eine Verlaufstabelle würde jeden personenbezogenen Wert ein zweites Mal und
+  dauerhaft ablegen — `public.feldquelle` trägt Rolle und Zeitpunkt, **keinen
+  Wert**. Der vorgeschlagene Wert wird nach der Entscheidung auf `NULL`
+  gesetzt, bei Annahme wie bei Ablehnung.
+- **`feldquelle` und `korrekturvorschlag` sind für kein Konto beschreibbar.**
+  Nur der Auslöser und die beiden `SECURITY DEFINER`-Funktionen schreiben.
+  Sonst liesse sich eine Quelle umschreiben und danach eine fremde Angabe
+  «als eigene» überschreiben.
+- **Bestandsangaben wurden pauschal dem Haus zugeschrieben** (0016). Aus dem
+  Protokoll wäre eine Teilrekonstruktion möglich, sie wird aber bewusst nicht
+  benutzt: sie kennt nur Schreibvorgänge von aussen, und ihr Fehler ginge in
+  die gefährliche Richtung (die Familie dürfte die Korrektur des Hauses
+  überschreiben). Der Fehler der pauschalen Zuschreibung kostet eine
+  Rückfrage.
 
 ---
 
@@ -220,11 +236,19 @@ Gemessene Ergebnisse der letzten Runde:
 
 ## IN PROGRESS
 
-- **0015 — Rechte je Feld** ist geschrieben, lokal auf PostgreSQL 16 über die
-  ganze Kette `0001`–`0015` angewandt und geprüft. **Noch NICHT auf der echten
-  Datenbank**: der Supabase-Verbinder ist im laufenden Gespräch abgeschaltet
-  (`enabledInChat: false`). Bis das Anwenden nachgeholt ist, sind die drei
-  Zugriffsfehler auf der echten Datenbank weiterhin vorhanden.
+**0015 — Rechte je Feld** und **0016 — Quelle je Angabe** sind fertig, lokal
+auf PostgreSQL 16 über die ganze Kette `0001`–`0016` angewandt und durch
+Ausführung geprüft (0015: Matrix in beide Richtungen; 0016: 16 Szenarien plus
+ein Durchlauf im Browser über beide Umkreise).
+
+**Noch NICHT auf der echten Datenbank**: der Supabase-Verbinder ist im
+laufenden Gespräch abgeschaltet (`enabledInChat: false`). Bis das Anwenden
+nachgeholt ist, gelten dort weiterhin die drei Zugriffsfehler **und** das
+stille Überschreiben durch die Familie.
+
+Reihenfolge beim Nachholen: `0015`, dann `0016`. `0016` prüft beim Anwenden,
+dass der öffentliche Vertrag bei genau sechs Funktionen bleibt — es droppt und
+legt `angaben_ergaenzen` neu an, und genau dabei entstünde sonst eine siebte.
 
 ---
 
@@ -233,26 +257,21 @@ Gemessene Ergebnisse der letzten Runde:
 Die Reihenfolge ist eine Abhängigkeitskette, keine Wunschliste. Sie kommt aus
 der Durchsicht des echten Ablaufs durch einen Branchenkenner.
 
-1. **0016 — Quelle je Angabe.** Heute schreibt `angaben_ergaenzen` direkt in
-   `deceased` und überschreibt damit, was das Haus eingetragen hat. Richtig
-   ist: jede Angabe trägt ihre Quelle, und wer nicht die Quelle ist, macht
-   einen **Vorschlag**. Tabellen `feldquelle`, `korrekturvorschlag`; eine
-   Korrekturschlange in der Fallkarte.
-2. **0017 — Abhängigkeiten und Freigaben.** Das System weiss nicht, dass eine
+1. **0017 — Abhängigkeiten und Freigaben.** Das System weiss nicht, dass eine
    Einäscherung ohne Freigabe nicht stattfinden darf. Tabellen `freigabe`,
    `abhaengigkeit`; `termin_bestaetigen` prüft Blocker; Bildschirme «was steht
    und wegen wem».
-3. **0018 — Übergaben und Identitätskette.** `uebergabe`, `sarg_id`/`urnen_id`,
+2. **0018 — Übergaben und Identitätskette.** `uebergabe`, `sarg_id`/`urnen_id`,
    `einaescherungsnummer`. Wer wann wem übergeben hat, ohne Bruch.
-4. **0019 — Unterlagenpakete nach draussen.** Ämter registrieren sich nicht:
+3. **0019 — Unterlagenpakete nach draussen.** Ämter registrieren sich nicht:
    PDF plus strukturierter Satz, ablaufende Adresse ohne Konto.
-5. **Eigenes SMTP** für Einladungs-E-Mails an Familien. Nicht blockierend,
+4. **Eigenes SMTP** für Einladungs-E-Mails an Familien. Nicht blockierend,
    aber ohne es erreicht kein Zugang eine Familie von selbst.
-6. **Partnerorganisationen mit Konten** — Voraussetzung für einen Kalender
+5. **Partnerorganisationen mit Konten** — Voraussetzung für einen Kalender
    über mehrere Fälle («alle meine Einäscherungen diese Woche»). Heute
    existiert ein Partner nur innerhalb eines Vorgangs. Das ist ein neuer,
    dritter Umkreis und **braucht eine Entscheidung des Eigentümers**.
-7. **Hochladen durch die Familie** (Vollmacht) — eigene Entscheidung, siehe
+6. **Hochladen durch die Familie** (Vollmacht) — eigene Entscheidung, siehe
    Sicherheitsabschnitt.
 
 Zuletzt, ausdrücklich auf Wunsch des Eigentümers ans Ende gestellt:
@@ -262,10 +281,10 @@ Rechtstexte (Impressum, Datenschutzerklärung), Auswertung, Kontaktformular.
 
 ## BLOCKED — wartet auf den Eigentümer, nicht auf Technik
 
-- **Entscheidung Partnerorganisationen** (siehe PLANNED 6). Ohne sie kein
+- **Entscheidung Partnerorganisationen** (siehe PLANNED 5). Ohne sie kein
   fallübergreifender Kalender.
-- **Supabase-Verbinder im Gespräch abgeschaltet** — deshalb liegt 0015 fertig,
-  aber nicht angewandt.
+- **Supabase-Verbinder im Gespräch abgeschaltet** — deshalb liegen 0015 und
+  0016 fertig, aber nicht angewandt.
 - **Floristik und Trauerredner sehen kein Feld.** Auf dem Schleifenband steht
   in der Praxis der Name; ein Trauerredner braucht Name, Lebensdaten und
   Konfession. 0015 hat das absichtlich nicht mitentschieden.
@@ -302,6 +321,14 @@ Offen bleiben:
 
 Neu dazugekommen durch dieselbe Durchsicht (siehe BLOCKED): Floristik und
 Trauerredner sehen kein Feld, obwohl beide fachlich etwas brauchen.
+
+**Schemaschuld, bei 0016 aufgefallen:** `herzschrittmacher` und
+`freigabe_einaescherung` stehen in 0001 als `boolean default false`. Damit
+lässt sich «nein» nicht von «nicht gefragt» unterscheiden — und «kein
+Herzschrittmacher» ist eine Sicherheitsaussage, die man nicht per
+Voreinstellung treffen sollte. 0016 umgeht das (beim `INSERT` zählt `false`
+nicht als Angabe), behebt es aber nicht. Richtig wäre ein Feld ohne
+Voreinstellung mit drei Zuständen; das ändert 0001 und die Häkchen im Bogen.
 
 Die Fragenliste für das Gespräch und der Prompt zum Gegenprüfen liegen als
 veröffentlichte Analyse vor. Die Antworten des Branchenkenners sind teilweise

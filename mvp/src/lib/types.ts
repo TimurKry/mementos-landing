@@ -19,6 +19,34 @@ export type Deceased = {
   herzschrittmacher?: boolean | null; infektionshinweis?: string | null; freigabe_einaescherung?: boolean | null; // sens
 };
 
+/* ── Quelle je Angabe (0016_quelle_je_angabe.sql) ────────────────
+   Jede gesetzte Angabe hat einen Urheber. Wer die Quelle ist, ändert direkt;
+   wer es nicht ist, macht einen Vorschlag. Deshalb genügt «gespeichert» als
+   Antwort nicht mehr: ein Aufruf kann teils übernommen und teils
+   vorgeschlagen worden sein, und wer das nicht unterscheidet, lässt die
+   Familie glauben, ihre Korrektur stehe schon. */
+export type AngabenErgebnis =
+  | { ok: false }
+  | { ok: true; uebernommen: (keyof Deceased)[]; vorgeschlagen: (keyof Deceased)[] };
+
+/* Ein offener Vorschlag, wie das Haus ihn sieht: der neue Wert UND der
+   bisherige, sonst entscheidet es im Blindflug. `bisher` kommt aus der Zeile
+   und kann deshalb auch Zahl oder Wahrheitswert sein.
+
+   `quelle` ist die Rolle, die den bisherigen Wert gesetzt hat, `rolle` die,
+   die den neuen vorschlägt. Beide gehören in die Anzeige: «die Familie
+   widerspricht dem Haus» und «der Friedhof widerspricht der Familie» sind für
+   das Haus zwei verschiedene Vorgänge. */
+export type Korrektur = {
+  id: string;
+  feld: keyof Deceased;
+  neu: string | null;
+  bisher: string | number | boolean | null;
+  quelle: Role | null;
+  rolle: Role;
+  erstellt: string;
+};
+
 /* id ist nur im Arbeitsbereich des Hauses bekannt — die rollengefilterte
    Ansicht (RoleView) gibt sie nicht heraus. Ohne sie liesse sich ein
    Beteiligter nicht gezielt entfernen: zwei Zeilen dürfen dieselbe Rolle

@@ -10,7 +10,8 @@
    nie benutzt. Und: keine Tokens/Sitzungs-IDs in Logs. */
 
 import type {
-  Case, Deceased, InviteSummary, Phase, Role, RoleView, Task, Termin,
+  AngabenErgebnis, Case, Deceased, InviteSummary, Korrektur, Phase, Role,
+  RoleView, Task, Termin,
 } from "./types";
 import type { Verlaufseintrag } from "./verlauf";
 import { getRuntimeMode, isMockMode } from "./env";
@@ -370,17 +371,62 @@ export async function terminBestaetigen(
    ein nicht erlaubter Schlüssel wird dort übergangen, nicht beanstandet —
    sonst liesse sich über die Antwort abtasten, welche Felder es gibt.
 
-   false = «darf nicht, Sitzung abgelaufen oder Eingabe unförmig». */
+   {ok:false} = «darf nicht, Sitzung abgelaufen oder Eingabe unförmig».
+
+   Seit 0016 zwei Listen statt eines Wahrheitswerts: was übernommen wurde und
+   was als Vorschlag beim Haus liegt. Beide enthalten nur Felder, die der
+   Aufrufer selbst geschickt hat. */
 export async function angabenErgaenzen(
   sessionId: string,
   felder: Partial<Deceased>,
-): Promise<boolean> {
+): Promise<AngabenErgebnis> {
   if (getRuntimeMode() === "mock") return mockStore.angabenErgaenzen(sessionId, felder);
   const { supabaseServer } = await import("./supabase/server");
   const sb = await supabaseServer();
   const { data, error } = await sb.rpc("angaben_ergaenzen", {
     p_session: sessionId,
     p_felder: felder,
+  });
+  if (error) throw new Error(ERR_DB);
+  return alsErgebnis(data);
+}
+
+/* Die Antwort kommt als jsonb und ist damit für TypeScript unbekannt. Statt
+   sie zu behaupten, wird sie geprüft: eine Fassung der Datenbank, die etwas
+   anderes zurückgibt, soll «nicht erlaubt» heissen und nicht abstürzen. */
+function alsErgebnis(data: unknown): AngabenErgebnis {
+  if (!data || typeof data !== "object") return { ok: false };
+  const o = data as Record<string, unknown>;
+  if (o.ok !== true) return { ok: false };
+  const liste = (v: unknown): (keyof Deceased)[] =>
+    Array.isArray(v) ? (v.filter((x) => typeof x === "string") as (keyof Deceased)[]) : [];
+  return {
+    ok: true,
+    uebernommen: liste(o.uebernommen),
+    vorgeschlagen: liste(o.vorgeschlagen),
+  };
+}
+
+/* ── Korrekturvorschläge (0016) ──────────────────────────────────
+   Die Schlange des Hauses: was jemand anders anders sieht. Beide Funktionen
+   prüfen die Eigentümerschaft in der Datenbank selbst — sie sind SECURITY
+   DEFINER und umgehen RLS, deshalb steht die Prüfung dort und nicht nur hier. */
+export async function korrekturen(caseId: string): Promise<Korrektur[]> {
+  if (getRuntimeMode() === "mock") return mockStore.korrekturen(caseId);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { data, error } = await sb.rpc("korrekturen", { p_case: caseId });
+  if (error) throw new Error(ERR_DB);
+  return Array.isArray(data) ? (data as Korrektur[]) : [];
+}
+
+export async function korrekturEntscheiden(id: string, annehmen: boolean): Promise<boolean> {
+  if (getRuntimeMode() === "mock") return mockStore.korrekturEntscheiden(id, annehmen);
+  const { supabaseServer } = await import("./supabase/server");
+  const sb = await supabaseServer();
+  const { data, error } = await sb.rpc("korrektur_entscheiden", {
+    p_id: id,
+    p_annehmen: annehmen,
   });
   if (error) throw new Error(ERR_DB);
   return data === true;

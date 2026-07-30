@@ -105,9 +105,9 @@
     "semantic_hash": "43aa27e1f6b688ab1c69f74402cbef0b"
   },
   "mvp/src/app/(extern)/zugang/AngabenBogen.tsx": {
-    "mtime": 1785264518.001427,
-    "ast_hash": "199de583fd4a99013f714bb6a23667f7",
-    "semantic_hash": "199de583fd4a99013f714bb6a23667f7"
+    "mtime": 1785417238.7800286,
+    "ast_hash": "04a46351ce6c8af6b4bb8de4ddd6b57f",
+    "semantic_hash": ""
   },
   "mvp/src/app/(extern)/zugang/ZugangBeenden.tsx": {
     "mtime": 1785243683.3765707,
@@ -120,9 +120,9 @@
     "semantic_hash": "cf8210e8c8a67ff0874027db324fdb17"
   },
   "mvp/src/app/(extern)/zugang/actions.ts": {
-    "mtime": 1785263817.485443,
-    "ast_hash": "2703d82f288255fac496c0be8bc5b24b",
-    "semantic_hash": "2703d82f288255fac496c0be8bc5b24b"
+    "mtime": 1785417183.1160264,
+    "ast_hash": "da55d3f695615abadc258172095f481f",
+    "semantic_hash": ""
   },
   "mvp/src/app/(extern)/zugang/page.tsx": {
     "mtime": 1785279933.8617582,
@@ -195,9 +195,9 @@
     "semantic_hash": "31ff259f3c9faded75bb9c56af680ba5"
   },
   "mvp/src/app/(intern)/fall/[id]/page.tsx": {
-    "mtime": 1785279924.9737585,
-    "ast_hash": "7a268637d7c6e6c7019a919d7a135d91",
-    "semantic_hash": "7a268637d7c6e6c7019a919d7a135d91"
+    "mtime": 1785417348.2600331,
+    "ast_hash": "2e243f9524c02c7645367c64ca227f30",
+    "semantic_hash": ""
   },
   "mvp/src/app/(intern)/fall/[id]/speicherstand.tsx": {
     "mtime": 1785243683.3773928,
@@ -270,9 +270,9 @@
     "semantic_hash": "9cb0cf66f97f5cc57a98db1f40c2eb7d"
   },
   "mvp/src/lib/data.ts": {
-    "mtime": 1785279789.849715,
-    "ast_hash": "f28ff515e39541bf49380f0e5ce78a5c",
-    "semantic_hash": "f28ff515e39541bf49380f0e5ce78a5c"
+    "mtime": 1785417048.9160209,
+    "ast_hash": "ad9554654c7448651a7162481eb26f51",
+    "semantic_hash": ""
   },
   "mvp/src/lib/eingaben.ts": {
     "mtime": 1785261994.6934848,
@@ -285,9 +285,9 @@
     "semantic_hash": "ddeceff4406da5eb9fd6718a6da4e5b9"
   },
   "mvp/src/lib/mock.ts": {
-    "mtime": 1785279819.8755114,
-    "ast_hash": "bebd422f1c8679cb5182fbec38462548",
-    "semantic_hash": "bebd422f1c8679cb5182fbec38462548"
+    "mtime": 1785417163.1800256,
+    "ast_hash": "56e45fe1bd1a223bd2174b37136e34ba",
+    "semantic_hash": ""
   },
   "mvp/src/lib/public-env.ts": {
     "mtime": 1785243683.3795643,
@@ -315,9 +315,9 @@
     "semantic_hash": "fb560c8fbe4f3e80871b90dd34cd733b"
   },
   "mvp/src/lib/types.ts": {
-    "mtime": 1785279947.493758,
-    "ast_hash": "85090eac364574fde862539adda3a41e",
-    "semantic_hash": "85090eac364574fde862539adda3a41e"
+    "mtime": 1785417017.8120196,
+    "ast_hash": "5b99652e6aaceb3f762ec64ae8fd01cf",
+    "semantic_hash": ""
   },
   "mvp/src/lib/unterlage-antwort.ts": {
     "mtime": 1785279842.0097604,
@@ -780,8 +780,8 @@
     "semantic_hash": ""
   },
   "docs/WORKING_CONTEXT.md": {
-    "mtime": 1785416415.6799948,
-    "ast_hash": "db696cf13f96e240b9c7b69e91ce1e6c",
+    "mtime": 1785431157.4452407,
+    "ast_hash": "10dabc1e833d63877dc5f8e2d6e6ab44",
     "semantic_hash": ""
   },
   "docs/components.md": {
@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "docs/features/mvp-sicherheit.md": {
-    "mtime": 1785416315.7639909,
-    "ast_hash": "fc3fa7290f39a8985ad895442f1f5f7a",
+    "mtime": 1785417553.4800415,
+    "ast_hash": "a9f1a1133f89eaf66d508c539b202c09",
     "semantic_hash": ""
   },
   "docs/features/vertrauen-und-ablauf.md": {
@@ -820,8 +820,8 @@
     "semantic_hash": ""
   },
   "mvp/README.md": {
-    "mtime": 1785243683.3721843,
-    "ast_hash": "fd610bd2542c4261660de9d03dc8480f",
+    "mtime": 1785417516.79604,
+    "ast_hash": "6e8aee2cc3f201c5328219d829227206",
     "semantic_hash": ""
   },
   "pnpm-workspace.yaml": {
@@ -892,6 +892,21 @@
   "mvp/supabase/migrations/0015_rechte_je_feld.sql": {
     "mtime": 1785415790.4399693,
     "ast_hash": "b626b41a7391394ce9a298b6ed2d8940",
+    "semantic_hash": ""
+  },
+  "mvp/src/app/(intern)/fall/[id]/Korrekturen.tsx": {
+    "mtime": 1785417318.0920317,
+    "ast_hash": "e9287523d85b26f18bfaa96d96b7c470",
+    "semantic_hash": ""
+  },
+  "mvp/src/app/(intern)/fall/[id]/korrektur-actions.ts": {
+    "mtime": 1785417274.84803,
+    "ast_hash": "1c0ad89ded426efb0bf72cf026063b7e",
+    "semantic_hash": ""
+  },
+  "mvp/supabase/migrations/0016_quelle_je_angabe.sql": {
+    "mtime": 1785416918.0720155,
+    "ast_hash": "36b0d477c65bf402d85fc04c327ef5ae",
     "semantic_hash": ""
   }
 }

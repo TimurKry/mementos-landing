@@ -47,7 +47,12 @@ export async function zugangBeendenAction() {
    Das wird als solches gemeldet und nicht als Störung: sonst versucht es
    jemand zehnmal, dem es schlicht nicht zusteht. */
 
-export type BestaetigenErgebnis = { ok: true } | { ok: false; fehler: string };
+/* hinweis ist kein Fehler: der Aufruf ist durchgegangen, aber nicht alles
+   davon ist schon eine Angabe im Vorgang. Seit 0016 kann ein Teil als
+   Vorschlag beim Haus liegen (siehe angabenErgaenzenAction). */
+export type BestaetigenErgebnis =
+  | { ok: true; hinweis?: string }
+  | { ok: false; fehler: string };
 
 const FEHLER_SITZUNG =
   "Dieser Zugang ist nicht mehr gültig. Bitte den Link erneut öffnen.";
@@ -140,12 +145,27 @@ export async function angabenErgaenzenAction(
   if (Object.keys(g.wert).length === 0) return { ok: false, fehler: FEHLER_ANGABEN };
 
   try {
-    const erlaubt = await angabenErgaenzen(session, g.wert);
-    if (!erlaubt) return { ok: false, fehler: FEHLER_ANGABEN };
+    const ergebnis = await angabenErgaenzen(session, g.wert);
+    if (!ergebnis.ok) return { ok: false, fehler: FEHLER_ANGABEN };
+
+    revalidatePath("/zugang");
+
+    /* Seit 0016 ist «gespeichert» nicht mehr die ganze Wahrheit. Was eine
+       fremde Quelle hatte, liegt als Vorschlag beim Bestattungshaus — und wer
+       das nicht erfährt, geht davon aus, seine Korrektur stehe schon.
+       Genannt werden die Feldnamen, nicht die Werte. */
+    if (ergebnis.vorgeschlagen.length > 0) {
+      const namen = ergebnis.vorgeschlagen.map((f) => feldLabel[f]).join(", ");
+      return {
+        ok: true,
+        hinweis: ergebnis.uebernommen.length > 0
+          ? `Gespeichert. Für ${namen} liegt bereits eine andere Angabe vor — Ihre Fassung geht als Vorschlag an das Bestattungshaus.`
+          : `Für ${namen} liegt bereits eine andere Angabe vor. Ihre Fassung geht als Vorschlag an das Bestattungshaus; bis zur Rückmeldung bleibt die bisherige stehen.`,
+      };
+    }
   } catch {
     return { ok: false, fehler: FEHLER_SPEICHERN };
   }
 
-  revalidatePath("/zugang");
   return { ok: true };
 }

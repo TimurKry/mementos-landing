@@ -46,6 +46,10 @@ export function AngabenBogen({
   });
   const [fehler, setFehler] = useState<string | null>(null);
   const [fertig, setFertig] = useState(false);
+  /* Kein Fehler und kein blosses «gespeichert»: seit 0016 kann ein Teil der
+     Eingabe als Vorschlag beim Haus liegen, weil dort schon eine andere
+     Angabe steht. Wer das nicht liest, glaubt, seine Korrektur sei drin. */
+  const [hinweis, setHinweis] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   /* Der zuletzt gespeicherte Stand — Bezugspunkt dafür, was «geändert» ist.
@@ -57,6 +61,7 @@ export function AngabenBogen({
     e.preventDefault();
     setFehler(null);
     setFertig(false);
+    setHinweis(null);
 
     /* Nur die tatsächlich geänderten Felder. Sonst stünde nach jedem
        Speichern im Journal des Hauses, die Familie habe alle fünf Angaben
@@ -76,7 +81,12 @@ export function AngabenBogen({
     start(async () => {
       const res = await angabenErgaenzenAction(geaendert);
       if (res.ok) {
+        /* Auch bei einem Vorschlag gilt der Entwurf als abgeschickt: sonst
+           meldet der nächste Klick dieselben Felder erneut, und beim Haus
+           stapelt sich derselbe Vorschlag. Was davon schon eine Angabe im
+           Vorgang ist und was noch beim Haus liegt, sagt der Hinweis. */
         setGespeichert({ ...entwurf });
+        setHinweis(res.hinweis ?? null);
         setFertig(true);
       } else {
         setFehler(res.fehler);
@@ -88,14 +98,16 @@ export function AngabenBogen({
     setEntwurf((alt) => ({ ...alt, [feld]: wert }));
     setFehler(null);
     setFertig(false);
+    setHinweis(null);
   }
 
   return (
     <form onSubmit={speichern} className="card p-4">
       <p className="text-[12.5px] leading-relaxed text-fog">
-        Diese Angaben kennen meist nur die Angehörigen. Sie können sie hier
-        selbst eintragen oder korrigieren — das Bestattungshaus sieht die
-        Änderung sofort. Was Sie nicht wissen, lassen Sie bitte offen.
+        Diese Angaben kennen meist nur die Angehörigen. Was noch offen ist,
+        können Sie hier eintragen — das Bestattungshaus sieht es sofort. Steht
+        eine Angabe schon da, wird sie nicht überschrieben: Ihre Fassung geht
+        als Vorschlag an das Haus. Was Sie nicht wissen, lassen Sie bitte offen.
       </p>
 
       <div className="mt-3.5 grid gap-2.5 sm:grid-cols-2">
@@ -124,9 +136,14 @@ export function AngabenBogen({
         >
           {pending ? "Einen Moment …" : "Angaben speichern"}
         </button>
-        {fertig && (
+        {fertig && !hinweis && (
           <p role="status" aria-live="polite" className="text-[12px] text-mint">
             Gespeichert. Vielen Dank.
+          </p>
+        )}
+        {fertig && hinweis && (
+          <p role="status" aria-live="polite" className="text-[12px] leading-relaxed text-fog">
+            {hinweis}
           </p>
         )}
         {fehler && (

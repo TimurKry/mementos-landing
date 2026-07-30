@@ -1,25 +1,25 @@
 # Graph Report - mementos-landing  (2026-07-30)
 
 ## Corpus Check
-- 172 files · ~105,714 words
+- 175 files · ~112,957 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1135 nodes · 2213 edges · 81 communities (65 shown, 16 thin omitted)
+- 1159 nodes · 2280 edges · 74 communities (59 shown, 15 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.73)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d8224de9`
+- Built from commit: `81772144`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - admin.ts
 - site.ts
-- Unterlagen.tsx
+- icons.tsx
 - zugang/page.tsx
-- datenmodell/page.tsx
+- datamodel/ui.tsx
 - lib/data.ts
 - dependencies
 - mock.ts
@@ -30,33 +30,30 @@
 - compilerOptions
 - 0004_hardening.sql
 - Termine.tsx
-- icons.tsx
+- HubDiagram.tsx
 - preise/page.tsx
-- sicherheit/page.tsx
+- so-funktioniert-es/page.tsx
 - BestatterWorkspace.tsx
 - DemoFlow.tsx
 - audienceMetadata
-- audience/types.ts
+- Artifacts.tsx
 - VerstorbenePerson.tsx
 - MementoOS — Arbeitsstand (durable project knowledge)
 - verlauf.ts
 - AudiencePage.tsx
 - MementoOS Landing — контекст проекта
-- Einladungen.tsx
+- 0016_quelle_je_angabe.sql
 - 0002_rls.sql
 - 0008_plattform_uebersicht.sql
 - 0001_init.sql
-- safeNext
-- (intern)/fall/[id]/page.tsx
+- fuer-zulieferer/page.tsx
 - src/app/layout.tsx
 - Как закрыто: `mvp/supabase/migrations/0004_hardening.sql`
 - .claude/CLAUDE.md
 - 0011_termine.sql
 - vercel.json
-- middleware.ts
 - env.ts
 - lib/types.ts
-- isSessionId
 - ungueltig/page.tsx
 - access.ts
 - 0014_unterlagen.sql
@@ -73,29 +70,25 @@
 - Конвейер
 - Feature: Datenmodell & Zugriff (/datenmodell)
 - MementoOS — где мы сейчас
-- (admin)/layout.tsx
 - Компоненты демо-потока (/demo)
 - MementoOS — Landing
 - Канон дизайн-систем MementoOS
-- public-env.ts
 - Markenzeichen
-- ScenarioSection.tsx
+- audience/types.ts
 - fuer-familien/page.tsx
-- fuer-friedhoefe/page.tsx
-- fuer-verbuende/page.tsx
 - fuer-krematorien/page.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `getRuntimeMode()` - 37 edges
-2. `meldung()` - 23 edges
-3. `pruefe()` - 22 edges
-4. `dbFehler()` - 19 edges
-5. `kennung()` - 19 edges
+1. `getRuntimeMode()` - 39 edges
+2. `meldung()` - 25 edges
+3. `pruefe()` - 24 edges
+4. `kennung()` - 21 edges
+5. `dbFehler()` - 19 edges
 6. `compilerOptions` - 16 edges
 7. `compilerOptions` - 16 edges
-8. `MementoOS — Arbeitsstand (durable project knowledge)` - 15 edges
-9. `Как закрыто: `mvp/supabase/migrations/0004_hardening.sql`` - 14 edges
-10. `schreibe()` - 13 edges
+8. `useSpeicherstand()` - 15 edges
+9. `MementoOS — Arbeitsstand (durable project knowledge)` - 15 edges
+10. `Как закрыто: `mvp/supabase/migrations/0004_hardening.sql`` - 15 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `ZugangPage()` --calls--> `getCaseBySession()`  [EXTRACTED]
@@ -112,31 +105,31 @@
 ## Import Cycles
 - None detected.
 
-## Communities (81 total, 16 thin omitted)
+## Communities (74 total, 15 thin omitted)
 
 ### Community 0 - "admin.ts"
 Cohesion: 0.08
 Nodes (59): EreignisseSeite(), AdminErgebnis, ausfuehren(), sitzungBeendenAction(), zugangZurueckziehenAction(), FallSeite(), badgeKlasse, Zugaenge() (+51 more)
 
 ### Community 1 - "site.ts"
-Cohesion: 0.19
-Nodes (10): metadata, robots(), Eintrag, SEITEN, sitemap(), STAND, DemoFlow(), absolut() (+2 more)
+Cohesion: 0.27
+Nodes (8): robots(), Eintrag, SEITEN, sitemap(), STAND, absolut(), seite(), SeitenPfad
 
-### Community 2 - "Unterlagen.tsx"
-Cohesion: 0.13
-Nodes (21): Aufgaben(), ROLLEN, Beteiligte(), ROLLEN, EntfernenKnopf(), Speicherstand(), Stand, STILL (+13 more)
+### Community 2 - "icons.tsx"
+Cohesion: 0.09
+Nodes (18): blocks, metadata, FeatureCards(), HeuteMorgen(), heuteSteps, morgenSteps, IconBrief(), IconCheck() (+10 more)
 
 ### Community 3 - "zugang/page.tsx"
 Cohesion: 0.20
-Nodes (10): zugangBeendenAction(), AngabenBogen(), DATUMSFELDER, PLATZHALTER, ZugangPage(), ZugangBeenden(), ZugangTermine(), feldLabel (+2 more)
+Nodes (10): zugangBeendenAction(), AngabenBogen(), DATUMSFELDER, PLATZHALTER, ZugangPage(), ZugangBeenden(), feldLabel, Deceased (+2 more)
 
-### Community 4 - "datenmodell/page.tsx"
-Cohesion: 0.10
-Nodes (23): metadata, roleOrder, DocRow, documents, entities, Entity, Field, Group (+15 more)
+### Community 4 - "datamodel/ui.tsx"
+Cohesion: 0.09
+Nodes (30): metadata, roleOrder, DocRow, documents, entities, Entity, Field, Group (+22 more)
 
 ### Community 5 - "lib/data.ts"
-Cohesion: 0.17
-Nodes (32): addParticipant(), addTask(), addTermin(), addUnterlage(), angabenErgaenzen(), createCase(), createInvite(), dbFehler() (+24 more)
+Cohesion: 0.06
+Nodes (64): metadata, metadata, badgeKlasse, Einladungen(), Kopierstand, datumsformat, EinladungAnsicht, EinladungStatus (+56 more)
 
 ### Community 6 - "dependencies"
 Cohesion: 0.06
@@ -144,7 +137,7 @@ Nodes (34): dependencies, next, react, react-dom, server-only, @supabase/ssr, @s
 
 ### Community 7 - "mock.ts"
 Cohesion: 0.06
-Nodes (33): addInvite(), alleFaelle(), alleZugaenge(), DEMO_ANGELEGT, demoFaelle(), demoZugaenge(), ereignisEintragen(), fallVon() (+25 more)
+Nodes (36): addInvite(), alleFaelle(), alleZugaenge(), DEMO_ANGELEGT, demoFaelle(), demoZugaenge(), ereignisEintragen(), fallVon() (+28 more)
 
 ### Community 8 - "package.json"
 Cohesion: 0.06
@@ -155,12 +148,12 @@ Cohesion: 0.07
 Nodes (27): mvp, compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib (+19 more)
 
 ### Community 10 - "Sections.tsx"
-Cohesion: 0.06
-Nodes (23): AccessTeaser(), Faq(), items, FeatureCards(), Hero(), HeuteMorgen(), heuteSteps, morgenSteps (+15 more)
+Cohesion: 0.11
+Nodes (11): Faq(), items, Marquee(), roles, Audiences, bandItems, ContactCta(), Process() (+3 more)
 
 ### Community 11 - "(intern)/fall/[id]/actions.ts"
-Cohesion: 0.09
-Nodes (60): angabenErgaenzenAction(), BestaetigenErgebnis, LAENGE, terminBestaetigenAction(), BestattungsartFeld(), AufgabeEingabe, aufgabeEntfernenAction(), aufgabeHinzufuegenAction() (+52 more)
+Cohesion: 0.06
+Nodes (83): angabenErgaenzenAction(), BestaetigenErgebnis, LAENGE, terminBestaetigenAction(), BestattungsartFeld(), AufgabeEingabe, aufgabeEntfernenAction(), aufgabeHinzufuegenAction() (+75 more)
 
 ### Community 12 - "compilerOptions"
 Cohesion: 0.07
@@ -172,35 +165,35 @@ Nodes (16): app.audit_log_append_only(), app.case_for_role(), app.handle_new_use
 
 ### Community 14 - "Termine.tsx"
 Cohesion: 0.10
-Nodes (27): TerminKarte(), TerminEingabe, Entwurf, entwurfAus(), Felder(), LEER, ROLLEN, Termine() (+19 more)
+Nodes (26): TerminKarte(), ZugangTermine(), TerminEingabe, Entwurf, entwurfAus(), LEER, ROLLEN, Termine() (+18 more)
 
-### Community 15 - "icons.tsx"
+### Community 15 - "HubDiagram.tsx"
 Cohesion: 0.13
-Nodes (23): tierKey, tierRow, curves, endpoints, Node, nodes, IconBehoerde(), IconBestatter() (+15 more)
+Nodes (16): AccessTeaser(), Hero(), curves, endpoints, HubDiagram(), Node, nodes, IconBestatter() (+8 more)
 
 ### Community 16 - "preise/page.tsx"
-Cohesion: 0.19
-Nodes (9): cta, metadata, pricing, AudienceFooter(), AudienceNav(), defaultPlans, Pricing(), PricingPlan (+1 more)
+Cohesion: 0.21
+Nodes (8): cta, metadata, pricing, AudienceFooter(), defaultPlans, Pricing(), PricingPlan, PricingSpec
 
-### Community 17 - "sicherheit/page.tsx"
-Cohesion: 0.14
-Nodes (13): blocks, metadata, metadata, steps, umstieg, metadata, Footer(), Header() (+5 more)
+### Community 17 - "so-funktioniert-es/page.tsx"
+Cohesion: 0.18
+Nodes (10): metadata, steps, umstieg, metadata, AudienceNav(), Footer(), Header(), links (+2 more)
 
 ### Community 18 - "BestatterWorkspace.tsx"
 Cohesion: 0.11
 Nodes (13): metadata, IconKerze(), BestatterWorkspace(), Case, Col, cols, Contact, contactMeta (+5 more)
 
 ### Community 19 - "DemoFlow.tsx"
-Cohesion: 0.23
-Nodes (10): stepLabels, Card(), Field(), GhostBtn(), Pill(), PillTone, pillTones, PrimaryBtn() (+2 more)
+Cohesion: 0.21
+Nodes (10): metadata, DemoFlow(), stepLabels, Card(), Field(), GhostBtn(), Pill(), PillTone (+2 more)
 
 ### Community 20 - "audienceMetadata"
-Cohesion: 0.19
-Nodes (7): metadata, metadata, audienceMetadata(), AudiencePage(), bestatter, zulieferer, faqSchema()
+Cohesion: 0.14
+Nodes (9): metadata, metadata, metadata, audienceMetadata(), AudiencePage(), bestatter, friedhoefe, verbuende (+1 more)
 
-### Community 21 - "audience/types.ts"
-Cohesion: 0.11
-Nodes (13): Artifact(), AudienceHero(), slots, FaqSection(), AccessRow, ArtifactSpec, BoardTask, FaqItem (+5 more)
+### Community 21 - "Artifacts.tsx"
+Cohesion: 0.18
+Nodes (5): Artifact(), AudienceHero(), slots, ArtifactSpec, HeroSpec
 
 ### Community 22 - "VerstorbenePerson.tsx"
 Cohesion: 0.27
@@ -222,9 +215,9 @@ Nodes (5): AudienceCta(), QuoteSection(), StepsSection(), AudienceData, WarumSec
 Cohesion: 0.25
 Nodes (7): Git, graphify, MementoOS Landing — контекст проекта, Команды, Правила контента (нарушение = блокер на ревью), Структура, Три дизайн-системы (кратко)
 
-### Community 27 - "Einladungen.tsx"
-Cohesion: 0.29
-Nodes (6): badgeKlasse, Einladungen(), Kopierstand, EinladungAnsicht, EinladungStatus, roleLabel
+### Community 27 - "0016_quelle_je_angabe.sql"
+Cohesion: 0.36
+Nodes (5): app.feldquelle_pflegen(), deceased_feldquelle, public.feldquelle, public.korrektur_entscheiden(), public.korrekturvorschlag
 
 ### Community 28 - "0002_rls.sql"
 Cohesion: 0.22
@@ -234,49 +227,33 @@ Nodes (9): audit_log, cases, deceased, documents, invites, is_case_owner(), part
 Cohesion: 0.44
 Nodes (8): audit_log, cases, deceased, documents, invites, participants, profiles, tasks
 
-### Community 31 - "safeNext"
-Cohesion: 0.26
-Nodes (10): Art, ARTEN, GET(), istArt(), AnmeldeErgebnis, mitPasswortAnmelden(), LoginPage(), PasswortForm() (+2 more)
-
-### Community 32 - "(intern)/fall/[id]/page.tsx"
-Cohesion: 0.20
-Nodes (11): datumsformat, status(), zuAnsicht(), FallPage(), Dashboard(), phaseLabel, getCase(), listCases() (+3 more)
-
 ### Community 33 - "src/app/layout.tsx"
 Cohesion: 0.24
 Nodes (8): inter, metadata, mono, RootLayout(), serif, Reveal(), Schema(), softwareSchema()
 
 ### Community 34 - "Как закрыто: `mvp/supabase/migrations/0004_hardening.sql`"
-Cohesion: 0.06
-Nodes (35): Fail-loud вместо тихого mock (`src/lib/env.ts`), Feature: Sicherheit im MVP (`mvp/`) — Rechtemodell, Sitzungen, Kopfzeilen, Middleware (`src/middleware.ts`), Open redirect через управляющие символы в `?next=`, service_role, Вход, Гигиена `search_path`, Два побочных исправления в схеме (+27 more)
+Cohesion: 0.05
+Nodes (36): Fail-loud вместо тихого mock (`src/lib/env.ts`), Feature: Sicherheit im MVP (`mvp/`) — Rechtemodell, Sitzungen, Kopfzeilen, Middleware (`src/middleware.ts`), Open redirect через управляющие символы в `?next=`, service_role, Вход, Гигиена `search_path`, Два побочных исправления в схеме (+28 more)
 
 ### Community 38 - "vercel.json"
 Cohesion: 0.33
 Nodes (5): framework, installCommand, regions, $schema, fra1
 
-### Community 39 - "middleware.ts"
-Cohesion: 0.21
-Nodes (13): nextConfig, assertRuntimeConfig(), supabasePublicConfig(), applySecurityHeaders(), contentSecurityPolicy(), HeaderOptions, isVertraulich(), staticSecurityHeaders (+5 more)
-
-### Community 41 - "env.ts"
-Cohesion: 0.23
-Nodes (11): POST(), ab(), GET(), istForm(), redeemInvite(), isBuildPhase(), isMockMode(), RuntimeMode (+3 more)
+### Community 39 - "env.ts"
+Cohesion: 0.06
+Nodes (44): nextConfig, POST(), Art, ARTEN, GET(), istArt(), ab(), GET() (+36 more)
 
 ### Community 42 - "lib/types.ts"
-Cohesion: 0.15
-Nodes (12): AdminFall, AdminFallKontext, AdminHaus, AdminSitzung, AdminUebersicht, Case, ContactStatus, Event (+4 more)
-
-### Community 43 - "isSessionId"
-Cohesion: 0.27
-Nodes (9): GET(), GET(), Auslieferung, unterlageFuerHaus(), unterlageFuerSitzung(), ausliefern(), contentDisposition(), KEIN_CACHE (+1 more)
+Cohesion: 0.14
+Nodes (13): AdminFall, AdminFallKontext, AdminHaus, AdminSitzung, AdminUebersicht, AngabenErgebnis, Case, ContactStatus (+5 more)
 
 ### Community 45 - "access.ts"
-Cohesion: 0.19
-Nodes (16): Gruppe(), allowedTiers(), aufzaehlung(), caseForRole(), darfBestaetigen(), deceasedForRole(), empfaengerSatz(), felderSchreibbar() (+8 more)
+Cohesion: 0.17
+Nodes (18): Felder(), Gruppe(), allowedTiers(), aufzaehlung(), caseForRole(), darfBestaetigen(), deceasedForRole(), empfaengerSatz() (+10 more)
 
 ### Community 49 - "MementoOS — MVP"
 Cohesion: 0.10
-Nodes (19): 1. Projekt anlegen, 2. Schema einspielen, 3. Umgebungsvariablen, Aufbau, Build & Verifikation, Demo-Ablauf (die eine Sache, die es zu zeigen gilt), Deployment, Der Token steht nicht in der Adresszeile (+11 more)
+Nodes (20): 1. Projekt anlegen, 2. Schema einspielen, 3. Umgebungsvariablen, Aufbau, Build & Verifikation, Demo-Ablauf (die eine Sache, die es zu zeigen gilt), Deployment, Der Token steht nicht in der Adresszeile (+12 more)
 
 ### Community 59 - "Feature: Zielgruppen-Seiten & Preise (/fuer-*, /preise)"
 Cohesion: 0.15
@@ -298,10 +275,6 @@ Nodes (10): Feature: Datenmodell & Zugriff (/datenmodell), Данные — `src
 Cohesion: 0.20
 Nodes (9): 1. Что вообще есть в репозитории, 2. Модель данных, 3. Кто какие поля видит, 4. Как участник попадает в дело, 5. Два периметра и что их стережёт, 6. История миграций — включая два бага, найденных на боевой базе, 7. Что готово, что нет, 8. Админка платформы — что предлагаю строить (+1 more)
 
-### Community 65 - "(admin)/layout.tsx"
-Cohesion: 0.24
-Nodes (5): metadata, metadata, metadata, Wordmark(), isMock
-
 ### Community 66 - "Компоненты демо-потока (/demo)"
 Cohesion: 0.25
 Nodes (7): Field, Pill — статусная метка, PrimaryBtn / GhostBtn, Stepper — шаги демо, Компоненты демо-потока (/demo), Переход шагов, Правило данных
@@ -314,37 +287,33 @@ Nodes (7): MementoOS — Landing, MVP (`mvp/`), Деплой, Запуск, Ко
 Cohesion: 0.29
 Nodes (6): 1. Monad — лендинг `/`, `/demo` и Monad-подстраницы, 2. Steep — страницы аудиторий `/fuer-*`, 3. Default — CRM `/workspace`, Зона Datenmodell (/datenmodell) — внутри Monad, Канон дизайн-систем MementoOS, Общие законы (все системы)
 
-### Community 69 - "public-env.ts"
-Cohesion: 0.28
-Nodes (6): LoginForm(), Zustand, anon, publicSupabaseUrl, publishable, supabaseBrowser()
-
 ### Community 70 - "Markenzeichen"
 Cohesion: 0.50
 Nodes (3): Entschieden: die Datei gewinnt, Markenzeichen, Wo das Zeichen benutzt wird
 
-### Community 75 - "ScenarioSection.tsx"
-Cohesion: 0.22
-Nodes (3): ScenarioSection(), BoardColumnSpec, ScenarioBlock
+### Community 75 - "audience/types.ts"
+Cohesion: 0.12
+Nodes (11): FaqSection(), ScenarioSection(), AccessRow, BoardColumnSpec, BoardTask, FaqItem, LossStep, MitStep (+3 more)
 
 ## Knowledge Gaps
-- **389 isolated node(s):** `nextConfig`, `name`, `version`, `private`, `dev` (+384 more)
+- **391 isolated node(s):** `nextConfig`, `name`, `version`, `private`, `dev` (+386 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **16 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getRuntimeMode()` connect `lib/data.ts` to `admin.ts`, `(intern)/fall/[id]/page.tsx`, `middleware.ts`, `env.ts`, `isSessionId`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `Role` connect `Unterlagen.tsx` to `admin.ts`, `lib/data.ts`, `mock.ts`, `lib/types.ts`, `(intern)/fall/[id]/actions.ts`, `access.ts`, `Termine.tsx`, `verlauf.ts`, `Einladungen.tsx`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `seite()` connect `site.ts` to `src/app/layout.tsx`, `datenmodell/page.tsx`, `preise/page.tsx`, `sicherheit/page.tsx`, `BestatterWorkspace.tsx`, `audienceMetadata`, `AudiencePage.tsx`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `getRuntimeMode()` connect `lib/data.ts` to `admin.ts`, `env.ts`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `seite()` connect `site.ts` to `src/app/layout.tsx`, `icons.tsx`, `datamodel/ui.tsx`, `preise/page.tsx`, `so-funktioniert-es/page.tsx`, `BestatterWorkspace.tsx`, `DemoFlow.tsx`, `audienceMetadata`, `AudiencePage.tsx`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `Role` connect `(intern)/fall/[id]/actions.ts` to `admin.ts`, `lib/data.ts`, `mock.ts`, `lib/types.ts`, `access.ts`, `Termine.tsx`, `verlauf.ts`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `nextConfig`, `name`, `version` to the rest of the system?**
-  _389 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _391 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `admin.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.08128772635814889 - nodes in this community are weakly interconnected._
-- **Should `Unterlagen.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.1339031339031339 - nodes in this community are weakly interconnected._
-- **Should `datenmodell/page.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.0962566844919786 - nodes in this community are weakly interconnected._
+- **Should `icons.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.09032258064516129 - nodes in this community are weakly interconnected._
+- **Should `datamodel/ui.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.08710801393728224 - nodes in this community are weakly interconnected._

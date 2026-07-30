@@ -10,7 +10,8 @@
 
 import type {
   AdminEreignis, AdminFall, AdminFallKontext, AdminHaus, AdminUebersicht,
-  AdminZugang, Case, Deceased, InviteSummary, Phase, Role, RoleView, Task, Termin,
+  AdminZugang, AngabenErgebnis, Case, Deceased, InviteSummary, Korrektur,
+  Phase, Role, RoleView, Task, Termin,
 } from "./types";
 import type { Auslieferung } from "./data";
 import { caseForRole, darfBestaetigen, felderSchreibbar } from "./access";
@@ -213,11 +214,27 @@ type MockPlattform = {
   ereignisse: MockEreignis[];    // absteigend nach Zeitpunkt
 };
 
+/* Spiegel von public.feldquelle und public.korrekturvorschlag (0016). Ohne
+   diese beiden lügt der Mock-Betrieb an der wichtigsten Stelle: er liesse die
+   Familie überschreiben, was in der echten Datenbank ein Vorschlag würde. */
+type MockKorrektur = {
+  id: string;
+  caseId: string;
+  feld: keyof Deceased;
+  wert: string | null;
+  rolle: Role;
+  erstelltAm: number;
+  stand: "offen" | "angenommen" | "abgelehnt";
+};
+
 type MockState = {
   cases: Case[];
   invites: Map<string, MockInvite>;   // id → Einladung
   sessions: Map<string, MockSession>; // Sitzungs-ID → Sitzung
   dateien: Map<string, MockDatei>;    // Unterlagen-ID → Bytes
+  /* «<fallId>|<feld>» → Rolle, die die Angabe gesetzt hat. */
+  quellen: Map<string, Role>;
+  korrekturen: MockKorrektur[];
   plattform: MockPlattform;
   /* Wann ein im Betrieb angelegter Vorgang entstanden ist. Gehört in den
      Zustand und nicht in eine Modulkonstante: der Bundler legt dieses Modul
@@ -237,9 +254,21 @@ function initState(): MockState {
     invites: new Map(),
     sessions: new Map(),
     dateien: new Map(),
+    quellen: new Map(),
+    korrekturen: [],
     plattform: seedPlattform(),
     angelegt: new Map(),
   };
+  /* Wie der Nachtrag in Abschnitt 3 von 0016: alles, was in den
+     Beispieldaten schon steht, gehört dem Haus. Sonst dürfte die Familie im
+     Vorführ-Betrieb direkt überschreiben und der Mock zeigte den Vorschlagsweg
+     nie — also genau das, was hier vorzuführen ist. */
+  for (const c of state.cases) {
+    for (const [feld, wert] of Object.entries(c.verstorbene)) {
+      if (wert === null || wert === undefined || wert === false) continue;
+      state.quellen.set(`${c.id}|${feld}`, "bestatter");
+    }
+  }
   /* Demo-Einladungen: die beiden Ansichten aus dem README (Beispieldaten) */
   addInvite(state, DEMO_CASE_ID, "familie", DEMO_FAMILY_TOKEN, "Familie Weber");
   addInvite(state, DEMO_CASE_ID, "krematorium", DEMO_KREMATORIUM_TOKEN, "Krematorium Südstadt");
@@ -428,7 +457,7 @@ function seedPlattform(): MockPlattform {
 }
 
 const state: MockState = (g.__mementoMock ??= initState());
-const { cases, invites, sessions, dateien, plattform, angelegt } = state;
+const { cases, invites, sessions, dateien, quellen, korrekturen, plattform, angelegt } = state;
 
 function inviteByToken(token: string): MockInvite | undefined {
   for (const inv of invites.values()) if (inv.token === token) return inv;
@@ -459,6 +488,20 @@ function neueFallNummer(): string {
 }
 
 const fallVon = (caseId: string): Case | undefined => cases.find((c) => c.id === caseId);
+
+/* ── Quelle je Angabe (0016) ─────────────────────────────────────
+   Spiegel des Auslösers app.feldquelle_pflegen: wer schreibt, wird Quelle;
+   wer leert, gibt die Quelle ab. Deshalb an EINER Stelle und nicht an jeder
+   Schreibstelle einzeln — genau wie in der Datenbank. */
+const quellenschluessel = (caseId: string, feld: string) => `${caseId}|${feld}`;
+
+function quelleSetzen(caseId: string, patch: Partial<Deceased>, rolle: Role): void {
+  for (const [feld, wert] of Object.entries(patch)) {
+    const k = quellenschluessel(caseId, feld);
+    if (wert === null || wert === undefined) quellen.delete(k);
+    else quellen.set(k, rolle);
+  }
+}
 
 /* Kurzform der Sitzungs-Kennung, wie app.akteur_kurz in 0013: acht Zeichen.
    Die volle Kennung ist ein Schlüssel auf Vorzeigen und verlässt den Server
@@ -560,6 +603,8 @@ export const mockStore = {
     const c = fallVon(caseId);
     if (!c) return;
     c.verstorbene = { ...c.verstorbene, ...patch };
+    /* Nur das Haus kommt hierher: dieser Weg hängt am Konto des Eigentümers. */
+    quelleSetzen(caseId, patch, "bestatter");
   },
 
   addParticipant: (caseId: string, role: Role, org: string): void => {
@@ -758,36 +803,116 @@ export const mockStore = {
     return { art: "bytes", inhalt: datei.inhalt, mime: datei.mime, dateiname: datei.dateiname };
   },
 
-  /* Spiegel von public.angaben_ergaenzen (0012), in derselben Reihenfolge:
-     Sitzung lebendig → Rolle hat überhaupt ein Schreibrecht → nur erlaubte
-     Schlüssel werden übernommen, nicht erlaubte übergangen. */
-  angabenErgaenzen: (sessionId: string, felder: Partial<Deceased>): boolean => {
+  /* Spiegel von public.angaben_ergaenzen (0012, neu gefasst in 0016), in
+     derselben Reihenfolge: Sitzung lebendig → Rolle hat überhaupt ein
+     Schreibrecht → nur erlaubte Schlüssel, nicht erlaubte übergangen.
+
+     Neu aus 0016 die Verzweigung je Feld — dieselben drei Fälle wie in der
+     Datenbank: leer oder ohne Quelle → direkt; eigene Quelle → direkt;
+     fremde Quelle → Vorschlag. Der bisherige Wert bleibt dabei stehen. */
+  angabenErgaenzen: (sessionId: string, felder: Partial<Deceased>): AngabenErgebnis => {
     const now = Date.now();
     const s = sessions.get(sessionId);
-    if (!s || s.expiresAt <= now) return false;
+    if (!s || s.expiresAt <= now) return { ok: false };
     const inv = invites.get(s.inviteId);
-    if (!usable(inv, now)) return false;
+    if (!usable(inv, now)) return { ok: false };
 
     const erlaubt = felderSchreibbar(inv.role);
-    if (erlaubt.length === 0) return false;
+    if (erlaubt.length === 0) return { ok: false };
 
     const c = cases.find((x) => x.id === inv.caseId);
-    if (!c) return false;
+    if (!c) return { ok: false };
 
-    const patch: Partial<Deceased> = {};
-    let etwas = false;
+    const direkt: Partial<Deceased> = {};
+    const uebernommen: (keyof Deceased)[] = [];
+    const vorgeschlagen: (keyof Deceased)[] = [];
+
     for (const f of erlaubt) {
-      if (f in felder) {
-        (patch as Record<string, unknown>)[f] = felder[f] ?? null;
-        etwas = true;
+      if (!(f in felder)) continue;
+      const wert = felder[f] ?? null;
+      const bisher = c.verstorbene[f];
+      const quelle = quellen.get(quellenschluessel(c.id, f));
+
+      if (bisher === null || bisher === undefined || !quelle || quelle === inv.role) {
+        (direkt as Record<string, unknown>)[f] = wert;
+        uebernommen.push(f);
+      } else {
+        vorgeschlagen.push(f);
+        /* Ein zweiter Vorschlag derselben Rolle ersetzt den ersten — Spiegel
+           des Teilindex korrekturvorschlag_offen. */
+        const offen = korrekturen.find(
+          (k) => k.caseId === c.id && k.feld === f
+            && k.rolle === inv.role && k.stand === "offen",
+        );
+        const text = wert === null ? null : String(wert);
+        if (offen) {
+          offen.wert = text;
+          offen.erstelltAm = now;
+        } else {
+          korrekturen.push({
+            id: crypto.randomUUID(), caseId: c.id, feld: f,
+            wert: text, rolle: inv.role, erstelltAm: now, stand: "offen",
+          });
+        }
       }
     }
-    if (!etwas) return false;
 
-    c.verstorbene = { ...c.verstorbene, ...patch };
-    protokolliere(c.id, "invite", akteurKurz(sessionId), "angaben.ergaenzt", {
-      role: inv.role, felder: Object.keys(patch),
-    });
+    if (uebernommen.length === 0 && vorgeschlagen.length === 0) return { ok: false };
+
+    if (uebernommen.length > 0) {
+      c.verstorbene = { ...c.verstorbene, ...direkt };
+      quelleSetzen(c.id, direkt, inv.role);
+      protokolliere(c.id, "invite", akteurKurz(sessionId), "angaben.ergaenzt", {
+        role: inv.role, felder: uebernommen,
+      });
+    }
+    if (vorgeschlagen.length > 0) {
+      protokolliere(c.id, "invite", akteurKurz(sessionId), "korrektur.vorgeschlagen", {
+        role: inv.role, felder: vorgeschlagen,
+      });
+    }
+
+    return { ok: true, uebernommen, vorgeschlagen };
+  },
+
+  /* Spiegel von public.korrekturen: der neue UND der bisherige Wert. */
+  korrekturen: (caseId: string): Korrektur[] =>
+    korrekturen
+      .filter((k) => k.caseId === caseId && k.stand === "offen")
+      .sort((a, b) => a.erstelltAm - b.erstelltAm)
+      .map((k) => ({
+        id: k.id,
+        feld: k.feld,
+        neu: k.wert,
+        bisher: (fallVon(caseId)?.verstorbene[k.feld] ?? null) as Korrektur["bisher"],
+        quelle: quellen.get(quellenschluessel(caseId, k.feld)) ?? null,
+        rolle: k.rolle,
+        erstellt: new Date(k.erstelltAm).toISOString(),
+      })),
+
+  /* Spiegel von public.korrektur_entscheiden. Auch hier wird der Inhalt nach
+     der Entscheidung gelöscht — bei Annahme steht er in der Zeile, bei
+     Ablehnung wollte ihn das Haus nicht. */
+  korrekturEntscheiden: (id: string, annehmen: boolean): boolean => {
+    const k = korrekturen.find((x) => x.id === id && x.stand === "offen");
+    if (!k) return false;
+    const c = fallVon(k.caseId);
+    if (!c) return false;
+
+    if (annehmen) {
+      if (k.wert === null) return false;
+      const patch = { [k.feld]: k.wert } as Partial<Deceased>;
+      c.verstorbene = { ...c.verstorbene, ...patch };
+      /* Quelle wird die vorschlagende Rolle, nicht das Haus: der Wert kommt
+         von ihr, freigegeben hat ihn nur das Haus. */
+      quelleSetzen(c.id, patch, k.rolle);
+    }
+
+    k.stand = annehmen ? "angenommen" : "abgelehnt";
+    k.wert = null;
+    protokolliere(c.id, "konto", null,
+      annehmen ? "korrektur.angenommen" : "korrektur.abgelehnt",
+      { feld: k.feld, role: k.rolle });
     return true;
   },
 
