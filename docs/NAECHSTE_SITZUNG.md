@@ -15,8 +15,7 @@ Commit betrifft `0017`.
 |---|---|
 | Lendung (`src/`) | live auf GitHub Pages |
 | Anwendung (`mvp/`) | läuft, SSR auf Vercel |
-| Datenbank | Migrationen `0001`–`0016` **angewandt und nachgemessen** |
-| `0017` | geschrieben und im Mock-Betrieb geprüft, **noch nicht angewandt** |
+| Datenbank | Migrationen `0001`–`0017` **angewandt und nachgemessen** |
 | Öffentlicher Vertrag | genau sechs `anon`-Funktionen, null Funktionen ohne ACL, **null Tabellenrechte für `anon`** (dritte Invariante, ab 0017) |
 
 Die letzten drei Migrationen:
@@ -32,13 +31,20 @@ Die letzten drei Migrationen:
   Liste, welche Voraussetzung welchen Termin blockiert, ist eine ANNAHME aus
   drei Zeilen. Siehe den eigenen Abschnitt weiter unten.
 
-> **`0017` ist noch nicht auf der Datenbank.** Alles darunter — Tabelle, fünfte
-> Matrix, Prüfung in `termin_bestaetigen`, beide Bildschirme — ist geschrieben
-> und im Mock-Betrieb durch Ausführung geprüft, aber nicht angewandt. Der
-> Grund ist nicht Vorsicht vor dem Skript, sondern die Liste: sie fehlt noch,
-> und mit ihr ändern sich vermutlich Zeilen der Matrix. Vor dem Anwenden die
-> zwei Invarianten messen (sechs `anon`-Funktionen, null Funktionen ohne ACL);
-> die Prüfungen in Abschnitt 8 der Datei tun das selbst und brechen ab.
+> **`0017` ist angewandt** (2026-07-30). Der erste Versuch brach an Prüfung 8.6
+> ab und legte offen, dass `anon` seit `0011` Tabellenrechte in `public` hatte;
+> der Riegel steckt jetzt in derselben Migration. Der zweite Lauf ging durch.
+>
+> Nachgemessen auf der echten Datenbank: `anon` darf genau sechs Funktionen
+> ausführen, null Funktionen ohne eigene ACL, **null Tabellenrechte für
+> `anon`**, `termin_bestaetigen` existiert genau einmal und gibt `jsonb`
+> zurück, die fünfte Matrix trägt genau die drei angenommenen Zeilen.
+>
+> Was auf der echten Datenbank **nicht** geprüft ist: die Blockade selbst.
+> Dort steht bisher kein einziger Termin und keine Voraussetzung — die
+> Wirkung ist nur im Mock-Betrieb durchgespielt (einschliesslich des
+> Wettrennens). Der erste echte Termin mit einer offenen Voraussetzung ist
+> die eigentliche Abnahme.
 
 ---
 
@@ -74,7 +80,7 @@ sich genau einmal je Sitzung und lässt danach alles durch.
 
 ---
 
-## `0017` — gebaut, aber auf die Liste wartend
+## `0017` — angewandt, aber auf die Liste wartend
 
 **Abhängigkeiten und Freigaben.** Der Mechanismus ist da:
 
@@ -112,10 +118,14 @@ neu zu bewerten sind (Begründung ausführlich im Kopf der Migration):
    Anwendung. Sagt ein Bestatter «nein, auch wir dürfen das nicht», wird
    daraus ein Auslöser auf `public.termine`, dann aber als eigene Migration.
 
-**Wenn die Liste kommt:** die Matrix in `0017` NICHT bearbeiten — sie ist dann
+**Wenn die Liste kommt:** die Matrix in `0017` NICHT bearbeiten — sie ist
 angewandt. Eine neue Migration, wie bei jeder Rechteänderung. Zu ändern sind
 dann immer beide Seiten zusammen: `app.voraussetzungen_fuer_termin` und
 `voraussetzungenFuerTermin` in `mvp/src/lib/access.ts`.
+
+**Bis dahin hält nichts irgendetwas auf**, weil in `public.voraussetzung`
+keine Zeile steht. Der Notausschalter ist derselbe Satz:
+`delete from public.voraussetzung;` — kein DDL, keine Rücknahme der Migration.
 
 ---
 

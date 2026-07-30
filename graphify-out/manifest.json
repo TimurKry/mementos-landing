@@ -780,8 +780,8 @@
     "semantic_hash": ""
   },
   "docs/WORKING_CONTEXT.md": {
-    "mtime": 1785446092.0516295,
-    "ast_hash": "8017e4fe5d2ec8a0fb249108460cf7e0",
+    "mtime": 1785449070.799422,
+    "ast_hash": "306d11868570278ba3083c3c872a42c2",
     "semantic_hash": ""
   },
   "docs/components.md": {
@@ -910,8 +910,8 @@
     "semantic_hash": ""
   },
   "docs/NAECHSTE_SITZUNG.md": {
-    "mtime": 1785446097.2196293,
-    "ast_hash": "4785065a72a25552b97b4ef541e8b1e6",
+    "mtime": 1785449033.191423,
+    "ast_hash": "86927e9d070296808cd676bf565a3768",
     "semantic_hash": ""
   },
   "mvp/src/app/(intern)/fall/[id]/Voraussetzungen.tsx": {

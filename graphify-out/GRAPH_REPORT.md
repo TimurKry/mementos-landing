@@ -1,7 +1,7 @@
 # Graph Report - mementos-landing  (2026-07-30)
 
 ## Corpus Check
-- 178 files · ~122,475 words
+- 178 files · ~122,633 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `01edec28`
+- Built from commit: `7de3abf1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -318,7 +318,7 @@ Nodes (39): nextConfig, dynamic, POST(), Art, ARTEN, dynamic, GET(), istArt() (+
 
 ### Community 83 - "Nächste Sitzung — Übergabe"
 Cohesion: 0.25
-Nodes (7): `0017` — gebaut, aber auf die Liste wartend, Arbeitsregeln, die nicht verhandelbar sind, Danach, in dieser Reihenfolge, Nächste Sitzung — Übergabe, Vor jeder Arbeit lesen, Wo der Stand steht, Zuerst den Wissensgraphen benutzen
+Nodes (7): `0017` — angewandt, aber auf die Liste wartend, Arbeitsregeln, die nicht verhandelbar sind, Danach, in dieser Reihenfolge, Nächste Sitzung — Übergabe, Vor jeder Arbeit lesen, Wo der Stand steht, Zuerst den Wissensgraphen benutzen
 
 ## Knowledge Gaps
 - **416 isolated node(s):** `nextConfig`, `name`, `version`, `private`, `dev` (+411 more)

@@ -228,9 +228,14 @@ Ausführlich in `docs/features/mvp-sicherheit.md`.
 
 ## CONFIRMED — fertig und auf der echten Datenbank geprüft
 
-Migrationen `0001`–`0016` sind angewandt (Supabase, PostgreSQL 17,
+Migrationen `0001`–`0017` sind angewandt (Supabase, PostgreSQL 17,
 `eu-west-3`). `0006` ist ein dokumentierter Fehlversuch, `0007` die
 Korrektur; die Datei bleibt zur Nachvollziehbarkeit liegen.
+
+`0017` brach im ersten Anlauf an der eigenen Prüfung 8.6 ab und blieb dabei
+folgenlos — die Datei läuft in einer Transaktion. Der Befund (offene
+Tabellenrechte von `anon` seit `0011`) steckt jetzt in derselben Migration;
+der zweite Lauf ging durch.
 
 Nach `0015`/`0016` auf der echten Datenbank nachgemessen: `anon` darf genau
 sechs Funktionen ausführen, keine Funktion ohne eigene ACL, die Feldmatrix
@@ -259,10 +264,22 @@ Bestandsangaben haben eine Quelle.
 - Der Betreiberzugang ist eingetragen (Tabelle `public.platform_admins`, wird
   nur von Hand gepflegt; RLS an, absichtlich **keine** Policy).
 
-Gemessene Ergebnisse der letzten Runde:
+Gemessene Ergebnisse der letzten Runde (nach `0017`):
 
-- `anon` darf genau die sechs Funktionen ausführen, keine siebte.
+- `anon` darf genau die sechs Funktionen ausführen, keine siebte —
+  namentlich geprüft: `angaben_ergaenzen`, `end_session`,
+  `get_case_by_session`, `redeem_invite`, `termin_bestaetigen`,
+  `unterlage_fuer_sitzung`.
 - Funktionen ohne eigene ACL: 0.
+- **Tabellenrechte von `anon` in `public`: 0** — vor `0017` waren es sechs
+  (siehe Sicherheitsabschnitt).
+- `public.termin_bestaetigen` existiert genau einmal und gibt `jsonb` zurück;
+  keine Überladung der alten `boolean`-Fassung übrig geblieben.
+- Die fünfte Matrix trägt genau die drei angenommenen Zeilen, die übrigen drei
+  Terminarten sind leer.
+- `app.offene_voraussetzungen` gibt für einen Vorgang ohne erfasste
+  Voraussetzung `{}` zurück — «nicht erfasst blockiert nicht» gilt auch auf
+  der echten Datenbank.
 - Krematorium sieht Überführung und Einäscherung, bestätigen darf es nur die
   Einäscherung.
 - Floristik sieht Zeit, Ort und Karte der Trauerfeier — und **kein** Feld
@@ -275,20 +292,18 @@ Gemessene Ergebnisse der letzten Runde:
 
 ## IN PROGRESS
 
-**`0017` — Abhängigkeiten und Freigaben: geschrieben, nicht angewandt.**
+**Die Blockade ist auf der echten Datenbank noch nie ausgelöst worden.**
 
-Der Mechanismus steht vollständig: `public.voraussetzung`, die fünfte Matrix,
-die Blockerprüfung in `public.termin_bestaetigen` (Rückgabe jetzt `jsonb`
-statt `boolean`) und beide Bildschirme. Geprüft wurde durch Ausführung im
-Mock-Betrieb, einschliesslich des Wettrennens: Bogen offen, Freigabe
-zwischendurch zurückgenommen, Absenden wird mit Nennung des Fehlenden
-abgewiesen und steht als `termin.blockiert` im Verlauf.
+`0017` ist angewandt und in allen Strukturen nachgemessen (siehe CONFIRMED),
+aber `public.termine` und `public.voraussetzung` sind dort beide leer: es gibt
+noch keinen echten Vorgang mit einem Termin. Die Wirkung — Knopf verschwindet,
+Absenden wird mit Nennung des Fehlenden abgewiesen, `termin.blockiert` steht
+im Verlauf — ist bisher nur im Mock-Betrieb durchgespielt, dort allerdings
+einschliesslich des Wettrennens (Bogen offen, Freigabe zwischendurch
+zurückgenommen).
 
-Die Invarianten prüft die Datei beim Anwenden selbst (Abschnitt 8) und bricht
-ab. Der erste Anwendungsversuch tat das auch: Prüfung 8.6 hat die offenen
-Tabellenrechte von anon gefunden (siehe oben). Nichts wurde dabei angewandt —
-die Datei läuft in einer Transaktion, und eine gescheiterte Prüfung nimmt
-alles zurück. Der Riegel ist jetzt in derselben Migration mit drin.
+Die eigentliche Abnahme ist der erste echte Termin mit einer offenen
+Voraussetzung. Bis dahin gilt die Wirkung als unbewiesen, nicht als bewiesen.
 
 ---
 
