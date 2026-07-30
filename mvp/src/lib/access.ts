@@ -11,6 +11,7 @@
 
 import type {
   Role, Tier, Deceased, Case, Phase, RoleView, TerminArt, TerminStatus,
+  Voraussetzung, Voraussetzungsart,
 } from "./types";
 
 /* Phasen eines Vorgangs — eine Beschriftung für alle Bildschirme
@@ -207,6 +208,74 @@ export function terminSichtbarFuerText(art: TerminArt): string {
   return `Sichtbar für ${aufzaehlung(namen)} — sobald ein Zugang dieser Rolle vergeben ist.`;
 }
 
+/* ── Die fünfte Matrix: Voraussetzungen je Terminart ─────────────
+   Spiegel von app.voraussetzungen_fuer_termin aus 0017_voraussetzungen.sql.
+
+   ACHTUNG — JEDE ZEILE DIESER MATRIX IST EINE ANNAHME. Keine ist von einem
+   Bestatter bestätigt. Die Begründung je Zeile steht im Kopf der Migration
+   und nicht hier: sie gehört zu der Regel, die wirklich prüft.
+
+   Zwei Eigenschaften des Mechanismus, die man dem Code sonst nicht ansieht:
+
+   1) Nur eine ERFASSTE Voraussetzung blockiert. Eine fehlende Zeile hält
+      nichts auf — sonst hätte die Migration jeden bestehenden Vorgang von
+      selbst angehalten, auf Grundlage einer Liste, die niemand bestätigt hat.
+   2) Blockiert wird ausschliesslich der äussere Umkreis. Das Haus sieht den
+      Blocker und entscheidet selbst; die Datenbank fährt ihm nicht dazwischen.
+
+   Beide Entscheidungen sind mit der Liste zusammen neu zu bewerten. */
+
+export const voraussetzungsartLabel: Record<Voraussetzungsart, string> = {
+  todesbescheinigung: "Todesbescheinigung",
+  zweite_leichenschau: "Zweite Leichenschau",
+  grabstelle: "Grabstelle",
+};
+
+/* Ein Satz je Art, damit im Bogen nicht geraten wird, was gemeint ist. */
+export const voraussetzungsartHinweis: Record<Voraussetzungsart, string> = {
+  todesbescheinigung: "Ärztliche Bescheinigung des Todes",
+  zweite_leichenschau: "Zweite Leichenschau vor einer Feuerbestattung",
+  grabstelle: "Vergebene und bestätigte Grabstelle",
+};
+
+export const VORAUSSETZUNGS_ARTEN = Object.keys(voraussetzungsartLabel) as Voraussetzungsart[];
+
+/* Welche Voraussetzungen braucht eine Terminart? Abholung, Trauerfeier und
+   Abschiednahme stehen bewusst mit leerer Liste da — auch das ist eine
+   Annahme, nur eine, die zu keiner Blockade führt. */
+export function voraussetzungenFuerTermin(art: TerminArt): Voraussetzungsart[] {
+  switch (art) {
+    case "ueberfuehrung": return ["todesbescheinigung"];
+    case "einaescherung": return ["zweite_leichenschau"];
+    case "beisetzung": return ["grabstelle"];
+    default: return []; // abholung, trauerfeier, abschiednahme
+  }
+}
+
+/* Umgekehrt: welche Termine hält eine Voraussetzung auf? Abgeleitet, nicht
+   gepflegt — die Beschriftung im Bogen kann so nicht von der Regel abweichen.
+   Ohne diesen Satz wäre «Grabstelle» im Bogen eine Zeile ohne Wirkung, und
+   niemand wüsste, warum er sie erfassen soll. */
+export function terminartenFuerVoraussetzung(art: Voraussetzungsart): TerminArt[] {
+  return TERMIN_ARTEN.filter((t) => voraussetzungenFuerTermin(t).includes(art));
+}
+
+/* Spiegel von app.offene_voraussetzungen: was diese Terminart braucht, im
+   Vorgang erfasst ist und noch nicht erfüllt. Alle drei Bedingungen zusammen.
+
+   Die mittlere ist die entscheidende: `erfasst` enthält nur, was das Haus für
+   diesen Vorgang eingetragen hat. Was nicht darin steht, blockiert nicht. */
+export function offeneVoraussetzungen(
+  art: TerminArt,
+  erfasst: Voraussetzung[],
+): Voraussetzungsart[] {
+  const noetig = voraussetzungenFuerTermin(art);
+  return erfasst
+    .filter((v) => !v.erfuellt && noetig.includes(v.art))
+    .map((v) => v.art)
+    .sort((a, b) => VORAUSSETZUNGS_ARTEN.indexOf(a) - VORAUSSETZUNGS_ARTEN.indexOf(b));
+}
+
 /* ── Schreibmatrix: welche Felder darf eine Rolle ÄNDERN ─────────
    Spiegel von app.felder_schreibbar aus 0012_angaben_der_familie.sql.
 
@@ -359,7 +428,12 @@ export function caseForRole(c: Case, role: Role): RoleView {
       .map((d) => ({ id: d.id, doc_type: d.doc_type, verified: d.verified })),
     /* Gefiltert nach Terminart, sortiert nach Beginn — Termine ohne Zeit ans
        Ende. zustaendig bleibt draussen: es ist eine Notiz des Hauses.
-       darf_bestaetigen kommt je Zeile mit, wie in app.case_for_role. */
+       darf_bestaetigen kommt je Zeile mit, wie in app.case_for_role.
+
+       blockiert_durch ebenso (0017), und ebenso je Zeile: nach aussen geht
+       die ART der offenen Voraussetzung, nie die Notiz des Hauses dazu und
+       nie eine Voraussetzung, die zu einem Termin gehört, den diese Rolle
+       gar nicht sieht. */
     termine: c.termine
       .filter((t) => termineFuerRolle(role).includes(t.art))
       .slice()
@@ -367,6 +441,7 @@ export function caseForRole(c: Case, role: Role): RoleView {
       .map(({ zustaendig: _egal, ...t }) => ({
         ...t,
         darf_bestaetigen: darfBestaetigen(role, t.art),
+        blockiert_durch: offeneVoraussetzungen(t.art, c.voraussetzungen),
       })),
   };
 }

@@ -11,10 +11,12 @@
 import type {
   AdminEreignis, AdminFall, AdminFallKontext, AdminHaus, AdminUebersicht,
   AdminZugang, AngabenErgebnis, Case, Deceased, InviteSummary, Korrektur,
-  Phase, Role, RoleView, Task, Termin,
+  Phase, Role, RoleView, Task, Termin, TerminErgebnis, Voraussetzung,
 } from "./types";
 import type { Auslieferung } from "./data";
-import { caseForRole, darfBestaetigen, felderSchreibbar } from "./access";
+import {
+  caseForRole, darfBestaetigen, felderSchreibbar, offeneVoraussetzungen,
+} from "./access";
 
 /* фиксированные demo-токены (Demo-Ablauf im README) — müssen gültig bleiben.
    Sie gehören zu genau einem Fall: nur dort dürfen die beiden festen
@@ -95,6 +97,21 @@ function seedCases(): Case[] {
         zustaendig: "bestatter", status: "geplant", hinweis: null,
       },
     ],
+    /* Voraussetzungen (0017), Beispieldaten. Absichtlich so gesetzt, dass die
+       Vorführung beides zeigt: die Todesbescheinigung liegt vor, die zweite
+       Leichenschau nicht. Das Krematorium sieht damit seine Überführung
+       offen und die Einäscherung angehalten — und zwar mit dem Grund. */
+    voraussetzungen: [
+      {
+        id: "v1", art: "todesbescheinigung", zustaendig: "klinik",
+        erfuellt: true, erfuellt_am: "2026-07-11T09:20:00.000Z", hinweis: null,
+      },
+      {
+        id: "v2", art: "zweite_leichenschau", zustaendig: "klinik",
+        erfuellt: false, erfuellt_am: null,
+        hinweis: "Amtsarzt kommt Dienstag.",
+      },
+    ],
     verlauf: [
       { actor: "Krematorium Südstadt", action: "Fall angelegt", at: "Do 09:12" },
       { actor: "System", action: "Hinweis: Herzschrittmacher markiert", at: "Do 11:40" },
@@ -134,6 +151,12 @@ function seedCases(): Case[] {
         von: "2026-07-30T11:00:00.000Z", bis: null,
         ort_name: "Südfriedhof Leipzig, Abteilung 12", ort_adresse: "Friedhofsweg 3, 04277 Leipzig",
         zustaendig: "friedhof", status: "geplant", hinweis: null,
+      },
+    ],
+    voraussetzungen: [
+      {
+        id: "v3", art: "grabstelle", zustaendig: "friedhof",
+        erfuellt: false, erfuellt_am: null, hinweis: null,
       },
     ],
     verlauf: [{ actor: "Sie", action: "Fall angelegt", at: "Mi 16:20" }],
@@ -580,6 +603,10 @@ export const mockStore = {
       aufgaben: [],
       dokumente: [],
       termine: [],
+      /* Leer, wie in der Datenbank: ein neuer Vorgang bringt keine
+         Voraussetzung mit. Was gilt, trägt das Haus ein — eine nicht
+         erfasste Voraussetzung blockiert nicht (0017). */
+      voraussetzungen: [],
       verlauf: [],
     });
     angelegt.set(id, Date.now());
@@ -673,27 +700,86 @@ export const mockStore = {
     c.termine = c.termine.filter((t) => t.id !== terminId);
   },
 
-  /* Spiegel von public.termin_bestaetigen (0011) — in derselben Reihenfolge,
-     damit der Mock nicht durchlässt, was die Datenbank abweist:
-     Sitzung lebendig → Termin gehört zu DIESEM Fall → Rolle darf diese Art. */
+  /* ── Voraussetzungen (0017) ──────────────────────────────────
+     Wie bei den Terminen: im Mock gibt es kein is_case_owner, geprüft wird
+     nur der Fallbezug. Einen Weg aus dem äusseren Umkreis gibt es auch hier
+     nicht — er existiert in der Datenbank nicht. */
+
+  addVoraussetzung: (
+    caseId: string,
+    v: { art: Voraussetzung["art"]; zustaendig?: Role | null; hinweis?: string | null },
+  ): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    /* Spiegel des eindeutigen Index voraussetzung_je_fall: eine Zeile je Art.
+       Zwei «Grabstelle» wären zwei Wahrheiten über dieselbe Sache. */
+    if (c.voraussetzungen.some((x) => x.art === v.art)) return;
+    c.voraussetzungen.push({
+      id: crypto.randomUUID(),
+      art: v.art,
+      zustaendig: v.zustaendig ?? null,
+      erfuellt: false,
+      erfuellt_am: null,
+      hinweis: v.hinweis ?? null,
+    });
+  },
+
+  setVoraussetzungErfuellt: (caseId: string, vorId: string, erfuellt: boolean): void => {
+    const v = fallVon(caseId)?.voraussetzungen.find((x) => x.id === vorId);
+    if (!v) return;
+    v.erfuellt = erfuellt;
+    v.erfuellt_am = erfuellt ? new Date().toISOString() : null;
+  },
+
+  updateVoraussetzung: (
+    caseId: string,
+    vorId: string,
+    patch: Partial<Omit<Voraussetzung, "id" | "art">>,
+  ): void => {
+    const v = fallVon(caseId)?.voraussetzungen.find((x) => x.id === vorId);
+    if (!v) return;
+    Object.assign(v, patch);
+  },
+
+  removeVoraussetzung: (caseId: string, vorId: string): void => {
+    const c = fallVon(caseId);
+    if (!c) return;
+    c.voraussetzungen = c.voraussetzungen.filter((v) => v.id !== vorId);
+  },
+
+  /* Spiegel von public.termin_bestaetigen (0011, neu gefasst in 0017) — in
+     derselben Reihenfolge, damit der Mock nicht durchlässt, was die Datenbank
+     abweist: Sitzung lebendig → Termin gehört zu DIESEM Fall → Rolle darf
+     diese Art → nichts steht offen.
+
+     Der Blocker steht auch hier zuletzt: wer nicht bestätigen darf, soll über
+     die Antwort nicht erfahren, was einem fremden Termin fehlt. */
   terminBestaetigen: (
     sessionId: string,
     terminId: string,
     von: string | null,
     bis: string | null,
     hinweis: string | null,
-  ): boolean => {
+  ): TerminErgebnis => {
     const now = Date.now();
     const s = sessions.get(sessionId);
-    if (!s || s.expiresAt <= now) return false;
+    if (!s || s.expiresAt <= now) return { ok: false };
     const inv = invites.get(s.inviteId);
-    if (!usable(inv, now)) return false;
+    if (!usable(inv, now)) return { ok: false };
 
     const c = cases.find((x) => x.id === inv.caseId);
     const t = c?.termine.find((x) => x.id === terminId);
-    if (!t) return false;
+    if (!t) return { ok: false };
 
-    if (!darfBestaetigen(inv.role, t.art)) return false;
+    if (!darfBestaetigen(inv.role, t.art)) return { ok: false };
+
+    const offen = offeneVoraussetzungen(t.art, c!.voraussetzungen);
+    if (offen.length > 0) {
+      protokolliere(c!.id, "invite", akteurKurz(sessionId), "termin.blockiert", {
+        role: inv.role, art: t.art, offen,
+      });
+      return { ok: false, blockiert: offen };
+    }
 
     t.von = von;
     t.bis = bis;
@@ -702,7 +788,7 @@ export const mockStore = {
     protokolliere(c!.id, "invite", akteurKurz(sessionId), "termin.bestaetigt", {
       role: inv.role, art: t.art,
     });
-    return true;
+    return { ok: true };
   },
 
   /* Token → Sitzung. Ungültig/abgelaufen/zurückgezogen ⇒ null (kein Fehler:

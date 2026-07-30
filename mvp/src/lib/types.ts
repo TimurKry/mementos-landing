@@ -82,8 +82,50 @@ export type Termin = {
 /* Ein Termin, wie ihn ein Eingeladener sieht. darf_bestaetigen kommt vom
    Server mit (app.darf_bestaetigen je Zeile), damit die Oberfläche weiss, ob
    sie ein Formular zeigen darf. Die Entscheidung selbst trifft weiterhin die
-   Datenbank in termin_bestaetigen — das Feld ist eine Auskunft, kein Recht. */
-export type RollenTermin = Omit<Termin, "zustaendig"> & { darf_bestaetigen: boolean };
+   Datenbank in termin_bestaetigen — das Feld ist eine Auskunft, kein Recht.
+
+   blockiert_durch (0017) ist dieselbe Art von Auskunft: was diesem Termin
+   noch fehlt. Optional, weil eine vor 0017 gelieferte Ansicht den Schlüssel
+   nicht kennt — dann wird nichts angezeigt, und die Datenbank weist einen
+   Versuch trotzdem ab. */
+export type RollenTermin = Omit<Termin, "zustaendig"> & {
+  darf_bestaetigen: boolean;
+  blockiert_durch?: Voraussetzungsart[];
+};
+
+/* ── Voraussetzungen und Freigaben (0017_voraussetzungen.sql) ────
+   Was beigebracht sein muss, bevor ein Termin bestätigt werden kann.
+
+   Die Zuordnung «welche Terminart braucht welche Voraussetzung» ist die
+   fünfte Matrix und steht in access.ts (voraussetzungenFuerTermin) — als
+   Spiegel von app.voraussetzungen_fuer_termin. JEDE ihrer Zeilen ist eine
+   Annahme; die Begründung steht im Kopf der Migration.
+
+   Zwei Regeln, die man beim Lesen des Codes sonst nicht sieht:
+   · Nur eine ERFASSTE Voraussetzung blockiert. Eine fehlende Zeile hält
+     nichts auf.
+   · Blockiert wird ausschliesslich der äussere Umkreis. Das Haus sieht den
+     Blocker und entscheidet selbst. */
+export type Voraussetzungsart =
+  | "todesbescheinigung" | "zweite_leichenschau" | "grabstelle";
+
+/* zustaendig ist eine Notiz des Hauses, keine Regel: sie erteilt niemandem
+   ein Recht und steht deshalb auch in keiner Matrix. */
+export type Voraussetzung = {
+  id?: string;
+  art: Voraussetzungsart;
+  zustaendig?: Role | null;
+  erfuellt: boolean;
+  erfuellt_am?: string | null;
+  hinweis?: string | null;
+};
+
+/* Die Antwort von public.termin_bestaetigen. Seit 0017 jsonb statt boolean:
+   «darf nicht» und «etwas fehlt noch» sind zwei verschiedene Auskünfte, und
+   wer am Ofen steht, muss sie unterscheiden können. */
+export type TerminErgebnis =
+  | { ok: true }
+  | { ok: false; blockiert?: Voraussetzungsart[] };
 export type Task = { id?: string; title: string; assignee?: Role | null; due?: string | null; status: TaskStatus };
 /* Eine Unterlage. storage_path verlässt den Server nie — nach aussen geht
    höchstens eine signierte Adresse, und die stellt der Server aus.
@@ -116,6 +158,9 @@ export type Case = {
   aufgaben: Task[];
   dokumente: Doc[];
   termine: Termin[];
+  /* 0017. Optional, weil listCases die Kindtabellen nicht mitlädt — dort
+     steht überall eine leere Liste. */
+  voraussetzungen: Voraussetzung[];
   verlauf?: Event[];
 };
 

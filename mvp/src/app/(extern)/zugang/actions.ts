@@ -5,8 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { angabenErgaenzen, endInviteSession, terminBestaetigen } from "@/lib/data";
 import { ZUGANG_COOKIE, isSessionId } from "@/lib/zugang";
-import { VON_AUSSEN_SCHREIBBAR, feldLabel } from "@/lib/access";
-import type { Deceased } from "@/lib/types";
+import { VON_AUSSEN_SCHREIBBAR, feldLabel, voraussetzungsartLabel } from "@/lib/access";
+import type { Deceased, Voraussetzungsart } from "@/lib/types";
 import {
   GRENZEN, kennung, meldung, optDatum, optMehrzeilig, optText, pruefe,
   zeitfensterGeprueft,
@@ -43,9 +43,15 @@ export async function zugangBeendenAction() {
    dieser Sitzung gehört, und ob die Rolle diese Terminart bestätigen darf.
    Hier steht keine zweite, selbstgebaute Prüfung — nur die Form.
 
-   false von der Datenbank heisst «nicht erlaubt oder Sitzung abgelaufen».
-   Das wird als solches gemeldet und nicht als Störung: sonst versucht es
-   jemand zehnmal, dem es schlicht nicht zusteht. */
+   {ok:false} von der Datenbank heisst «nicht erlaubt oder Sitzung
+   abgelaufen». Das wird als solches gemeldet und nicht als Störung: sonst
+   versucht es jemand zehnmal, dem es schlicht nicht zusteht.
+
+   Seit 0017 gibt es einen dritten Ausgang: die Rolle darf, die Sitzung lebt,
+   und trotzdem geschieht nichts, weil eine Voraussetzung offen ist. Der wird
+   ausdrücklich anders gemeldet — mit dem Namen dessen, was fehlt. «Das war
+   nicht möglich» führt zu einem Anruf beim Bestattungshaus; «Die zweite
+   Leichenschau fehlt» führt zu einem Anruf beim Arzt. */
 
 /* hinweis ist kein Fehler: der Aufruf ist durchgegangen, aber nicht alles
    davon ist schon eine Angabe im Vorgang. Seit 0016 kann ein Teil als
@@ -60,6 +66,19 @@ const FEHLER_NICHT_ERLAUBT =
   "Dieser Termin lässt sich über Ihren Zugang nicht bestätigen.";
 const FEHLER_TECHNIK =
   "Die Bestätigung war gerade nicht möglich. Bitte in einigen Minuten erneut versuchen.";
+
+/* Was fehlt, im Klartext — und dazu der Hinweis, dass es nicht an diesem
+   Zugang liegt. Ohne den zweiten Satz liest sich die Meldung wie ein Vorwurf
+   an denjenigen, der gerade nur seine Zeit eintragen wollte.
+
+   Genannt wird ausschliesslich die ART der Voraussetzung. Die Notiz des
+   Hauses dazu und die Zuständigkeit bleiben drinnen; sie stehen in einer
+   Tabelle, an die der äussere Umkreis nicht herankommt. */
+function blockerText(offen: Voraussetzungsart[]): string {
+  const namen = offen.map((a) => voraussetzungsartLabel[a]).join(", ");
+  const was = offen.length > 1 ? "Es fehlen noch" : "Es fehlt noch";
+  return `${was}: ${namen}. Der Termin lässt sich erst bestätigen, wenn das vorliegt — das Bestattungshaus sieht diesen Versuch.`;
+}
 
 export async function terminBestaetigenAction(
   terminId: string,
@@ -78,10 +97,20 @@ export async function terminBestaetigenAction(
   if (!g.ok) return { ok: false, fehler: meldung(g) };
 
   try {
-    const erlaubt = await terminBestaetigen(
+    const ergebnis = await terminBestaetigen(
       session, g.wert.id, g.wert.zeit.von, g.wert.zeit.bis, g.wert.hinweis,
     );
-    if (!erlaubt) return { ok: false, fehler: FEHLER_NICHT_ERLAUBT };
+    if (!ergebnis.ok) {
+      /* Der Termin bleibt unverändert stehen — auch die eingetragene Zeit
+         wird nicht übernommen. Das ist Absicht: eine Zeit an einem Termin,
+         der nicht stattfinden darf, sähe nach einer Verabredung aus. */
+      return {
+        ok: false,
+        fehler: ergebnis.blockiert?.length
+          ? blockerText(ergebnis.blockiert)
+          : FEHLER_NICHT_ERLAUBT,
+      };
+    }
   } catch {
     return { ok: false, fehler: FEHLER_TECHNIK };
   }

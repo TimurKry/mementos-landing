@@ -24,12 +24,15 @@
 
 import { revalidatePath } from "next/cache";
 import {
-  addParticipant, addTask, addTermin, createInvite, istKeinZugriff,
-  removeParticipant, removeTask, removeTermin, revokeInvite,
-  setParticipantJoined, toggleTask, updateCase, updateDeceased, updateTermin,
+  addParticipant, addTask, addTermin, addVoraussetzung, createInvite,
+  istKeinZugriff, removeParticipant, removeTask, removeTermin,
+  removeVoraussetzung, revokeInvite, setParticipantJoined,
+  setVoraussetzungErfuellt, toggleTask, updateCase, updateDeceased,
+  updateTermin, updateVoraussetzung,
 } from "@/lib/data";
 import {
-  TERMIN_ARTEN, TERMIN_STATUS, istEinladbareRolle, phaseLabel, roleLabel,
+  TERMIN_ARTEN, TERMIN_STATUS, VORAUSSETZUNGS_ARTEN, istEinladbareRolle,
+  phaseLabel, roleLabel,
 } from "@/lib/access";
 import type { Deceased, Phase, Role, Tier } from "@/lib/types";
 import {
@@ -353,6 +356,97 @@ export async function terminEntfernenAction(
 
   const { fall, id } = g.wert;
   return schreibe(fall, () => removeTermin(fall, id));
+}
+
+/* ── Voraussetzungen (0017) ──────────────────────────────────────
+   Was beigebracht sein muss, bevor ein Termin bestätigt werden kann.
+
+   Zwei Dinge, die hier bewusst NICHT stehen:
+
+   · Keine Prüfung, ob die Art zu einer Terminart des Vorgangs passt. Das Haus
+     darf eine Voraussetzung erfassen, bevor der zugehörige Termin angelegt
+     ist — das ist die übliche Reihenfolge, nicht ein Fehler.
+   · Kein Weg, über den ein Eingeladener «erfüllt» setzt. Diese Actions
+     gehören zum inneren Umkreis; die Datenbank kennt für den äusseren gar
+     keine Tür zu dieser Tabelle (siehe Kopf der Migration). */
+
+const VORAUSSETZUNG_HINWEIS_MAX = 300;
+
+export async function voraussetzungHinzufuegenAction(
+  caseId: string,
+  art: string,
+  zustaendig: string,
+  hinweis: string,
+): Promise<Ergebnis> {
+  const g = pruefe(() => ({
+    fall: kennung("Vorgang", caseId),
+    art: ausListe("Voraussetzung", art, VORAUSSETZUNGS_ARTEN),
+    zustaendig:
+      (zustaendig ?? OHNE_ZUSTAENDIGKEIT) === OHNE_ZUSTAENDIGKEIT
+        ? null
+        : ausListe("Zuständig", zustaendig, ROLLEN),
+    hinweis: optMehrzeilig("Hinweis", hinweis ?? "", VORAUSSETZUNG_HINWEIS_MAX),
+  }));
+  if (!g.ok) return { ok: false, fehler: meldung(g) };
+
+  const { fall, ...v } = g.wert;
+  return schreibe(fall, () => addVoraussetzung(fall, v));
+}
+
+/* Abhaken und wieder aufmachen sind derselbe Weg. Das Zurücknehmen ist keine
+   Nebensache: wer versehentlich abhakt, hat damit einen Blocker abgeschaltet,
+   und ohne Rückweg bliebe er abgeschaltet. */
+export async function voraussetzungErfuelltAction(
+  caseId: string,
+  vorId: string,
+  erfuellt: unknown,
+): Promise<Ergebnis> {
+  const g = pruefe(() => ({
+    fall: kennung("Vorgang", caseId),
+    id: kennung("Voraussetzung", vorId),
+    erfuellt: jaNein("Stand", erfuellt),
+  }));
+  if (!g.ok) return { ok: false, fehler: meldung(g) };
+
+  const { fall, id, erfuellt: wert } = g.wert;
+  return schreibe(fall, () => setVoraussetzungErfuellt(fall, id, wert));
+}
+
+export async function voraussetzungSpeichernAction(
+  caseId: string,
+  vorId: string,
+  zustaendig: string,
+  hinweis: string,
+): Promise<Ergebnis> {
+  const g = pruefe(() => ({
+    fall: kennung("Vorgang", caseId),
+    id: kennung("Voraussetzung", vorId),
+    patch: {
+      zustaendig:
+        (zustaendig ?? OHNE_ZUSTAENDIGKEIT) === OHNE_ZUSTAENDIGKEIT
+          ? null
+          : ausListe("Zuständig", zustaendig, ROLLEN),
+      hinweis: optMehrzeilig("Hinweis", hinweis ?? "", VORAUSSETZUNG_HINWEIS_MAX),
+    },
+  }));
+  if (!g.ok) return { ok: false, fehler: meldung(g) };
+
+  const { fall, id, patch } = g.wert;
+  return schreibe(fall, () => updateVoraussetzung(fall, id, patch));
+}
+
+export async function voraussetzungEntfernenAction(
+  caseId: string,
+  vorId: string,
+): Promise<Ergebnis> {
+  const g = pruefe(() => ({
+    fall: kennung("Vorgang", caseId),
+    id: kennung("Voraussetzung", vorId),
+  }));
+  if (!g.ok) return { ok: false, fehler: meldung(g) };
+
+  const { fall, id } = g.wert;
+  return schreibe(fall, () => removeVoraussetzung(fall, id));
 }
 
 /* ── Einladungen ─────────────────────────────────────────────── */

@@ -4,7 +4,7 @@ Dieses Dokument hält fest, was künftige Sitzungen wissen müssen, ohne die
 gesamte Gesprächsgeschichte zu rekonstruieren. Es enthält **keine**
 Zugangsdaten, Schlüssel, Tokens oder Werte von Umgebungsvariablen.
 
-Stand: 2026-07-30. Arbeitszweig `claude/memento-os-design-fx5ev8`.
+Stand: 2026-07-30. Arbeitszweig `claude/migration-0017-dependencies-uyjelu`.
 
 ---
 
@@ -76,7 +76,7 @@ Datenbank, sonst Mock (`mvp/src/lib/mock.ts`, In-Memory-Beispieldaten).
 
 ---
 
-## Rechtemodell: vier Matrizen
+## Rechtemodell: fünf Matrizen
 
 Sie liegen **doppelt** und dürfen nur zusammen wandern:
 
@@ -89,6 +89,12 @@ Sie liegen **doppelt** und dürfen nur zusammen wandern:
 | `app.termine_fuer_rolle(rolle)` | welche Terminarten sieht sie | 0011 |
 | `app.darf_bestaetigen(rolle, art)` | welche Termine darf sie bestätigen | 0011 |
 | `app.felder_schreibbar(rolle)` | welche Felder darf sie **ändern** | 0012 |
+| `app.voraussetzungen_fuer_termin(art)` | was muss vorliegen, bevor eine Terminart bestätigt werden kann | 0017 |
+
+Die fünfte hat einen anderen Rang als die ersten vier: sie regelt nicht, wer
+was sieht, sondern wann etwas geschehen darf — und **jede ihrer Zeilen ist
+eine ungeprüfte Annahme** (siehe NEEDS VERIFICATION). Die anderen vier sind
+zumindest teilweise durch eine Durchsicht gegangen.
 
 Feldgruppen (tier): `kern` (Name), `org` (persönlich), `op` (körperlich),
 `sens` (medizinisch). Sie entscheiden seit 0015 **nichts** mehr — sie sind
@@ -183,6 +189,24 @@ Ausführlich in `docs/features/mvp-sicherheit.md`.
   Nur der Auslöser und die beiden `SECURITY DEFINER`-Funktionen schreiben.
   Sonst liesse sich eine Quelle umschreiben und danach eine fremde Angabe
   «als eigene» überschreiben.
+- **Eine Blockade gilt nur nach aussen** (0017). `public.termin_bestaetigen`
+  prüft offene Voraussetzungen; auf `public.termine` liegt **kein** Auslöser,
+  der dem Haus dazwischenfährt. Das Haus weiss mehr als die Anwendung (die
+  Bescheinigung liegt im Fax), und die Liste, auf der die Blockade beruht, ist
+  eine Annahme. Wer das Haus gegen eine unbestätigte Liste sperrt, erzieht es
+  dazu, pauschal abzuhaken — dann steht die Blockade auch dort nicht mehr, wo
+  sie richtig wäre.
+- **Nur eine erfasste Voraussetzung blockiert** (0017). Eine fehlende Zeile
+  hält nichts auf. Die umgekehrte Richtung des Versagens als in 0015, und
+  zwar mit Absicht: dort geht es um Sichtbarkeit personenbezogener Daten, wo
+  «niemand sieht es» der sichere Zustand ist. Hier geht es ums Anhalten eines
+  Ablaufs. Prüfung 8.1 der Migration fängt dafür den gefährlichen Fall ab, dass
+  die Matrix durch einen Tippfehler still leer läuft.
+- **Kein Eingeladener setzt eine Voraussetzung auf «erfüllt»** (0017). Der
+  äussere Umkreis hat auf `public.voraussetzung` kein einziges Recht, auch
+  kein lesendes; nach aussen geht über `app.case_for_role` allein die ART
+  einer offenen Voraussetzung zum eigenen Termin — nie die Notiz des Hauses.
+  Sonst erteilte das Krematorium seine eigene Freigabe.
 - **Bestandsangaben wurden pauschal dem Haus zugeschrieben** (0016). Aus dem
   Protokoll wäre eine Teilrekonstruktion möglich, sie wird aber bewusst nicht
   benutzt: sie kennt nur Schreibvorgänge von aussen, und ihr Fehler ginge in
@@ -241,8 +265,18 @@ Gemessene Ergebnisse der letzten Runde:
 
 ## IN PROGRESS
 
-Nichts offen. Der nächste Schritt ist `0017` und braucht eine fachliche
-Antwort, siehe BLOCKED und `docs/NAECHSTE_SITZUNG.md`.
+**`0017` — Abhängigkeiten und Freigaben: geschrieben, nicht angewandt.**
+
+Der Mechanismus steht vollständig: `public.voraussetzung`, die fünfte Matrix,
+die Blockerprüfung in `public.termin_bestaetigen` (Rückgabe jetzt `jsonb`
+statt `boolean`) und beide Bildschirme. Geprüft wurde durch Ausführung im
+Mock-Betrieb, einschliesslich des Wettrennens: Bogen offen, Freigabe
+zwischendurch zurückgenommen, Absenden wird mit Nennung des Fehlenden
+abgewiesen und steht als `termin.blockiert` im Verlauf.
+
+Nicht auf der Datenbank, weil die fachliche Liste weiterhin fehlt und mit ihr
+vermutlich Zeilen der Matrix wandern. Die zwei Invarianten prüft die Datei
+beim Anwenden selbst (Abschnitt 8) und bricht ab.
 
 ---
 
@@ -251,21 +285,20 @@ Antwort, siehe BLOCKED und `docs/NAECHSTE_SITZUNG.md`.
 Die Reihenfolge ist eine Abhängigkeitskette, keine Wunschliste. Sie kommt aus
 der Durchsicht des echten Ablaufs durch einen Branchenkenner.
 
-1. **0017 — Abhängigkeiten und Freigaben.** Das System weiss nicht, dass eine
-   Einäscherung ohne Freigabe nicht stattfinden darf. Tabellen `freigabe`,
-   `abhaengigkeit`; `termin_bestaetigen` prüft Blocker; Bildschirme «was steht
-   und wegen wem».
-2. **0018 — Übergaben und Identitätskette.** `uebergabe`, `sarg_id`/`urnen_id`,
+1. **0018 — Übergaben und Identitätskette.** `uebergabe`, `sarg_id`/`urnen_id`,
    `einaescherungsnummer`. Wer wann wem übergeben hat, ohne Bruch.
-3. **0019 — Unterlagenpakete nach draussen.** Ämter registrieren sich nicht:
-   PDF plus strukturierter Satz, ablaufende Adresse ohne Konto.
-4. **Eigenes SMTP** für Einladungs-E-Mails an Familien. Nicht blockierend,
+2. **0019 — Unterlagenpakete nach draussen.** Ämter registrieren sich nicht:
+   PDF plus strukturierter Satz, ablaufende Adresse ohne Konto. Dorthin gehört
+   auch die Frage, ob ein Eingeladener eine Voraussetzung selbst als erfüllt
+   melden darf — 0017 hat sie bewusst offen gelassen, weil das Krematorium
+   sonst seine eigene Freigabe erteilt.
+3. **Eigenes SMTP** für Einladungs-E-Mails an Familien. Nicht blockierend,
    aber ohne es erreicht kein Zugang eine Familie von selbst.
-5. **Partnerorganisationen mit Konten** — Voraussetzung für einen Kalender
+4. **Partnerorganisationen mit Konten** — Voraussetzung für einen Kalender
    über mehrere Fälle («alle meine Einäscherungen diese Woche»). Heute
    existiert ein Partner nur innerhalb eines Vorgangs. Das ist ein neuer,
    dritter Umkreis und **braucht eine Entscheidung des Eigentümers**.
-6. **Hochladen durch die Familie** (Vollmacht) — eigene Entscheidung, siehe
+5. **Hochladen durch die Familie** (Vollmacht) — eigene Entscheidung, siehe
    Sicherheitsabschnitt.
 
 Zuletzt, ausdrücklich auf Wunsch des Eigentümers ans Ende gestellt:
@@ -277,12 +310,13 @@ Rechtstexte (Impressum, Datenschutzerklärung), Auswertung, Kontaktformular.
 
 - **Entscheidung Partnerorganisationen** (siehe PLANNED 5). Ohne sie kein
   fallübergreifender Kalender.
-- **Die Abhängigkeitsliste für `0017`.** Der Mechanismus (was blockiert was)
-  ist Architektur und wird hier gebaut; WELCHE Voraussetzung welchen Termin
-  blockiert, ist Branchenwissen. Der Eigentümer hat die Antworten eines
-  Branchenkenners zugesagt («10 Abhängigkeiten», «wo Fälle stehenbleiben»).
-  Ohne sie wird nur der Mechanismus gebaut, mit einem klein gehaltenen,
-  ausdrücklich als Annahme markierten Satz.
+- **Die Abhängigkeitsliste für `0017`.** Der Mechanismus ist gebaut; WELCHE
+  Voraussetzung welchen Termin blockiert, ist Branchenwissen und fehlt
+  weiterhin. Der Eigentümer hat die Antworten eines Branchenkenners zugesagt
+  («10 Abhängigkeiten», «wo Fälle stehenbleiben»). Bis dahin stehen drei
+  ausdrücklich als Annahme markierte Zeilen in der Matrix, und `0017` bleibt
+  unangewandt. Mit der Liste kommt eine **neue** Migration — die angewandte
+  wird nicht bearbeitet.
 - **Floristik und Trauerredner sehen kein Feld.** Auf dem Schleifenband steht
   in der Praxis der Name; ein Trauerredner braucht Name, Lebensdaten und
   Konfession. 0015 hat das absichtlich nicht mitentschieden.
@@ -319,6 +353,25 @@ Offen bleiben:
 
 Neu dazugekommen durch dieselbe Durchsicht (siehe BLOCKED): Floristik und
 Trauerredner sehen kein Feld, obwohl beide fachlich etwas brauchen.
+
+**Die gesamte fünfte Matrix (0017) ist Annahme.** Sie steht hier getrennt,
+weil sie nicht regelt, wer etwas sieht, sondern wann etwas geschehen darf —
+ein Irrtum hält Arbeit an oder lässt sie durch:
+
+6. **Überführung setzt die Todesbescheinigung voraus.** Sicherheit hoch.
+7. **Einäscherung setzt die zweite Leichenschau voraus.** Sicherheit hoch, und
+   von allen Zeilen die, bei der ein Irrtum am schwersten wiegt: eine
+   Feuerbestattung ist nicht rückholbar.
+8. **Beisetzung setzt eine Grabstelle voraus.** Die schwächste der drei — in
+   der Praxis ist die Stelle vermutlich längst vergeben, wenn überhaupt ein
+   Termin eingetragen wird.
+9. **Abholung, Trauerfeier und Abschiednahme setzen nichts voraus.** Ebenfalls
+   eine Annahme, nur eine ohne Wirkung.
+
+Dazu zwei Bauentscheidungen, die aus derselben Unsicherheit folgen und mit der
+Liste zusammen neu zu bewerten sind: **nur eine erfasste Voraussetzung
+blockiert**, und **das Haus wird nie blockiert** — geprüft wird allein im
+äusseren Umkreis. Ausführlich im Kopf von `0017_voraussetzungen.sql`.
 
 **Schemaschuld, bei 0016 aufgefallen:** `herzschrittmacher` und
 `freigabe_einaescherung` stehen in 0001 als `boolean default false`. Damit

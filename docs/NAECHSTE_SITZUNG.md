@@ -4,8 +4,8 @@ Dieses Dokument ist der Einstieg, wenn eine neue Sitzung ohne
 Gesprächsgeschichte beginnt. Es enthält **keine** Zugangsdaten, Schlüssel oder
 Tokens.
 
-Stand: 2026-07-30, Zweig `claude/memento-os-design-fx5ev8`, letzter Commit
-betrifft `0016`.
+Stand: 2026-07-30, Zweig `claude/migration-0017-dependencies-uyjelu`, letzter
+Commit betrifft `0017`.
 
 ---
 
@@ -16,9 +16,10 @@ betrifft `0016`.
 | Lendung (`src/`) | live auf GitHub Pages |
 | Anwendung (`mvp/`) | läuft, SSR auf Vercel |
 | Datenbank | Migrationen `0001`–`0016` **angewandt und nachgemessen** |
+| `0017` | geschrieben und im Mock-Betrieb geprüft, **noch nicht angewandt** |
 | Öffentlicher Vertrag | genau sechs `anon`-Funktionen, null Funktionen ohne ACL |
 
-Die letzten beiden Migrationen:
+Die letzten drei Migrationen:
 
 - **`0015` — Rechte je Feld.** Sichtbarkeit steht je Feld, nicht je Feldgruppe.
   Drei bestätigte Zugriffsfehler behoben (Fahrdienst sieht den
@@ -27,6 +28,17 @@ Die letzten beiden Migrationen:
 - **`0016` — Quelle je Angabe.** Wer die Quelle einer Angabe ist, ändert
   direkt; wer es nicht ist, macht einen Vorschlag. Damit endet das stille
   Überschreiben durch den Familienbogen.
+- **`0017` — Abhängigkeiten und Freigaben.** Der Mechanismus steht; die
+  Liste, welche Voraussetzung welchen Termin blockiert, ist eine ANNAHME aus
+  drei Zeilen. Siehe den eigenen Abschnitt weiter unten.
+
+> **`0017` ist noch nicht auf der Datenbank.** Alles darunter — Tabelle, fünfte
+> Matrix, Prüfung in `termin_bestaetigen`, beide Bildschirme — ist geschrieben
+> und im Mock-Betrieb durch Ausführung geprüft, aber nicht angewandt. Der
+> Grund ist nicht Vorsicht vor dem Skript, sondern die Liste: sie fehlt noch,
+> und mit ihr ändern sich vermutlich Zeilen der Matrix. Vor dem Anwenden die
+> zwei Invarianten messen (sechs `anon`-Funktionen, null Funktionen ohne ACL);
+> die Prüfungen in Abschnitt 8 der Datei tun das selbst und brechen ab.
 
 ---
 
@@ -62,30 +74,48 @@ sich genau einmal je Sitzung und lässt danach alles durch.
 
 ---
 
-## Der nächste Schritt: `0017`
+## `0017` — gebaut, aber auf die Liste wartend
 
-**Abhängigkeiten und Freigaben.** Heute weiss das System nicht, dass eine
-Einäscherung ohne Freigabe nicht stattfinden darf. Ein Termin lässt sich
-bestätigen, egal was fehlt.
-
-Zu bauen:
+**Abhängigkeiten und Freigaben.** Der Mechanismus ist da:
 
 - `public.voraussetzung` je Fall — was beigebracht werden muss, von wem, ob
   erfüllt.
-- Die **fünfte Matrix**: welche Terminart welche Voraussetzung braucht.
-- `public.termin_bestaetigen` prüft Blocker, bevor es bestätigt.
-- Bildschirme «was steht und wegen wem» — für das Haus vollständig, für
-  Eingeladene nur zu ihren eigenen Terminen.
+- Die **fünfte Matrix** `app.voraussetzungen_fuer_termin` — welche Terminart
+  welche Voraussetzung braucht.
+- `public.termin_bestaetigen` prüft Blocker, bevor es bestätigt. Rückgabe
+  jetzt `jsonb` statt `boolean`, weil «darf nicht» und «etwas fehlt noch»
+  zwei verschiedene Auskünfte sind.
+- Beide Bildschirme: das Haus sieht an jedem Termin, was ihn aufhält und wer
+  es beibringt; Eingeladene sehen es nur an ihren eigenen Terminen.
 
-**Was fehlt, um es richtig zu bauen:** die Liste selbst. Der Mechanismus ist
-Architektur; welche Voraussetzung welchen Termin blockiert, ist Branchenwissen
-und wird nicht geraten. Der Eigentümer hat die Antworten eines Branchenkenners
-zugesagt.
+**Was weiterhin fehlt: die Liste selbst.** Die Antworten des Branchenkenners
+sind nicht eingetroffen. In der Matrix stehen deshalb DREI ZEILEN, jede
+ausdrücklich als Annahme gekennzeichnet, wie in `0015` verfahren:
 
-Ohne diese Antworten: nur den Mechanismus bauen, mit einem kleinen Satz, bei
-dem die Sicherheit hoch ist (Überführung setzt die Todesbescheinigung voraus,
-Einäscherung die zweite Leichenschau, Beisetzung eine Grabstelle) — und jede
-Zeile ausdrücklich als Annahme markieren, wie in `0015` geschehen.
+| Terminart | braucht | Sicherheit |
+|---|---|---|
+| Überführung | Todesbescheinigung | hoch |
+| Einäscherung | zweite Leichenschau | hoch, und der teuerste Irrtum |
+| Beisetzung | Grabstelle | die schwächste der drei |
+
+Abholung, Trauerfeier und Abschiednahme stehen mit leerer Liste da — auch das
+ist eine Annahme, nur eine ohne Wirkung.
+
+Aus der Unsicherheit folgen zwei Bauentscheidungen, die mit der Liste zusammen
+neu zu bewerten sind (Begründung ausführlich im Kopf der Migration):
+
+1. **Nur eine erfasste Voraussetzung blockiert.** Eine fehlende Zeile hält
+   nichts auf. Ein Mechanismus auf einer Vermutung darf nicht von selbst
+   Arbeit anhalten; das Haus schaltet ihn je Vorgang ein.
+2. **Das Haus wird nicht blockiert.** Geprüft wird nur im äusseren Umkreis.
+   Das Haus sieht den Blocker und entscheidet selbst — es weiss mehr als die
+   Anwendung. Sagt ein Bestatter «nein, auch wir dürfen das nicht», wird
+   daraus ein Auslöser auf `public.termine`, dann aber als eigene Migration.
+
+**Wenn die Liste kommt:** die Matrix in `0017` NICHT bearbeiten — sie ist dann
+angewandt. Eine neue Migration, wie bei jeder Rechteänderung. Zu ändern sind
+dann immer beide Seiten zusammen: `app.voraussetzungen_fuer_termin` und
+`voraussetzungenFuerTermin` in `mvp/src/lib/access.ts`.
 
 ---
 

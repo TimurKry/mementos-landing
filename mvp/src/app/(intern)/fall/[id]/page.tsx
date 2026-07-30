@@ -10,6 +10,7 @@ import { Einladungen } from "./Einladungen";
 import { Korrekturen } from "./Korrekturen";
 import { Termine } from "./Termine";
 import { Unterlagen } from "./Unterlagen";
+import { Voraussetzungen } from "./Voraussetzungen";
 import { VerstorbenePerson } from "./VerstorbenePerson";
 import { Verlauf } from "./Verlauf";
 import { Vorgang } from "./Vorgang";
@@ -122,7 +123,21 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
               den Termin zu sehen bekommt — Fahrdienst, Krematorium und
               Friedhof sehen sonst kein Datum und keine Adresse.
             </p>
-            <Termine caseId={c.id} termine={c.termine} />
+            <Termine caseId={c.id} termine={c.termine} voraussetzungen={c.voraussetzungen} />
+          </section>
+
+          {/* Voraussetzungen — direkt unter den Terminen, weil sie nur dort
+              wirken. Weiter oben wäre es eine Liste ohne erkennbaren Bezug,
+              weiter unten eine, die man beim Planen eines Termins nicht
+              sieht. */}
+          <section>
+            <div className="mb-2.5 text-[10px] font-medium text-fog">Voraussetzungen</div>
+            <p className="mb-2.5 max-w-[560px] text-[11.5px] leading-relaxed text-steel">
+              Was vorliegen muss, bevor Beteiligte einen Termin bestätigen
+              können. Nur was hier steht, hält etwas auf — und aufgehalten
+              werden Eingeladene, nicht Sie.
+            </p>
+            <Voraussetzungen caseId={c.id} voraussetzungen={c.voraussetzungen} />
           </section>
 
           {/* Beteiligte */}
