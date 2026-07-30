@@ -5,12 +5,12 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1159 nodes · 2280 edges · 74 communities (59 shown, 15 thin omitted)
+- 1159 nodes · 2232 edges · 81 communities (66 shown, 15 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.73)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `81772144`
+- Built from commit: `bed0acaa`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -29,7 +29,7 @@
 - (intern)/fall/[id]/actions.ts
 - compilerOptions
 - 0004_hardening.sql
-- Termine.tsx
+- ZugangTermine.tsx
 - HubDiagram.tsx
 - preise/page.tsx
 - so-funktioniert-es/page.tsx
@@ -47,13 +47,16 @@
 - 0008_plattform_uebersicht.sql
 - 0001_init.sql
 - fuer-zulieferer/page.tsx
+- (intern)/fall/[id]/page.tsx
 - src/app/layout.tsx
 - Как закрыто: `mvp/supabase/migrations/0004_hardening.sql`
 - .claude/CLAUDE.md
 - 0011_termine.sql
 - vercel.json
 - env.ts
+- zugang/unterlage/[docId]/route.ts
 - lib/types.ts
+- (admin)/layout.tsx
 - ungueltig/page.tsx
 - access.ts
 - 0014_unterlagen.sql
@@ -70,42 +73,46 @@
 - Конвейер
 - Feature: Datenmodell & Zugriff (/datenmodell)
 - MementoOS — где мы сейчас
+- Termine.tsx
 - Компоненты демо-потока (/demo)
 - MementoOS — Landing
 - Канон дизайн-систем MementoOS
+- [token]/route.ts
 - Markenzeichen
 - audience/types.ts
 - fuer-familien/page.tsx
+- phaseLabel
+- angabenErgaenzen
 - fuer-krematorien/page.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `getRuntimeMode()` - 39 edges
-2. `meldung()` - 25 edges
-3. `pruefe()` - 24 edges
-4. `kennung()` - 21 edges
-5. `dbFehler()` - 19 edges
+1. `meldung()` - 22 edges
+2. `pruefe()` - 21 edges
+3. `dbFehler()` - 19 edges
+4. `kennung()` - 19 edges
+5. `compilerOptions` - 16 edges
 6. `compilerOptions` - 16 edges
-7. `compilerOptions` - 16 edges
-8. `useSpeicherstand()` - 15 edges
-9. `MementoOS — Arbeitsstand (durable project knowledge)` - 15 edges
-10. `Как закрыто: `mvp/supabase/migrations/0004_hardening.sql`` - 15 edges
+7. `MementoOS — Arbeitsstand (durable project knowledge)` - 15 edges
+8. `Как закрыто: `mvp/supabase/migrations/0004_hardening.sql`` - 15 edges
+9. `useSpeicherstand()` - 14 edges
+10. `istKeinZugriff()` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ZugangPage()` --calls--> `getCaseBySession()`  [EXTRACTED]
-  mvp/src/app/(extern)/zugang/page.tsx → mvp/src/lib/data.ts
-- `zugangZurueckziehenAction()` --indirect_call--> `adminZugangZurueckziehen()`  [INFERRED]
-  mvp/src/app/(admin)/admin/fall/[id]/actions.ts → mvp/src/lib/admin.ts
-- `sitzungBeendenAction()` --indirect_call--> `adminSitzungBeenden()`  [INFERRED]
-  mvp/src/app/(admin)/admin/fall/[id]/actions.ts → mvp/src/lib/admin.ts
-- `PlattformSeite()` --indirect_call--> `adminHaeuser()`  [INFERRED]
-  mvp/src/app/(admin)/admin/page.tsx → mvp/src/lib/admin.ts
-- `PlattformSeite()` --indirect_call--> `adminUebersicht()`  [INFERRED]
-  mvp/src/app/(admin)/admin/page.tsx → mvp/src/lib/admin.ts
+- `zugangBeendenAction()` --calls--> `endInviteSession()`  [EXTRACTED]
+  mvp/src/app/(extern)/zugang/actions.ts → mvp/src/lib/data.ts
+- `terminBestaetigenAction()` --calls--> `terminBestaetigen()`  [EXTRACTED]
+  mvp/src/app/(extern)/zugang/actions.ts → mvp/src/lib/data.ts
+- `korrekturEntscheidenAction()` --calls--> `korrekturEntscheiden()`  [EXTRACTED]
+  mvp/src/app/(intern)/fall/[id]/korrektur-actions.ts → mvp/src/lib/data.ts
+- `fallAnlegenAction()` --calls--> `createCase()`  [EXTRACTED]
+  mvp/src/app/(intern)/fall/neu/actions.ts → mvp/src/lib/data.ts
+- `vorgangSpeichernAction()` --calls--> `updateCase()`  [EXTRACTED]
+  mvp/src/app/(intern)/fall/[id]/actions.ts → mvp/src/lib/data.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (74 total, 15 thin omitted)
+## Communities (81 total, 15 thin omitted)
 
 ### Community 0 - "admin.ts"
 Cohesion: 0.08
@@ -120,16 +127,16 @@ Cohesion: 0.09
 Nodes (18): blocks, metadata, FeatureCards(), HeuteMorgen(), heuteSteps, morgenSteps, IconBrief(), IconCheck() (+10 more)
 
 ### Community 3 - "zugang/page.tsx"
-Cohesion: 0.20
-Nodes (10): zugangBeendenAction(), AngabenBogen(), DATUMSFELDER, PLATZHALTER, ZugangPage(), ZugangBeenden(), feldLabel, Deceased (+2 more)
+Cohesion: 0.17
+Nodes (12): zugangBeendenAction(), AngabenBogen(), DATUMSFELDER, PLATZHALTER, ZugangPage(), ZugangBeenden(), ZugangTermine(), feldLabel (+4 more)
 
 ### Community 4 - "datamodel/ui.tsx"
 Cohesion: 0.09
 Nodes (30): metadata, roleOrder, DocRow, documents, entities, Entity, Field, Group (+22 more)
 
 ### Community 5 - "lib/data.ts"
-Cohesion: 0.06
-Nodes (64): metadata, metadata, badgeKlasse, Einladungen(), Kopierstand, datumsformat, EinladungAnsicht, EinladungStatus (+56 more)
+Cohesion: 0.14
+Nodes (29): addParticipant(), addTask(), addTermin(), addUnterlage(), createCase(), createInvite(), dbFehler(), endInviteSession() (+21 more)
 
 ### Community 6 - "dependencies"
 Cohesion: 0.06
@@ -153,7 +160,7 @@ Nodes (11): Faq(), items, Marquee(), roles, Audiences, bandItems, ContactCta(), 
 
 ### Community 11 - "(intern)/fall/[id]/actions.ts"
 Cohesion: 0.06
-Nodes (83): angabenErgaenzenAction(), BestaetigenErgebnis, LAENGE, terminBestaetigenAction(), BestattungsartFeld(), AufgabeEingabe, aufgabeEntfernenAction(), aufgabeHinzufuegenAction() (+75 more)
+Nodes (81): BestaetigenErgebnis, LAENGE, BestattungsartFeld(), AufgabeEingabe, aufgabeEntfernenAction(), aufgabeHinzufuegenAction(), aufgabeUmschaltenAction(), beteiligtenBeitrittAction() (+73 more)
 
 ### Community 12 - "compilerOptions"
 Cohesion: 0.07
@@ -163,9 +170,9 @@ Nodes (26): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModu
 Cohesion: 0.12
 Nodes (16): app.audit_log_append_only(), app.case_for_role(), app.handle_new_user(), app.log(), audit_log_append_only, on_auth_user_created, public.audit_log, public.cases (+8 more)
 
-### Community 14 - "Termine.tsx"
-Cohesion: 0.10
-Nodes (26): TerminKarte(), ZugangTermine(), TerminEingabe, Entwurf, entwurfAus(), LEER, ROLLEN, Termine() (+18 more)
+### Community 14 - "ZugangTermine.tsx"
+Cohesion: 0.19
+Nodes (15): terminBestaetigenAction(), TerminKarte(), entwurfAus(), terminStatusLabel, abstandMinuten(), ausWanduhr(), gleicherTag(), istWanduhr() (+7 more)
 
 ### Community 15 - "HubDiagram.tsx"
 Cohesion: 0.13
@@ -204,8 +211,8 @@ Cohesion: 0.12
 Nodes (15): Arbeitsweise, Architektur des MVP, BLOCKED — wartet auf den Eigentümer, nicht auf Technik, CONFIRMED — fertig und auf der echten Datenbank geprüft, Der öffentliche Vertrag, Drei Designsysteme, IN PROGRESS, MementoOS — Arbeitsstand (durable project knowledge) (+7 more)
 
 ### Community 24 - "verlauf.ts"
-Cohesion: 0.27
-Nodes (11): Verlauf(), wann(), zeitpunkt, TerminArt, akteure, akteurLabel(), aktionen, aktionLabel() (+3 more)
+Cohesion: 0.24
+Nodes (12): Verlauf(), wann(), zeitpunkt, terminArtLabel, TerminArt, akteure, akteurLabel(), aktionen (+4 more)
 
 ### Community 25 - "AudiencePage.tsx"
 Cohesion: 0.33
@@ -227,6 +234,10 @@ Nodes (9): audit_log, cases, deceased, documents, invites, is_case_owner(), part
 Cohesion: 0.44
 Nodes (8): audit_log, cases, deceased, documents, invites, participants, profiles, tasks
 
+### Community 32 - "(intern)/fall/[id]/page.tsx"
+Cohesion: 0.13
+Nodes (18): badgeKlasse, Einladungen(), Kopierstand, datumsformat, EinladungAnsicht, EinladungStatus, status(), zuAnsicht() (+10 more)
+
 ### Community 33 - "src/app/layout.tsx"
 Cohesion: 0.24
 Nodes (8): inter, metadata, mono, RootLayout(), serif, Reveal(), Schema(), softwareSchema()
@@ -240,12 +251,20 @@ Cohesion: 0.33
 Nodes (5): framework, installCommand, regions, $schema, fra1
 
 ### Community 39 - "env.ts"
-Cohesion: 0.06
-Nodes (44): nextConfig, POST(), Art, ARTEN, GET(), istArt(), ab(), GET() (+36 more)
+Cohesion: 0.08
+Nodes (36): nextConfig, POST(), Art, ARTEN, GET(), istArt(), AnmeldeErgebnis, mitPasswortAnmelden() (+28 more)
+
+### Community 41 - "zugang/unterlage/[docId]/route.ts"
+Cohesion: 0.27
+Nodes (9): GET(), GET(), Auslieferung, unterlageFuerHaus(), unterlageFuerSitzung(), ausliefern(), contentDisposition(), KEIN_CACHE (+1 more)
 
 ### Community 42 - "lib/types.ts"
 Cohesion: 0.14
 Nodes (13): AdminFall, AdminFallKontext, AdminHaus, AdminSitzung, AdminUebersicht, AngabenErgebnis, Case, ContactStatus (+5 more)
+
+### Community 43 - "(admin)/layout.tsx"
+Cohesion: 0.24
+Nodes (5): metadata, metadata, metadata, Wordmark(), isMock
 
 ### Community 45 - "access.ts"
 Cohesion: 0.17
@@ -275,6 +294,10 @@ Nodes (10): Feature: Datenmodell & Zugriff (/datenmodell), Данные — `src
 Cohesion: 0.20
 Nodes (9): 1. Что вообще есть в репозитории, 2. Модель данных, 3. Кто какие поля видит, 4. Как участник попадает в дело, 5. Два периметра и что их стережёт, 6. История миграций — включая два бага, найденных на боевой базе, 7. Что готово, что нет, 8. Админка платформы — что предлагаю строить (+1 more)
 
+### Community 65 - "Termine.tsx"
+Cohesion: 0.17
+Nodes (10): TerminEingabe, Entwurf, LEER, ROLLEN, Termine(), TERMIN_ARTEN, TERMIN_STATUS, terminArtHinweis (+2 more)
+
 ### Community 66 - "Компоненты демо-потока (/demo)"
 Cohesion: 0.25
 Nodes (7): Field, Pill — статусная метка, PrimaryBtn / GhostBtn, Stepper — шаги демо, Компоненты демо-потока (/demo), Переход шагов, Правило данных
@@ -287,6 +310,10 @@ Nodes (7): MementoOS — Landing, MVP (`mvp/`), Деплой, Запуск, Ко
 Cohesion: 0.29
 Nodes (6): 1. Monad — лендинг `/`, `/demo` и Monad-подстраницы, 2. Steep — страницы аудиторий `/fuer-*`, 3. Default — CRM `/workspace`, Зона Datenmodell (/datenmodell) — внутри Monad, Канон дизайн-систем MementoOS, Общие законы (все системы)
 
+### Community 69 - "[token]/route.ts"
+Cohesion: 0.60
+Nodes (5): ab(), GET(), istForm(), redeemInvite(), zugangCookie()
+
 ### Community 70 - "Markenzeichen"
 Cohesion: 0.50
 Nodes (3): Entschieden: die Datei gewinnt, Markenzeichen, Wo das Zeichen benutzt wird
@@ -295,21 +322,29 @@ Nodes (3): Entschieden: die Datei gewinnt, Markenzeichen, Wo das Zeichen benutzt
 Cohesion: 0.12
 Nodes (11): FaqSection(), ScenarioSection(), AccessRow, BoardColumnSpec, BoardTask, FaqItem, LossStep, MitStep (+3 more)
 
+### Community 78 - "phaseLabel"
+Cohesion: 0.67
+Nodes (3): Dashboard(), phaseLabel, listCases()
+
+### Community 79 - "angabenErgaenzen"
+Cohesion: 0.67
+Nodes (3): angabenErgaenzenAction(), alsErgebnis(), angabenErgaenzen()
+
 ## Knowledge Gaps
-- **391 isolated node(s):** `nextConfig`, `name`, `version`, `private`, `dev` (+386 more)
+- **391 isolated node(s):** `Produktziel`, `Zwei Anwendungen in einem Repository`, `Drei Designsysteme`, `Architektur des MVP`, `Rechtemodell: vier Matrizen` (+386 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getRuntimeMode()` connect `lib/data.ts` to `admin.ts`, `env.ts`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `getRuntimeMode()` connect `env.ts` to `admin.ts`, `lib/data.ts`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **Why does `seite()` connect `site.ts` to `src/app/layout.tsx`, `icons.tsx`, `datamodel/ui.tsx`, `preise/page.tsx`, `so-funktioniert-es/page.tsx`, `BestatterWorkspace.tsx`, `DemoFlow.tsx`, `audienceMetadata`, `AudiencePage.tsx`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **Why does `Role` connect `(intern)/fall/[id]/actions.ts` to `admin.ts`, `lib/data.ts`, `mock.ts`, `lib/types.ts`, `access.ts`, `Termine.tsx`, `verlauf.ts`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **Why does `Role` connect `(intern)/fall/[id]/actions.ts` to `(intern)/fall/[id]/page.tsx`, `Termine.tsx`, `admin.ts`, `lib/data.ts`, `mock.ts`, `lib/types.ts`, `access.ts`, `verlauf.ts`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **What connects `nextConfig`, `name`, `version` to the rest of the system?**
+- **What connects `Produktziel`, `Zwei Anwendungen in einem Repository`, `Drei Designsysteme` to the rest of the system?**
   _391 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `admin.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.08128772635814889 - nodes in this community are weakly interconnected._
