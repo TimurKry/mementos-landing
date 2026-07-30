@@ -194,9 +194,14 @@ Ausführlich in `docs/features/mvp-sicherheit.md`.
 
 ## CONFIRMED — fertig und auf der echten Datenbank geprüft
 
-Migrationen `0001`–`0014` sind angewandt (Supabase, PostgreSQL 17,
+Migrationen `0001`–`0016` sind angewandt (Supabase, PostgreSQL 17,
 `eu-west-3`). `0006` ist ein dokumentierter Fehlversuch, `0007` die
 Korrektur; die Datei bleibt zur Nachvollziehbarkeit liegen.
+
+Nach `0015`/`0016` auf der echten Datenbank nachgemessen: `anon` darf genau
+sechs Funktionen ausführen, keine Funktion ohne eigene ACL, die Feldmatrix
+stimmt in beide Richtungen mit dem lokalen Lauf überein, und die
+Bestandsangaben haben eine Quelle.
 
 - **Anmeldung**: Magic Link **und** Passwort. Der Callback nimmt beide
   Rückwege (`?code=` per PKCE und `?token_hash=&type=`). Passwort wurde
@@ -236,19 +241,8 @@ Gemessene Ergebnisse der letzten Runde:
 
 ## IN PROGRESS
 
-**0015 — Rechte je Feld** und **0016 — Quelle je Angabe** sind fertig, lokal
-auf PostgreSQL 16 über die ganze Kette `0001`–`0016` angewandt und durch
-Ausführung geprüft (0015: Matrix in beide Richtungen; 0016: 16 Szenarien plus
-ein Durchlauf im Browser über beide Umkreise).
-
-**Noch NICHT auf der echten Datenbank**: der Supabase-Verbinder ist im
-laufenden Gespräch abgeschaltet (`enabledInChat: false`). Bis das Anwenden
-nachgeholt ist, gelten dort weiterhin die drei Zugriffsfehler **und** das
-stille Überschreiben durch die Familie.
-
-Reihenfolge beim Nachholen: `0015`, dann `0016`. `0016` prüft beim Anwenden,
-dass der öffentliche Vertrag bei genau sechs Funktionen bleibt — es droppt und
-legt `angaben_ergaenzen` neu an, und genau dabei entstünde sonst eine siebte.
+Nichts offen. Der nächste Schritt ist `0017` und braucht eine fachliche
+Antwort, siehe BLOCKED und `docs/NAECHSTE_SITZUNG.md`.
 
 ---
 
@@ -283,8 +277,12 @@ Rechtstexte (Impressum, Datenschutzerklärung), Auswertung, Kontaktformular.
 
 - **Entscheidung Partnerorganisationen** (siehe PLANNED 5). Ohne sie kein
   fallübergreifender Kalender.
-- **Supabase-Verbinder im Gespräch abgeschaltet** — deshalb liegen 0015 und
-  0016 fertig, aber nicht angewandt.
+- **Die Abhängigkeitsliste für `0017`.** Der Mechanismus (was blockiert was)
+  ist Architektur und wird hier gebaut; WELCHE Voraussetzung welchen Termin
+  blockiert, ist Branchenwissen. Der Eigentümer hat die Antworten eines
+  Branchenkenners zugesagt («10 Abhängigkeiten», «wo Fälle stehenbleiben»).
+  Ohne sie wird nur der Mechanismus gebaut, mit einem klein gehaltenen,
+  ausdrücklich als Annahme markierten Satz.
 - **Floristik und Trauerredner sehen kein Feld.** Auf dem Schleifenband steht
   in der Praxis der Name; ein Trauerredner braucht Name, Lebensdaten und
   Konfession. 0015 hat das absichtlich nicht mitentschieden.

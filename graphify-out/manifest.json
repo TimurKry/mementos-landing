@@ -780,8 +780,8 @@
     "semantic_hash": ""
   },
   "docs/WORKING_CONTEXT.md": {
-    "mtime": 1785431157.4452407,
-    "ast_hash": "10dabc1e833d63877dc5f8e2d6e6ab44",
+    "mtime": 1785433695.1823983,
+    "ast_hash": "05f3f3d1b8ce7a19c9b3424db0669270",
     "semantic_hash": ""
   },
   "docs/components.md": {
@@ -907,6 +907,11 @@
   "mvp/supabase/migrations/0016_quelle_je_angabe.sql": {
     "mtime": 1785416918.0720155,
     "ast_hash": "36b0d477c65bf402d85fc04c327ef5ae",
+    "semantic_hash": ""
+  },
+  "docs/NAECHSTE_SITZUNG.md": {
+    "mtime": 1785433733.1064,
+    "ast_hash": "46b2400d2dfbbb3b50d58583c33e93f5",
     "semantic_hash": ""
   }
 }
