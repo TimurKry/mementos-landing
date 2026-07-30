@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { isMock } from "@/lib/data";
-import { Logo } from "@/components/Logo";
+import { Wordmark } from "@/components/Wordmark";
 
 /* Dritter Umkreis: die Plattform-Betreuung — unser eigenes Team.
    Bewusst getrennt vom Arbeitsbereich eines Hauses: aus dem Arbeitsbereich
@@ -18,8 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <header className="hair sticky top-0 z-40 bg-void/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-[1180px] items-center gap-3 px-5 sm:gap-4">
           <Link href="/admin" className="flex items-center gap-2 text-[15px] font-medium">
-            <Logo className="h-[15px] w-[16px]" />
-            MementoOS
+            <Wordmark className="h-[17px]" />
             <span className="ml-1 hidden text-[13px] text-steel sm:inline">Plattform</span>
           </Link>
 

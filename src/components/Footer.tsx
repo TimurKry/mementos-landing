@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./icons";
+import { Wordmark } from "./Wordmark";
 
 export function Footer() {
   return (
@@ -7,11 +8,8 @@ export function Footer() {
       <div className="mx-auto max-w-[1200px] px-6">
         <div className="grid gap-10 border-b border-white/15 pb-10 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.4fr]">
           <div>
-            <a href="#top" className="flex items-center gap-2.5" aria-label="MementoOS Startseite">
-              <Logo className="h-6 w-7" fill="#f6f3f1" />
-              <span className="font-[family-name:var(--font-display)] text-[20px] text-paper">
-                MementoOS
-              </span>
+            <a href="#top" className="flex items-center" aria-label="MementoOS Startseite">
+              <Wordmark className="h-[22px] text-paper" />
             </a>
             <p className="mt-4 max-w-[32ch] leading-relaxed">
               Das Betriebssystem für die Bestattungsbranche. Ein Fall. Alle Beteiligten.

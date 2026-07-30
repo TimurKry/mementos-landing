@@ -11,6 +11,7 @@ const links = [
   { href: "/preise/", label: "Preise" },
   { href: "/demo/", label: "Demo" },
 ];
+import { Wordmark } from "./Wordmark";
 
 export function Header() {
   return (
@@ -31,11 +32,8 @@ export function Header() {
 
       <header className="sticky top-0 z-50 border-b border-line bg-paper/95 backdrop-blur-sm">
         <div className="mx-auto flex h-[72px] max-w-[1200px] items-center gap-8 px-6">
-          <a href="#top" className="flex items-center gap-2.5" aria-label="MementoOS Startseite">
-            <Logo className="h-[24px] w-[28px]" />
-            <span className="font-[family-name:var(--font-display)] text-[22px] text-ink">
-              MementoOS
-            </span>
+          <a href="#top" className="flex items-center" aria-label="MementoOS Startseite">
+            <Wordmark className="h-[26px] text-ink" />
           </a>
           <nav className="mono-label ml-auto hidden gap-5 whitespace-nowrap text-[12px] text-graphite md:flex" aria-label="Hauptnavigation">
             {links.map((l) =>

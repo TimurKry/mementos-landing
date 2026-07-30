@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "../icons";
+import { Wordmark } from "../Wordmark";
 
 /* Навигация Steep-страниц: прозрачная, тихая. navLabel — подпись зоны,
    hasPricing — показывать ли якорь #preise. */
@@ -21,7 +22,7 @@ export function AudienceNav({
       <div className="mx-auto flex h-[76px] max-w-[1200px] items-center gap-8 px-6">
         <Link href="/" className="flex items-center gap-2.5" aria-label="MementoOS Startseite">
           <Logo className="h-[24px] w-[28px]" fill="#17191c" />
-          <span className={`${serif} text-[22px] text-nero`}>MementoOS</span>
+          <Wordmark className="h-[24px] text-nero" />
         </Link>
         <span className={`${sans} hidden text-[14px] text-ashen sm:block`}>{navLabel}</span>
         <nav className={`${sans} ml-auto flex items-center gap-6 text-[15px]`} aria-label="Seitennavigation">
