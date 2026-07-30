@@ -189,6 +189,16 @@ Ausführlich in `docs/features/mvp-sicherheit.md`.
   Nur der Auslöser und die beiden `SECURITY DEFINER`-Funktionen schreiben.
   Sonst liesse sich eine Quelle umschreiben und danach eine fremde Angabe
   «als eigene» überschreiben.
+- **anon hat auf KEINE Tabelle in `public` ein Recht** — die dritte Invariante,
+  neben den zwei für Funktionen. Supabase gewährt anon und authenticated per
+  `ALTER DEFAULT PRIVILEGES` Rechte auf jede neue Tabelle in `public`; ein
+  `grant … to authenticated` sagt deshalb nichts darüber, was anon hat. Ab
+  0011 wurde nur noch gewährt und nie entzogen, und dadurch stand
+  `public.termine` für anon **schreibend** offen (SELECT/INSERT/UPDATE/DELETE),
+  `feldquelle` und `korrekturvorschlag` lesend. Aufgefangen hat es allein RLS.
+  0017 entzieht es und misst es ab jetzt bei jeder Migration über alle
+  Tabellen. Eine neue Tabelle braucht immer ein ausdrückliches
+  `revoke all on … from anon`.
 - **Eine Blockade gilt nur nach aussen** (0017). `public.termin_bestaetigen`
   prüft offene Voraussetzungen; auf `public.termine` liegt **kein** Auslöser,
   der dem Haus dazwischenfährt. Das Haus weiss mehr als die Anwendung (die
@@ -218,9 +228,14 @@ Ausführlich in `docs/features/mvp-sicherheit.md`.
 
 ## CONFIRMED — fertig und auf der echten Datenbank geprüft
 
-Migrationen `0001`–`0016` sind angewandt (Supabase, PostgreSQL 17,
+Migrationen `0001`–`0017` sind angewandt (Supabase, PostgreSQL 17,
 `eu-west-3`). `0006` ist ein dokumentierter Fehlversuch, `0007` die
 Korrektur; die Datei bleibt zur Nachvollziehbarkeit liegen.
+
+`0017` brach im ersten Anlauf an der eigenen Prüfung 8.6 ab und blieb dabei
+folgenlos — die Datei läuft in einer Transaktion. Der Befund (offene
+Tabellenrechte von `anon` seit `0011`) steckt jetzt in derselben Migration;
+der zweite Lauf ging durch.
 
 Nach `0015`/`0016` auf der echten Datenbank nachgemessen: `anon` darf genau
 sechs Funktionen ausführen, keine Funktion ohne eigene ACL, die Feldmatrix
@@ -249,10 +264,22 @@ Bestandsangaben haben eine Quelle.
 - Der Betreiberzugang ist eingetragen (Tabelle `public.platform_admins`, wird
   nur von Hand gepflegt; RLS an, absichtlich **keine** Policy).
 
-Gemessene Ergebnisse der letzten Runde:
+Gemessene Ergebnisse der letzten Runde (nach `0017`):
 
-- `anon` darf genau die sechs Funktionen ausführen, keine siebte.
+- `anon` darf genau die sechs Funktionen ausführen, keine siebte —
+  namentlich geprüft: `angaben_ergaenzen`, `end_session`,
+  `get_case_by_session`, `redeem_invite`, `termin_bestaetigen`,
+  `unterlage_fuer_sitzung`.
 - Funktionen ohne eigene ACL: 0.
+- **Tabellenrechte von `anon` in `public`: 0** — vor `0017` waren es sechs
+  (siehe Sicherheitsabschnitt).
+- `public.termin_bestaetigen` existiert genau einmal und gibt `jsonb` zurück;
+  keine Überladung der alten `boolean`-Fassung übrig geblieben.
+- Die fünfte Matrix trägt genau die drei angenommenen Zeilen, die übrigen drei
+  Terminarten sind leer.
+- `app.offene_voraussetzungen` gibt für einen Vorgang ohne erfasste
+  Voraussetzung `{}` zurück — «nicht erfasst blockiert nicht» gilt auch auf
+  der echten Datenbank.
 - Krematorium sieht Überführung und Einäscherung, bestätigen darf es nur die
   Einäscherung.
 - Floristik sieht Zeit, Ort und Karte der Trauerfeier — und **kein** Feld
@@ -265,18 +292,18 @@ Gemessene Ergebnisse der letzten Runde:
 
 ## IN PROGRESS
 
-**`0017` — Abhängigkeiten und Freigaben: geschrieben, nicht angewandt.**
+**Die Blockade ist auf der echten Datenbank noch nie ausgelöst worden.**
 
-Der Mechanismus steht vollständig: `public.voraussetzung`, die fünfte Matrix,
-die Blockerprüfung in `public.termin_bestaetigen` (Rückgabe jetzt `jsonb`
-statt `boolean`) und beide Bildschirme. Geprüft wurde durch Ausführung im
-Mock-Betrieb, einschliesslich des Wettrennens: Bogen offen, Freigabe
-zwischendurch zurückgenommen, Absenden wird mit Nennung des Fehlenden
-abgewiesen und steht als `termin.blockiert` im Verlauf.
+`0017` ist angewandt und in allen Strukturen nachgemessen (siehe CONFIRMED),
+aber `public.termine` und `public.voraussetzung` sind dort beide leer: es gibt
+noch keinen echten Vorgang mit einem Termin. Die Wirkung — Knopf verschwindet,
+Absenden wird mit Nennung des Fehlenden abgewiesen, `termin.blockiert` steht
+im Verlauf — ist bisher nur im Mock-Betrieb durchgespielt, dort allerdings
+einschliesslich des Wettrennens (Bogen offen, Freigabe zwischendurch
+zurückgenommen).
 
-Nicht auf der Datenbank, weil die fachliche Liste weiterhin fehlt und mit ihr
-vermutlich Zeilen der Matrix wandern. Die zwei Invarianten prüft die Datei
-beim Anwenden selbst (Abschnitt 8) und bricht ab.
+Die eigentliche Abnahme ist der erste echte Termin mit einer offenen
+Voraussetzung. Bis dahin gilt die Wirkung als unbewiesen, nicht als bewiesen.
 
 ---
 
