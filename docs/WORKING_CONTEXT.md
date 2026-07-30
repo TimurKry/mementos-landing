@@ -85,13 +85,24 @@ Sie liegen **doppelt** und dürfen nur zusammen wandern:
 
 | Funktion | Frage | Migration |
 |---|---|---|
-| `app.allowed_tiers(rolle)` | welche Feldgruppen **sieht** eine Rolle | 0004 |
+| `app.sichtbare_felder(rolle)` | welche **Felder** sieht eine Rolle | 0015 |
 | `app.termine_fuer_rolle(rolle)` | welche Terminarten sieht sie | 0011 |
 | `app.darf_bestaetigen(rolle, art)` | welche Termine darf sie bestätigen | 0011 |
 | `app.felder_schreibbar(rolle)` | welche Felder darf sie **ändern** | 0012 |
 
 Feldgruppen (tier): `kern` (Name), `org` (persönlich), `op` (körperlich),
-`sens` (medizinisch).
+`sens` (medizinisch). Sie entscheiden seit 0015 **nichts** mehr — sie sind
+Überschrift im Bogen und Eintrag im Protokoll. `app.feld_gruppe(feld)` ordnet
+zu, `app.allowed_tiers(rolle)` ist daraus abgeleitet und nur noch für den
+Protokolleintrag da.
+
+Zwei Regeln, die 0015 beim Anwenden aktiv prüft:
+
+- **Schreiben setzt Sehen voraus.** `felder_schreibbar` ⊆ `sichtbare_felder`
+  für jede Rolle. Wer den bisherigen Wert nicht kennt, überschreibt still.
+- **Ein neues Feld ist für niemanden sichtbar**, bis es in der Matrix steht.
+  Vorher war ein `ALTER TABLE` in einer bestehenden Gruppe eine stille
+  Rechtevergabe.
 
 Unterlagen laufen **nicht** über eine Matrix: ihre Sichtbarkeit setzt das Haus
 je Datei beim Hochladen (`documents.visible_to`).
@@ -176,8 +187,8 @@ Korrektur; die Datei bleibt zur Nachvollziehbarkeit liegen.
   nötig, weil E-Mail-Vorlagen ohne eigenes SMTP nicht änderbar sind.
 - **Fälle**: anlegen, führen, Phasen, Beteiligte, Aufgaben.
 - **Verstorbene Person**: vier Feldgruppen, jede für sich speicherbar; der
-  Sichtbarkeitstext ist aus `allowedTiers` abgeleitet und kann nicht
-  abweichen.
+  Sichtbarkeitstext ist aus `sichtbareFelder` abgeleitet und kann nicht
+  abweichen. Seit 0015 ein Satz je Empfängerkreis statt je Gruppe.
 - **Zugänge ohne Konto**: Token → Sitzung, Entzug wirkt sofort.
 - **Termine** (0011): Zeitfenster, Ort, Zuständigkeit; Bestätigung durch die
   zuständige Rolle. Zeitpunkte laufen über `mvp/src/lib/zeit.ts` und werden
@@ -209,35 +220,55 @@ Gemessene Ergebnisse der letzten Runde:
 
 ## IN PROGRESS
 
-- Graphify-Wissensgraph als primärer Navigationsweg (dieser Schritt).
+- **0015 — Rechte je Feld** ist geschrieben, lokal auf PostgreSQL 16 über die
+  ganze Kette `0001`–`0015` angewandt und geprüft. **Noch NICHT auf der echten
+  Datenbank**: der Supabase-Verbinder ist im laufenden Gespräch abgeschaltet
+  (`enabledInChat: false`). Bis das Anwenden nachgeholt ist, sind die drei
+  Zugriffsfehler auf der echten Datenbank weiterhin vorhanden.
 
 ---
 
 ## PLANNED
 
-1. **Typ «Verpflichtung»** — das eigentliche nächste Stück. Heute existiert
-   eine Verpflichtung nur als Aufgabe mit Freitext und Zuständigkeit. Das
-   System weiss nicht, dass eine Einäscherung ohne Freigabe nicht stattfinden
-   darf. Vermutete Ketten stehen in der Analyse (siehe unten) und sind
-   ungeprüft.
-2. **Partnerorganisationen mit Konten** — Voraussetzung für einen Kalender
+Die Reihenfolge ist eine Abhängigkeitskette, keine Wunschliste. Sie kommt aus
+der Durchsicht des echten Ablaufs durch einen Branchenkenner.
+
+1. **0016 — Quelle je Angabe.** Heute schreibt `angaben_ergaenzen` direkt in
+   `deceased` und überschreibt damit, was das Haus eingetragen hat. Richtig
+   ist: jede Angabe trägt ihre Quelle, und wer nicht die Quelle ist, macht
+   einen **Vorschlag**. Tabellen `feldquelle`, `korrekturvorschlag`; eine
+   Korrekturschlange in der Fallkarte.
+2. **0017 — Abhängigkeiten und Freigaben.** Das System weiss nicht, dass eine
+   Einäscherung ohne Freigabe nicht stattfinden darf. Tabellen `freigabe`,
+   `abhaengigkeit`; `termin_bestaetigen` prüft Blocker; Bildschirme «was steht
+   und wegen wem».
+3. **0018 — Übergaben und Identitätskette.** `uebergabe`, `sarg_id`/`urnen_id`,
+   `einaescherungsnummer`. Wer wann wem übergeben hat, ohne Bruch.
+4. **0019 — Unterlagenpakete nach draussen.** Ämter registrieren sich nicht:
+   PDF plus strukturierter Satz, ablaufende Adresse ohne Konto.
+5. **Eigenes SMTP** für Einladungs-E-Mails an Familien. Nicht blockierend,
+   aber ohne es erreicht kein Zugang eine Familie von selbst.
+6. **Partnerorganisationen mit Konten** — Voraussetzung für einen Kalender
    über mehrere Fälle («alle meine Einäscherungen diese Woche»). Heute
    existiert ein Partner nur innerhalb eines Vorgangs. Das ist ein neuer,
    dritter Umkreis und **braucht eine Entscheidung des Eigentümers**.
-3. **Markenzeichen und Palette** zusammenführen: `assets/brand/` enthält eine
-   **Rekonstruktion**, keine Vorlage — das Original kam schwarz auf schwarz.
-   Nicht in die Oberfläche eingebaut, bis die Originaldatei vorliegt.
-4. **Eigenes SMTP** für Einladungs-E-Mails an Familien. Nicht blockierend.
-5. **Hochladen durch die Familie** (Vollmacht) — eigene Entscheidung, siehe
+7. **Hochladen durch die Familie** (Vollmacht) — eigene Entscheidung, siehe
    Sicherheitsabschnitt.
+
+Zuletzt, ausdrücklich auf Wunsch des Eigentümers ans Ende gestellt:
+Rechtstexte (Impressum, Datenschutzerklärung), Auswertung, Kontaktformular.
 
 ---
 
 ## BLOCKED — wartet auf den Eigentümer, nicht auf Technik
 
-- **Entscheidung Partnerorganisationen** (siehe PLANNED 2). Ohne sie kein
+- **Entscheidung Partnerorganisationen** (siehe PLANNED 6). Ohne sie kein
   fallübergreifender Kalender.
-- **Originaldatei des Markenzeichens**, bevorzugt SVG.
+- **Supabase-Verbinder im Gespräch abgeschaltet** — deshalb liegt 0015 fertig,
+  aber nicht angewandt.
+- **Floristik und Trauerredner sehen kein Feld.** Auf dem Schleifenband steht
+  in der Praxis der Name; ein Trauerredner braucht Name, Lebensdaten und
+  Konfession. 0015 hat das absichtlich nicht mitentschieden.
 - **Leaked Password Protection** ist im Supabase-Projekt aus. Seit es
   Passwort-Anmeldung gibt, sollte sie an sein. Nur über das Dashboard
   schaltbar, nicht über die Programmierschnittstelle.
@@ -249,26 +280,32 @@ Gemessene Ergebnisse der letzten Runde:
 
 ## NEEDS VERIFICATION — Annahmen, die kein Bestatter geprüft hat
 
-Das gesamte Rechtemodell beruht auf meinen Annahmen. Fünf Stellen sind
-fachlich heikel, drei davon mit möglichem Schaden:
+Das gesamte Rechtemodell beruht auf meinen Annahmen. Fünf Stellen waren
+fachlich heikel. **Drei sind durch die Durchsicht bestätigt und in 0015
+behoben:**
 
-1. **Der Fahrdienst sieht keinen Infektionshinweis.** Wer ein Verstorbenes
-   hebt und fährt, ist derjenige, den das körperlich betrifft. Möglicherweise
-   die falsche Tür geschlossen.
-2. **Der Friedhof sieht kein Sargmass.** Er hebt das Grab aus. Fällt sonst am
-   Tag der Beisetzung auf.
-3. **Der Steinmetz sieht nichts über die Person** — schlägt aber Name und
-   Daten in Stein. Entweder läuft die Inschrift an der Anwendung vorbei, oder
-   die Matrix muss sich ändern.
+1. ~~Der Fahrdienst sieht keinen Infektionshinweis.~~ Bestätigt als Fehler.
+   0015: er sieht ihn, und weiterhin nicht die Freigabe zur Einäscherung.
+2. ~~Der Friedhof sieht kein Sargmass.~~ Bestätigt als Fehler. 0015: Sargmass
+   und Gewicht, weiterhin keine Körpergrösse.
+3. ~~Der Steinmetz sieht nichts über die Person.~~ Bestätigt als Fehler. 0015:
+   beide Namen und beide Lebensdaten, weiterhin keine Anschrift.
+
+Offen bleiben:
+
 4. **Die Klinik liest, schreibt aber nicht.** Dann ist unklar, wozu sie
-   Zugang hat.
+   Zugang hat. Sie hält ausserdem weiterhin die Freigabe zur Einäscherung und
+   das Sargmass — beides 1:1 übernommen, nicht geprüft.
 5. **Standesamt und Verbund tun nichts.** Vermutlich am Schreibtisch
-   erfundene Rollen.
+   erfundene Rollen. Der Verbund sieht dabei Namen, was für eine Sammelsicht
+   über mehrere Häuser zu viel wäre.
 
-Die Fragenliste für ein Gespräch mit einem echten Bestatter und ein Prompt
-zum Gegenprüfen liegen als veröffentlichte Analyse vor. Reihenfolge:
-**erst das Gespräch, dann geänderte Matrizen zur Abnahme, dann Migration
-`0015`.**
+Neu dazugekommen durch dieselbe Durchsicht (siehe BLOCKED): Floristik und
+Trauerredner sehen kein Feld, obwohl beide fachlich etwas brauchen.
+
+Die Fragenliste für das Gespräch und der Prompt zum Gegenprüfen liegen als
+veröffentlichte Analyse vor. Die Antworten des Branchenkenners sind teilweise
+da; der Rest ist zugesagt.
 
 ---
 

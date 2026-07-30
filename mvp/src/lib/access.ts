@@ -1,7 +1,13 @@
-/* Полевой доступ по ролям — ЗЕРКАЛО функции app.allowed_tiers() из БД
-   (mvp/supabase/migrations/0004_hardening.sql). Источник истины — БД:
+/* Полевой доступ по ролям — ЗЕРКАЛО функции app.sichtbare_felder() из БД
+   (mvp/supabase/migrations/0015_rechte_je_feld.sql). Источник истины — БД:
    в live-режиме фильтрует сервер, здесь — mock-режим, подписи в UI и аудит.
-   Матрица tier'ов менялась только вместе с миграцией. Держать синхронно! */
+   Матрица менялась только вместе с миграцией. Держать синхронно!
+
+   С 0015 право «видеть» задано ПО ПОЛЯМ, а не по группам. Группа осталась
+   заголовком бланка и записью в журнале — она больше ничего не решает.
+   Причина в миграции; коротко: обещание группы, что её поля всегда ходят
+   вместе, для geburtsdatum и anschrift неверно, и на этом обещании роль
+   получала поле только потому, что оно лежало рядом. */
 
 import type {
   Role, Tier, Deceased, Case, Phase, RoleView, TerminArt, TerminStatus,
@@ -35,12 +41,12 @@ export const tierGruppenTitel: Record<Tier, string> = {
   sens: "Medizinische Hinweise",
 };
 
-/* Welche Rollen sehen eine Feldgruppe? Abgeleitet aus allowedTiers, damit
-   Beschriftung und Filterregel nicht auseinanderlaufen können. Das Haus
+/* Welche Rollen sehen ein bestimmtes Feld? Abgeleitet aus sichtbareFelder,
+   damit Beschriftung und Filterregel nicht auseinanderlaufen können. Das Haus
    selbst (bestatter) steht nicht dabei — es sieht ohnehin alles. */
-export function rollenMitTier(tier: Tier): Role[] {
+export function rollenMitFeld(feld: keyof Deceased): Role[] {
   return (Object.keys(roleLabel) as Role[])
-    .filter((r) => r !== "bestatter" && allowedTiers(r).includes(tier));
+    .filter((r) => r !== "bestatter" && sichtbareFelder(r).includes(feld));
 }
 
 function aufzaehlung(woerter: string[]): string {
@@ -48,12 +54,47 @@ function aufzaehlung(woerter: string[]): string {
   return `${woerter.slice(0, -1).join(", ")} und ${woerter[woerter.length - 1]}`;
 }
 
-/* Ein Satz für den Bogen: wer diese Gruppe zu sehen bekommt, sobald ein
-   Zugang dieser Rolle vergeben ist. */
-export function sichtbarFuerText(tier: Tier): string {
-  const namen = rollenMitTier(tier).map((r) => roleLabel[r]);
-  if (namen.length === 0) return "Bleibt im Haus.";
-  return `Sichtbar für ${aufzaehlung(namen)} — sobald ein Zugang dieser Rolle vergeben ist.`;
+/* Der Nachsatz gilt für jede Zeile gleichermassen und steht deshalb nur
+   einmal, an der letzten. Dreimal derselbe Halbsatz liest sich wie ein
+   Fehler in der Vorlage, und der Blick überspringt dann alle drei. */
+const ZUGANG_NACHSATZ = " — sobald ein Zugang dieser Rolle vergeben ist.";
+
+function empfaengerSatz(rollen: Role[], mitNachsatz: boolean): string {
+  if (rollen.length === 0) return "Bleibt im Haus.";
+  const namen = aufzaehlung(rollen.map((r) => roleLabel[r]));
+  return `Sichtbar für ${namen}${mitNachsatz ? ZUGANG_NACHSATZ : "."}`;
+}
+
+/* Der Hinweis unter der Überschrift einer Feldgruppe im Erfassungsbogen.
+   Bis 0015 war das ein Satz je Gruppe, weil eine Gruppe einen Empfängerkreis
+   hatte. Das gilt nicht mehr: Geburts- und Sterbedatum sieht der Steinmetz,
+   Konfession und Anschrift in derselben Gruppe nicht.
+
+   Deshalb wird nach gleichem Empfängerkreis zusammengefasst — ein Satz je
+   Kreis, und die Felder davor genannt, sobald es mehr als einen gibt. Bleibt
+   es bei einem, sieht der Bogen aus wie vorher.
+
+   Nebeneffekt, der erwünscht ist: eine Gruppe, die in vier Kreise zerfällt,
+   sieht im Bogen unruhig aus. Das ist dann keine Gestaltungsfrage, sondern
+   der Hinweis, dass diese Gruppierung nicht mehr die Wirklichkeit abbildet. */
+export function sichtbarFuerGruppe(tier: Tier): { felder: string; satz: string }[] {
+  const kreise: { schluessel: string; rollen: Role[]; felder: (keyof Deceased)[] }[] = [];
+
+  for (const feld of tierFields[tier]) {
+    const rollen = rollenMitFeld(feld);
+    const schluessel = rollen.join("|");
+    const vorhanden = kreise.find((k) => k.schluessel === schluessel);
+    if (vorhanden) vorhanden.felder.push(feld);
+    else kreise.push({ schluessel, rollen, felder: [feld] });
+  }
+
+  const einzig = kreise.length === 1;
+  const letzterMitRollen = kreise.map((k) => k.rollen.length > 0).lastIndexOf(true);
+
+  return kreise.map((k, i) => ({
+    felder: einzig ? "" : aufzaehlung(k.felder.map((f) => feldLabel[f])),
+    satz: empfaengerSatz(k.rollen, i === letzterMitRollen),
+  }));
 }
 
 /* Rollen, für die ein Einladungslink ausgegeben werden darf — Spiegel der
@@ -77,11 +118,15 @@ export function istEinladbareRolle(value: unknown): value is Role {
    sie sie nicht. Ein Krematorium sieht die Überführung, bestätigt aber nur die
    Einäscherung.
 
-   Bemerkenswert an der oberen Matrix: Floristik, Redner und Steinmetz sehen
-   nach allowedTiers von der verstorbenen Person NICHTS — kein Name, kein
-   Datum. Das bleibt so. Zeit und Ort der Trauerfeier brauchen sie trotzdem,
-   sonst wissen sie nicht, wohin die Blumen sollen. Der Termin gibt ihnen genau
-   das und kein Feld mehr über den Menschen.
+   Bemerkenswert an der oberen Matrix: Floristik und Redner sehen nach
+   sichtbareFelder von der verstorbenen Person NICHTS — kein Name, kein Datum.
+   Zeit und Ort der Trauerfeier brauchen sie trotzdem, sonst wissen sie nicht,
+   wohin die Blumen sollen. Der Termin gibt ihnen genau das und kein Feld mehr
+   über den Menschen.
+
+   Der Steinmetz stand bis 0015 in derselben Zeile und konnte deshalb keinen
+   Stein beschriften. Er sieht jetzt vier Felder: die beiden Namen und die
+   beiden Lebensdaten — genau das, was eingemeisselt wird.
 
    Beide Matrizen gehören zur Migration und dürfen nur zusammen mit ihr
    wandern. Die harte Grenze bleibt die Datenbank. */
@@ -166,9 +211,13 @@ export function terminSichtbarFuerText(art: TerminArt): string {
    Spiegel von app.felder_schreibbar aus 0012_angaben_der_familie.sql.
 
    Die vierte Matrix und die heikelste. Sehen und ändern fallen auch hier
-   auseinander: die Familie SIEHT nach allowedTiers die Gruppen kern, org und
-   op — ändern darf sie davon nur einen Teil. Sargmass und Gewicht misst das
-   Bestattungshaus, nicht die Tochter der Verstorbenen.
+   auseinander: die Familie SIEHT nach sichtbareFelder neun Felder — ändern
+   darf sie davon fünf. Sargmass und Gewicht misst das Bestattungshaus, nicht
+   die Tochter der Verstorbenen.
+
+   Umgekehrt gilt seit 0015 eine harte Regel, die die Migration auch prüft:
+   Schreiben setzt Sehen voraus. Wer den bisherigen Wert nicht kennt,
+   überschreibt still die Arbeit eines anderen.
 
    sterbedatum fehlt absichtlich: es steht in der Todesbescheinigung. Was aus
    einer Urkunde kommt, wird nicht aus dem Gedächtnis überschrieben.
@@ -205,7 +254,8 @@ export const feldLabel: Record<keyof Deceased, string> = {
   freigabe_einaescherung: "Freigabe Einäscherung",
 };
 
-/* какие поля Verstorbene относятся к какой группе */
+/* Поле → группа. Зеркало app.feld_gruppe (0015). Группа больше не решает,
+   кто что видит — она задаёт заголовки бланка и запись в журнале. */
 const tierFields: Record<Tier, (keyof Deceased)[]> = {
   kern: ["vorname", "nachname"],
   org: ["geburtsdatum", "sterbedatum", "konfession", "anschrift"],
@@ -221,31 +271,69 @@ export function tierOfField(field: keyof Deceased): Tier | null {
   return null;
 }
 
-export function allowedTiers(role: Role): Tier[] {
+/* DIE Matrix. Spiegel von app.sichtbare_felder (0015). Neben jeder Rolle steht
+   in der Migration, WOFÜR sie das Feld braucht — dort und nicht hier, damit die
+   Begründung bei der Regel steht, die wirklich filtert.
+
+   Wer hier ein Feld hinzufügt, ohne die Migration zu ändern, öffnet nichts:
+   der Server filtert weiter nach seiner eigenen Liste. Umgekehrt schon. Die
+   beiden dürfen nur gemeinsam wandern. */
+export function sichtbareFelder(role: Role): (keyof Deceased)[] {
   switch (role) {
-    case "bestatter": return ["kern", "org", "op", "sens"];
-    case "familie": return ["kern", "org", "op"];
-    case "krematorium": return ["kern", "op", "sens"];
-    case "transport": return ["kern", "op"];
-    case "friedhof": return ["kern", "org"];
-    case "standesamt": return ["kern", "org"];
-    case "klinik": return ["kern", "op", "sens"];
-    case "verbund": return ["kern"];
-    default: return []; // floristik / redner / steinmetz
+    case "bestatter":
+      return ["vorname", "nachname",
+              "geburtsdatum", "sterbedatum", "konfession", "anschrift",
+              "groesse_cm", "gewicht_kg", "sargmass",
+              "herzschrittmacher", "infektionshinweis", "freigabe_einaescherung"];
+    case "familie":
+      return ["vorname", "nachname",
+              "geburtsdatum", "sterbedatum", "konfession", "anschrift",
+              "groesse_cm", "gewicht_kg", "sargmass"];
+    case "krematorium":
+      return ["vorname", "nachname", "sterbedatum",
+              "groesse_cm", "gewicht_kg", "sargmass",
+              "herzschrittmacher", "infektionshinweis", "freigabe_einaescherung"];
+    case "transport":
+      return ["vorname", "nachname",
+              "groesse_cm", "gewicht_kg", "sargmass", "infektionshinweis"];
+    case "friedhof":
+      return ["vorname", "nachname",
+              "geburtsdatum", "sterbedatum", "konfession", "anschrift",
+              "gewicht_kg", "sargmass"];
+    case "standesamt":
+      return ["vorname", "nachname",
+              "geburtsdatum", "sterbedatum", "konfession", "anschrift"];
+    case "klinik":
+      return ["vorname", "nachname",
+              "groesse_cm", "gewicht_kg", "sargmass",
+              "herzschrittmacher", "infektionshinweis", "freigabe_einaescherung"];
+    case "steinmetz":
+      return ["vorname", "nachname", "geburtsdatum", "sterbedatum"];
+    case "verbund":
+      return ["vorname", "nachname"];
+    default:
+      return []; // floristik, redner — Zeit und Ort über die Termine
   }
 }
 
-/* Verstorbene, отфильтрованная по разрешённым группам роли */
+/* Abgeleitet, nicht gepflegt: eine Rolle «hält» eine Gruppe, wenn sie
+   mindestens ein Feld daraus sieht. Reihenfolge wie im Bogen, nicht
+   alphabetisch. Spiegel von app.allowed_tiers (0015), das dort ebenfalls
+   abgeleitet ist. */
+export function allowedTiers(role: Role): Tier[] {
+  const felder = new Set(sichtbareFelder(role));
+  return (Object.keys(tierFields) as Tier[])
+    .filter((tier) => tierFields[tier].some((f) => felder.has(f)));
+}
+
+/* Verstorbene, отфильтрованная по разрешённым ПОЛЯМ роли. Whitelist, а не
+   blacklist: новое поле не видит никто, пока оно не внесено в матрицу. */
 export function deceasedForRole(d: Deceased, role: Role): Partial<Deceased> {
-  const tiers = new Set(allowedTiers(role));
   const out: Partial<Deceased> = {};
-  (Object.keys(tierFields) as Tier[]).forEach((tier) => {
-    if (!tiers.has(tier)) return;
-    for (const f of tierFields[tier]) {
-      const v = d[f];
-      if (v !== undefined) (out as Record<string, unknown>)[f] = v;
-    }
-  });
+  for (const f of sichtbareFelder(role)) {
+    const v = d[f];
+    if (v !== undefined) (out as Record<string, unknown>)[f] = v;
+  }
   return out;
 }
 

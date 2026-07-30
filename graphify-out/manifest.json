@@ -175,9 +175,9 @@
     "semantic_hash": "5fe7c3993aebbc7aabd2f74a8467bc49"
   },
   "mvp/src/app/(intern)/fall/[id]/VerstorbenePerson.tsx": {
-    "mtime": 1785243683.3773928,
-    "ast_hash": "e1644b920ff6ad5b9c2876a5d77e9d8b",
-    "semantic_hash": "e1644b920ff6ad5b9c2876a5d77e9d8b"
+    "mtime": 1785415951.9519758,
+    "ast_hash": "8457d022621da3c9a37545fbfd72f52b",
+    "semantic_hash": ""
   },
   "mvp/src/app/(intern)/fall/[id]/Vorgang.tsx": {
     "mtime": 1785243683.3773928,
@@ -260,9 +260,9 @@
     "semantic_hash": "2879fbea731e0f3edbf9b6ba70587dc5"
   },
   "mvp/src/lib/access.ts": {
-    "mtime": 1785279948.809758,
-    "ast_hash": "a113e2ec01aa6bd14ee5a15cf0531c37",
-    "semantic_hash": "a113e2ec01aa6bd14ee5a15cf0531c37"
+    "mtime": 1785416118.9519827,
+    "ast_hash": "342f4b3027105392993de41e60ab6ff1",
+    "semantic_hash": ""
   },
   "mvp/src/lib/admin.ts": {
     "mtime": 1785243683.3795643,
@@ -775,13 +775,13 @@
     "semantic_hash": ""
   },
   "assets/brand/README.md": {
-    "mtime": 1785413637.6524863,
-    "ast_hash": "a104c6dfe5dddc802b3971df03bff40c",
+    "mtime": 1785415354.4119513,
+    "ast_hash": "f2f1870643931d86f28a86ef9984f84d",
     "semantic_hash": ""
   },
   "docs/WORKING_CONTEXT.md": {
-    "mtime": 1785359596.5642726,
-    "ast_hash": "c8dcfb090b4ee27cfb1cc72412bc4a2b",
+    "mtime": 1785416415.6799948,
+    "ast_hash": "db696cf13f96e240b9c7b69e91ce1e6c",
     "semantic_hash": ""
   },
   "docs/components.md": {
@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "docs/features/mvp-sicherheit.md": {
-    "mtime": 1785336389.6025083,
-    "ast_hash": "1067456db1be1376b5b290a1663ba473",
+    "mtime": 1785416315.7639909,
+    "ast_hash": "fc3fa7290f39a8985ad895442f1f5f7a",
     "semantic_hash": ""
   },
   "docs/features/vertrauen-und-ablauf.md": {
@@ -887,6 +887,11 @@
   "src/components/Wordmark.tsx": {
     "mtime": 1785414745.8913357,
     "ast_hash": "6e1dee2a6d53d7b6630355e5a3ccae35",
+    "semantic_hash": ""
+  },
+  "mvp/supabase/migrations/0015_rechte_je_feld.sql": {
+    "mtime": 1785415790.4399693,
+    "ast_hash": "b626b41a7391394ce9a298b6ed2d8940",
     "semantic_hash": ""
   }
 }
