@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="MementoOS">
+  <!-- Favicon des Lendung. Bewusst MIT eigenem Grund und nicht mit
+       currentColor: ein Favicon hat kein Umfeld, von dem es eine Farbe erben
+       könnte. Pergament unter dunkler Tinte wirkt sowohl auf hellen als auch
+       auf dunklen Browser-Leisten — ein transparentes schwarzes Zeichen wäre
+       im dunklen Modus unsichtbar.
+
+       Die drei Kreise stehen im Verhältnis von assets/mementoos-symbol.svg,
+       auf 64px umgerechnet und mit 6px Rand, damit sie im Tab nicht kleben. -->
+  <rect width="64" height="64" rx="13" fill="#f6f3f1"/>
+  <g fill="#1a1a1a">
+    <circle cx="24.2" cy="26.8" r="10.7"/>
+    <circle cx="47.6" cy="26.8" r="10.7"/>
+    <circle cx="35.9" cy="47.7" r="10.7"/>
+  </g>
+</svg>

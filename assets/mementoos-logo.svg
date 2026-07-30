@@ -6,7 +6,7 @@
   <title id="title">MementoOS logo</title>
   <desc id="desc">Three black circles in a triangular arrangement beside the MementoOS wordmark.</desc>
 
-  <g fill="#000000">
+  <g fill="currentColor">
     <!-- Timurid-inspired three-circle symbol -->
     <circle cx="72" cy="86" r="40"/>
     <circle cx="164" cy="86" r="40"/>

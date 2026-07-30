@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { isMock } from "@/lib/data";
+import { Logo } from "@/components/Logo";
 
 /* Innerer Umkreis: Arbeitsbereich des Hauses (Dashboard, Fälle).
    Nur hier gibt es Navigation und Abmelden. */
@@ -15,11 +16,7 @@ export default function InternLayout({ children }: { children: React.ReactNode }
       <header className="hair sticky top-0 z-40 bg-void/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-[1100px] items-center gap-3 px-5 sm:gap-4">
           <Link href="/" className="flex items-center gap-2 text-[15px] font-medium">
-            <span className="flex gap-1" aria-hidden="true">
-              <span className="h-2 w-2 rounded-full bg-white" />
-              <span className="h-2 w-2 rounded-full bg-white/70" />
-              <span className="h-2 w-2 rounded-full bg-white/40" />
-            </span>
+            <Logo className="h-[15px] w-[16px]" />
             MementoOS
             <span className="ml-1 hidden text-[13px] text-steel sm:inline">Arbeitsbereich</span>
           </Link>

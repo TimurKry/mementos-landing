@@ -227,12 +227,22 @@ export function IconEuro({ className }: IconProps) {
   );
 }
 
-export function Logo({ className, fill = "#242424" }: IconProps & { fill?: string }) {
+/* Das Markenzeichen: drei Kreise, zwei oben, einer mittig darunter.
+   Geometrie 1:1 aus assets/mementoos-symbol.svg — die Datei ist die Vorlage,
+   das hier ist nur ihre Inline-Fassung. Wird sie geändert, ändert sich beides.
+
+   `fill` bleibt als Ausnahme erhalten, wird aber nicht mehr gebraucht:
+   currentColor lässt das Zeichen die Textfarbe erben, und genau das braucht
+   es — auf Pergament dunkel, im dunklen Arbeitsbereich knochenfarben. Vorher
+   stand hier ein festes #242424; auf dem Void des MVP wäre das unsichtbar. */
+export function Logo({ className, fill = "currentColor" }: IconProps & { fill?: string }) {
   return (
-    <svg viewBox="0 0 32 29" className={className} aria-hidden="true">
-      <circle cx="8.5" cy="8" r="7" fill={fill} />
-      <circle cx="23.5" cy="8" r="7" fill={fill} />
-      <circle cx="16" cy="21" r="7" fill={fill} />
+    <svg viewBox="32 34 176 166" className={className} aria-hidden="true">
+      <g fill={fill}>
+        <circle cx="74" cy="76" r="42" />
+        <circle cx="166" cy="76" r="42" />
+        <circle cx="120" cy="158" r="42" />
+      </g>
     </svg>
   );
 }

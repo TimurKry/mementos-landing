@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { isMock } from "@/lib/data";
+import { Logo } from "@/components/Logo";
 
 /* Äußerer Umkreis: Zugang per Link, ohne Konto (Familie, Krematorium …).
    Bewusst ohne jede Verbindung in den Arbeitsbereich — keine Navigation,
@@ -15,11 +16,7 @@ export default function ExternLayout({ children }: { children: React.ReactNode }
       <header className="hair">
         <div className="mx-auto flex h-14 max-w-[860px] items-center gap-3 px-5">
           <span className="flex items-center gap-2 text-[15px] font-medium">
-            <span className="flex gap-1" aria-hidden="true">
-              <span className="h-2 w-2 rounded-full bg-white" />
-              <span className="h-2 w-2 rounded-full bg-white/70" />
-              <span className="h-2 w-2 rounded-full bg-white/40" />
-            </span>
+            <Logo className="h-[15px] w-[16px]" />
             MementoOS
           </span>
           {isMock && (
